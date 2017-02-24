@@ -1,0 +1,17 @@
+<xml>
+	<value key="FWD_TEAM">1</value>
+	<value key="FWD_CORNER">2</value>
+
+	<value key="DEF_TEAM">10</value>
+	<value key="DEF_CORNER">4</value>
+	
+	<value key="d1">8</value>
+	
+	<value key="w1">2</value>
+	<value key="w2">4</value>
+	
+	<value key="bx">-1</value>
+	<value key="by">10</value>
+	<value key="omega">E</value>
+
+</xml>
