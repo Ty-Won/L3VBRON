@@ -3,7 +3,7 @@ import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.lcd.TextLCD;
 
-public class Lab5 {
+public class FinalProject {
 	static int buttonChoice;
 	// Static Resources:
 	// Left motor connected to output A
