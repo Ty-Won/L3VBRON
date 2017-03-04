@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="Final Project"/>
+	<classpathentry kind="src" path="Wifi Code/DPMServer/src"/>
+	<classpathentry kind="src" path="Wifi Code/EV3WiFiClient/src"/>
+	<classpathentry kind="con" path="org.lejos.ev3.ldt.LEJOS_EV3_LIBRARY_CONTAINER"/>
+	<classpathentry kind="lib" path="Wifi Code/DPMServer/libraries/jopt-simple-5.0.3-sources.jar"/>
+	<classpathentry kind="lib" path="Wifi Code/DPMServer/libraries/jopt-simple-5.0.3.jar"/>
+	<classpathentry kind="lib" path="Wifi Code/DPMServer/libraries/json-simple-1.1.1.jar"/>
+	<classpathentry kind="lib" path="Wifi Code/EV3WiFiClient/lib/json-simple-1.1.1.jar"/>
+	<classpathentry kind="lib" path="Wifi Code/EV3WiFiClient/WifiTest.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="Wifi Code/DPMServer/bin"/>
+</classpath>

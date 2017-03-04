@@ -14,7 +14,7 @@ import static java.util.Arrays.asList;
 
 import java.io.IOException;
 
-public class FinalProject {
+public class FinalProject2 {
 	// simply start the main window
 	public static void main(String[] args) {
 

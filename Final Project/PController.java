@@ -1,4 +1,4 @@
-package wallFollower;
+
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
