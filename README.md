@@ -7,7 +7,7 @@ Team 3
 Documentation lead: Alexandre Tessier
 Testing lead: Andrei Guevorkian
 Software engineer: Ian Gauthier
-Software lead: Illana Haddad
+Software lead: Ilana Haddad
 Hardware design lead: Tristan Bouchard
 Team design manager: Tyrone Wong
 
