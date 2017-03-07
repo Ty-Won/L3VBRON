@@ -1,7 +1,8 @@
-
+package finalProject;
 
 import java.util.Map;
 
+import finalProject.BangBangController;
 import finalProject.Defense;
 import finalProject.Forward;
 import finalProject.Navigation;
@@ -12,6 +13,10 @@ import wifi.WifiConnection;
 import lejos.hardware.Button;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.port.Port;
+import lejos.hardware.sensor.EV3ColorSensor;
+import lejos.hardware.sensor.SensorModes;
+import lejos.robotics.SampleProvider;
 
 /**
  * Example class using WifiConnection to communicate with a server and receive
@@ -28,6 +33,12 @@ public class WiFiExample {
 	public static final double WHEEL_RADIUS = 2.2;
 	public static final double TRACK = 11.5; 
 	public static final int TRAVERSE_SPEED = 100;
+	private static final int bandCenter = 35;			// Offset from the wall (cm)
+	private static final int bandWidth = 3;				// Width of dead band (cm)
+	private static final int motorLow = 100;			// Speed of slower rotating wheel (deg/sec)
+	private static final int motorHigh = 200;			// Speed of the faster rotating wheel (deg/seec)
+	private static final int PbandCenter = 32;			// Offset from the wall for PController (cm)
+	private static final int PbandWidth = 2;			// Bandwidth for PController (cm)
 
 	// Left motor connected to output A
 	// Right motor connected to output D
@@ -35,10 +46,14 @@ public class WiFiExample {
 	public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 	public static final EV3LargeRegulatedMotor launcherMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
-
+	private static final Port colorPort = LocalEV3.get().getPort("S2");	
+	
 	//Initialization of odometer and navigation objects.
 	public static Odometer odometer = new Odometer(leftMotor, rightMotor,30,true);
 	public static Navigation navigation = new Navigation(odometer);
+	public static ballLauncher launch = new ballLauncher(launcherMotor,odometer,navigation);
+	BangBangController bangbang = new BangBangController(leftMotor, rightMotor,
+			 bandCenter, bandWidth, motorLow, motorHigh);
 
 	/*
 	 * We use System.out.println() instead of LCD printing so that full debug
@@ -128,13 +143,28 @@ public class WiFiExample {
 				System.out.println("Orientation is not North");
 			}
 			
+			//Setup color sensor
+			// 1. Create a port object attached to a physical port (done above)
+			// 2. Create a sensor instance and attach to port
+			// 3. Create a sample provider instance for the above and initialize operating mode
+			// 4. Create a buffer for the sensor data
+			@SuppressWarnings("resource")
+			SensorModes colorSensor = new EV3ColorSensor(colorPort);
+			SampleProvider colorValue = colorSensor.getMode("Red");			// colorValue provides samples from this instance
+			float[] colorData = new float[colorValue.sampleSize()];			// colorData is the buffer in which data are returned
+			//LOCALIZATION:
+			LightLocalizer lsl = new LightLocalizer(odometer,navigation, colorValue, colorData, leftMotor,rightMotor);
+			
+			
 			//pass all these values to start the game:
 			if(fwdTeam == 3){ //play forward:
+				lsl.doLocalization();
 				Forward forward = new Forward(fwdCorner, d1, w1, w2, bx, by, orientation);
 				forward.startFWD();
 			}
 			
 			if(defTeam == 3){//play defense:
+				lsl.doLocalization();
 				Defense defense = new Defense(defCorner, w1, w2);
 				defense.startDEF();
 			}
