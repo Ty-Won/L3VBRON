@@ -3,7 +3,7 @@ import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
-
+hi
 public class LightLocalizer {
 	private Odometer odo;
 	private Navigation nav;
