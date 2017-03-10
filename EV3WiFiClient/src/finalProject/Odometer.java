@@ -194,4 +194,13 @@ public class Odometer implements TimerListener {
 	public void setTheta(double t){
 		this.theta = t;
 	}
+	public double getTheta() {
+		double result;
+
+
+		result = theta;
+
+
+		return result;
+	}
 }

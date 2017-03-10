@@ -1,124 +1,96 @@
 package finalProject;
-
-/*
-
- * File: Navigation.java
- * Written by: Sean Lawlor
- * ECSE 211 - Design Principles and Methods, Head TA
- * Fall 2011
- * Ported to EV3 by: Francois Ouellet Delorme
- * Fall 2015
- * 
- * Movement control class (turnTo, travelTo, flt, localize)
- */
+import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
-public class Navigation {
-	final static int FAST = 200, SLOW = 100, ACCELERATION = 4000;
-	final static double DEG_ERR = 3.0, CM_ERR = 1.0;
-	private Odometer odometer;
-	private EV3LargeRegulatedMotor leftMotor, rightMotor;
-
-	public Navigation(Odometer odo) {
-		this.odometer = odo;
-
-		EV3LargeRegulatedMotor[] motors = this.odometer.getMotors();
-		this.leftMotor = motors[0];
-		this.rightMotor = motors[1];
-
-		// set acceleration
-		this.leftMotor.setAcceleration(ACCELERATION);
-		this.rightMotor.setAcceleration(ACCELERATION);
-	}
-
-	/*
-	 * Functions to set the motor speeds jointly
-	 */
-	public void setSpeeds(float lSpd, float rSpd) {
-		this.leftMotor.setSpeed(lSpd);
-		this.rightMotor.setSpeed(rSpd);
-		if (lSpd < 0)
-			this.leftMotor.backward();
-		else
-			this.leftMotor.forward();
-		if (rSpd < 0)
-			this.rightMotor.backward();
-		else
-			this.rightMotor.forward();
-	}
-
-	public void setSpeeds(int lSpd, int rSpd) {
-		this.leftMotor.setSpeed(lSpd);
-		this.rightMotor.setSpeed(rSpd);
-		if (lSpd < 0)
-			this.leftMotor.backward();
-		else
-			this.leftMotor.forward();
-		if (rSpd < 0)
-			this.rightMotor.backward();
-		else
-			this.rightMotor.forward();
-	}
-
-	/*
-	 * Float the two motors jointly
-	 */
-	public void setFloat() {
-		this.leftMotor.stop();
-		this.rightMotor.stop();
-		this.leftMotor.flt(true);
-		this.rightMotor.flt(true);
-	}
-
-	/*
-	 * TravelTo function which takes as arguments the x and y position in cm Will travel to designated position, while
-	 * constantly updating it's heading
-	 */
-	public void travelTo(double x, double y) {
-		double minAng;
-		while (Math.abs(x - odometer.getX()) > CM_ERR || Math.abs(y - odometer.getY()) > CM_ERR) {
-			minAng = (Math.atan2(y - odometer.getY(), x - odometer.getX())) * (180.0 / Math.PI);
-			if (minAng < 0)
-				minAng += 360.0;
-			this.turnTo(minAng, false);
-			this.setSpeeds(FAST, FAST);
-		}
-		this.setSpeeds(0, 0);
-	}
-
-	/*
-	 * TurnTo function which takes an angle and boolean as arguments The boolean controls whether or not to stop the
-	 * motors when the turn is completed
-	 */
-	public void turnTo(double angle, boolean stop) {
-
-		double error = angle - this.odometer.getAng();
-
-		while (Math.abs(error) > DEG_ERR) {
-
-			error = angle - this.odometer.getAng();
-
-			if (error < -180.0) {
-				this.setSpeeds(-SLOW, SLOW);
-			} else if (error < 0.0) {
-				this.setSpeeds(SLOW, -SLOW);
-			} else if (error > 180.0) {
-				this.setSpeeds(SLOW, -SLOW);
-			} else {
-				this.setSpeeds(-SLOW, SLOW);
-			}
-		}
-
-		if (stop) {
-			this.setSpeeds(0, 0);
-		}
+public class Navigation extends Thread{
+	
+	double wheel_radius = WiFiExample.WHEEL_RADIUS;
+	double width = WiFiExample.TRACK;
+	private static final int FORWARD_SPEED = 250;
+	private static final int ROTATE_SPEED = 150;
+	public double odo_x,odo_y, odo_theta;
+	public double x_dest, y_dest, theta_dest;
+	public static final EV3LargeRegulatedMotor leftMotor = WiFiExample.leftMotor;
+	public static final EV3LargeRegulatedMotor rightMotor = WiFiExample.rightMotor;
+	//instantiate odometer:
+	public Odometer odometer;
+	public Navigation(Odometer odometer){ //constructor
+		this.odometer = odometer;
 	}
 	
-	/*
-	 * Go foward a set distance in cm
-	 */
-	public void goForward(double distance) {
-		this.travelTo(Math.cos(Math.toRadians(this.odometer.getAng())) * distance, Math.cos(Math.toRadians(this.odometer.getAng())) * distance);
+	public void run(){
+		travelTo(60,30);
+		travelTo(30,30);
+		travelTo(30,60);
+		travelTo(60,0);		
+	}
+	
+	public void travelTo(double x, double y){
+		//this method causes robot to travel to the absolute field location (x,y)
 
+		odo_x = odometer.getX();
+		odo_y = odometer.getY();
+		odo_theta = odometer.getTheta();
+		
+		x_dest = x;
+		y_dest = y;
+		
+		//calculate the distance we want the robot to travel in x and y 
+		double delta_y = y_dest-odo_y;
+		double delta_x = x_dest-odo_x;
+		
+		//calculate desired theta heading: theta = arctan(x/y)
+		theta_dest = Math.toDegrees(Math.atan2(delta_x,delta_y));
+		
+		//distance to travel: d = sqrt(x^2+y^2)
+		double travelDist = Math.hypot(delta_x,delta_y);
+		//Math.hypot calculates the hypotenuse of its arguments (distance we want to find)
+		
+		//subtract odo_theta from theta_dest:
+		double theta_corr = theta_dest - odo_theta;
+		
+		//DIRECTING ROBOT TO CORRECT ANGLE: 
+		if(theta_corr < -180){ //if theta_dest is between angles [-180,-360] 
+			//add 360 degrees to theta_dest in order for the robot to turn the smallest angle
+			turnTo(theta_corr + 360);
+		}
+		else if(theta_corr > 180){ //if theta_dest is between angles [180,360]
+			//subtract 360 degrees from theta_dest in order for the robot to turn the smallest angle
+			turnTo(theta_corr - 360);
+		}
+		else{
+			turnTo(theta_corr);
+		}
+		drive(travelDist);
+
+	}
+	public void drive(double distance){
+		//set both motors to forward speed desired
+		leftMotor.setSpeed(FORWARD_SPEED);
+		rightMotor.setSpeed(FORWARD_SPEED);
+						
+		leftMotor.rotate(convertDistance(wheel_radius, distance), true);
+		rightMotor.rotate(convertDistance(wheel_radius, distance), false);
+	}
+	
+	public void turnTo(double theta){
+		//this method causes the robot to turn (on point) to the absolute heading theta
+		
+		//make robot turn to angle theta:
+		leftMotor.setSpeed(ROTATE_SPEED);
+		rightMotor.setSpeed(ROTATE_SPEED);
+		
+		leftMotor.rotate(convertAngle(wheel_radius, width, theta), true);
+		rightMotor.rotate(-convertAngle(wheel_radius, width, theta), false);
+	}
+	public boolean isNavigating(){
+		
+		return true;
+	}
+	private static int convertDistance(double radius, double distance) {
+		return (int) ((180.0 * distance) / (Math.PI * radius));
+	}
+	private static int convertAngle(double radius, double width, double angle) {
+		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
 }
