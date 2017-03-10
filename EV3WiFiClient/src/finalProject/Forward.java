@@ -29,13 +29,13 @@ public class Forward {
 	// Ball Launcher Motor connected to output B
 	public static final EV3LargeRegulatedMotor leftMotor = WiFiExample.leftMotor;
 	public static final EV3LargeRegulatedMotor rightMotor = WiFiExample.rightMotor;
-	public static final EV3LargeRegulatedMotor launcherMotor = WiFiExample.launcherMotor;;
+//	public static final EV3LargeRegulatedMotor launcherMotor = WiFiExample.launcherMotor;;
 	private static final Port usPort = LocalEV3.get().getPort("S1");
 
 	
 	public static Odometer odometer = WiFiExample.odometer;
 	public static Navigation navigation = WiFiExample.navigation;
-	public static ballLauncher launch =  WiFiExample.launch;
+//	public static ballLauncher launch =  WiFiExample.launch;
 	
 	//Setup ultrasonic sensor
 	// 1. Create a port object attached to a physical port (done above)
