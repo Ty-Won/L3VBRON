@@ -1,0 +1,28 @@
+<XML>
+	<inputs>
+		<team key="FWD_TEAM">
+			<label>Forward team number</label>
+		</team>
+		<int key="FWD_CORNER">
+			<label>Builder team start corner</label>
+		</int>
+		<team key="DEF_TEAM">
+			<label>Defender team number</label>
+		</team>
+		<int key="DEF_CORNER">
+			<label>Defender team start corner</label>
+		</int>
+		<int key="d1">
+			<label>Forward line position</label>
+		</int>
+		<coordinate keyx="w1" keyy="w2">
+			<label>Defender zone dimensions (w1,w2)</label>
+		</coordinate>
+		<coordinate keyx="bx" keyy="by">
+			<label>Ball dispenser position (bx,by)</label>
+		</coordinate>
+		<string key="omega">
+			<label>Ball dispenser orientation</label>
+		</string>
+	</inputs>
+</XML>
