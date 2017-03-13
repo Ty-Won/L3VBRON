@@ -37,7 +37,9 @@ public class Odometer implements TimerListener {
 	private Timer timer;
 	private EV3LargeRegulatedMotor leftMotor, rightMotor;
 	private final int DEFAULT_TIMEOUT_PERIOD = 20;
-	private double leftRadius, rightRadius, width;
+//	private double leftRadius, rightRadius, width;
+	public static double WHEEL_RADIUS = WiFiExample.WHEEL_RADIUS;
+	public static final double TRACK = WiFiExample.TRACK;
 	private double x, y, theta;
 	private double[] oldDH, dDH;
 	
@@ -45,16 +47,10 @@ public class Odometer implements TimerListener {
 	public Odometer (EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, int INTERVAL, boolean autostart) {
 		
 		this.leftMotor = leftMotor;
-		this.rightMotor = rightMotor;
-		
-		// default values, modify for your robot
-		this.rightRadius = 2.2;
-		this.leftRadius = 2.2;
-		this.width = 10.55;
-		
+		this.rightMotor = rightMotor;		
 		this.x = 0.0;
 		this.y = 0.0;
-		this.theta = 90.0;
+		this.theta = 0.0;
 		this.oldDH = new double[2];
 		this.dDH = new double[2];
 
@@ -84,8 +80,8 @@ public class Odometer implements TimerListener {
 		leftTacho = leftMotor.getTachoCount();
 		rightTacho = rightMotor.getTachoCount();
 
-		data[0] = (leftTacho * leftRadius + rightTacho * rightRadius) * Math.PI / 360.0;
-		data[1] = (rightTacho * rightRadius - leftTacho * leftRadius) / width;
+		data[0] = ((leftTacho * WHEEL_RADIUS) + (rightTacho * WHEEL_RADIUS)) * Math.PI / 360.0;
+		data[1] = ((rightTacho * WHEEL_RADIUS) - (leftTacho * WHEEL_RADIUS)) / TRACK;
 	}
 	
 	/*

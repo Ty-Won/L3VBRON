@@ -22,7 +22,8 @@ public class LightLocalizer {
 	private double[] thetaLocations;
 	private double sensorDist = 9;
 	private double dTheta; 	//delta theta 
-	public static int ROTATION_SPEED = 100; 
+	private static final int FORWARD_SPEED = WiFiExample.FORWARD_SPEED;
+	private static final int ROTATION_SPEED = WiFiExample.ROTATE_SPEED;
 	
 	public LightLocalizer(Odometer odo, Navigation nav, SampleProvider colorSensor, float[] colorData, 
 			EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, SampleProvider usValue, SensorModes usSensor, float[] usData) {
@@ -113,9 +114,9 @@ public class LightLocalizer {
 		boolean[] updates = {false,false,true}; //booleans indicating if x,y,theta are being updated
 		//only theta is being updated so index 2 is true but x and y remain 0
 		odo.setPosition(pos, updates);
-		nav.turnTo(0,true);
+		nav.turnTo(0);
 		Sound.buzz();
-		nav.turnBy(-45);
+		nav.turnTo(-45);
 		
 		
 		//LIGHT LOCALIZATION:
@@ -133,7 +134,7 @@ public class LightLocalizer {
 				break;
 			}
 		}
-		nav.goForward(5);
+		nav.drive(5);
 
 		// start rotating and clock all 4 gridlines
 		//here we have the robot rotate until it finds four grid lines
