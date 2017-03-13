@@ -68,7 +68,7 @@ public class LightLocalizer {
 		}
 		
 		//latch angle A:
-		angleA = odo.getTheta(); //get robot's angle from odometer
+		angleA = odo.getAng(); //get robot's angle from odometer
 		
 		// switch direction and wait until it sees no wall
 		while(wallDetected()){ //while robot sees a wall:
@@ -94,7 +94,7 @@ public class LightLocalizer {
 		}
 		
 		//latch angle B:
-		angleB = odo.getTheta(); //get robot's angle from odometer
+		angleB = odo.getAng(); //get robot's angle from odometer
 		
 		// angleA is clockwise from angleB, so assume the average of the
 		// angles to the right of angleB is 45 degrees past 'north'
@@ -108,7 +108,7 @@ public class LightLocalizer {
 		}
 		
 		//dTheta is the angle to be added to the heading reported by odometer:
-		pos[2] = dTheta + odo.getTheta(); //pos[2] is where we update the angle
+		pos[2] = dTheta + odo.getAng(); //pos[2] is where we update the angle
 		
 		// update the odometer position (example to follow:)
 		boolean[] updates = {false,false,true}; //booleans indicating if x,y,theta are being updated
@@ -154,7 +154,7 @@ public class LightLocalizer {
 				Sound.beep();
 				lineLocationsX[moreHelp] = odo.getX();
 				lineLocationsY[moreHelp] = odo.getY();
-				thetaLocations[moreHelp] = odo.getTheta();
+				thetaLocations[moreHelp] = odo.getAng();
 				moreHelp++;
 			}
 		}

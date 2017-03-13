@@ -30,7 +30,7 @@ public class Navigation extends Thread{
 
 		odo_x = odometer.getX();
 		odo_y = odometer.getY();
-		odo_theta = odometer.getTheta();
+		odo_theta = odometer.getAng();
 		
 		x_dest = x;
 		y_dest = y;
@@ -39,7 +39,7 @@ public class Navigation extends Thread{
 		double delta_y = y_dest-odo_y;
 		double delta_x = x_dest-odo_x;
 		
-		//calculate desired theta heading: theta = arctan(x/y)
+		//calculate desired theta heading: theta = arctan(y/x)
 		theta_dest = Math.toDegrees(Math.atan2(delta_y,delta_x));
 		
 		//distance to travel: d = sqrt(x^2+y^2)
