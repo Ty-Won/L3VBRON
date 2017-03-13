@@ -10,19 +10,19 @@ public class Navigation extends Thread{
 	private static final int ROTATE_SPEED = WiFiExample.ROTATE_SPEED;
 	public double odo_x,odo_y, odo_theta;
 	public double x_dest, y_dest, theta_dest;
-	private EV3LargeRegulatedMotor leftMotor, rightMotor;
+	private EV3LargeRegulatedMotor leftMotor = WiFiExample.leftMotor;
+	private EV3LargeRegulatedMotor rightMotor = WiFiExample.rightMotor;
 	
 	//instantiate odometer:
-	public Odometer odometer;
+	public Odometer odometer = WiFiExample.odometer;
 	public Navigation(Odometer odometer){ //constructor
 		this.odometer = odometer;
 	}
-	
 	public void run(){
 		travelTo(60,30);
 		travelTo(30,30);
 		travelTo(30,60);
-		travelTo(60,0);		
+		travelTo(60,0);
 	}
 	
 	public void travelTo(double x, double y){
@@ -40,7 +40,7 @@ public class Navigation extends Thread{
 		double delta_x = x_dest-odo_x;
 		
 		//calculate desired theta heading: theta = arctan(x/y)
-		theta_dest = Math.toDegrees(Math.atan2(delta_x,delta_y));
+		theta_dest = Math.toDegrees(Math.atan2(delta_y,delta_x));
 		
 		//distance to travel: d = sqrt(x^2+y^2)
 		double travelDist = Math.hypot(delta_x,delta_y);

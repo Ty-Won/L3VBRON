@@ -206,12 +206,14 @@ public class WiFiExample {
 				//					navigation.turnBy(90);
 				//					counter++;
 				//				}
-				navigation.travelTo(0,0); 
-				Sound.buzz();
-				navigation.travelTo(30.48,30.48);
-				Sound.beep();
-				navigation.travelTo(0,30.48);
-				Sound.twoBeeps();
+				navigation.start();
+//				navigation.travelTo(0,0); 
+//				Sound.buzz();
+//				navigation.travelTo(30.48,30.48);
+//				Sound.beep();
+//				navigation.travelTo(0,30.48);
+//				Sound.twoBeeps();
+				
 				//lsl.doLocalization(fwdCorner);
 				//Forward forward = new Forward(fwdCorner, d1, w1, w2, bx, by, orientation);
 				//forward.startFWD();
@@ -222,8 +224,8 @@ public class WiFiExample {
 				Defense defense = new Defense(defCorner, w1, w2);
 				defense.startDEF();
 			}
-
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
 		}
 
