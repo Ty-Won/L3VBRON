@@ -12,6 +12,7 @@ import finalProject.UltrasonicPoller;
 
 import wifi.WifiConnection;
 import lejos.hardware.Button;
+import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.port.Port;
@@ -33,8 +34,29 @@ import lejos.robotics.SampleProvider;
  *
  */
 public class WiFiExample {
-	public static final double WHEEL_RADIUS = 2.2;
-	public static final double TRACK = 11.5; 
+	public static final double WHEEL_RADIUS = 2.1;
+	public static final double TRACK = 10.6; 
+	//WITH SPEED 250
+	//10.2 not enough
+	//10.5 too much
+	//10.3 not enough 
+	//10.4 not enough 
+	//10.45 not enough
+	
+	//WITH SPEED 150
+	//navigation.goForward(60.96);
+	//navigation.turnBy(90);
+	//navigation.goForward(30.48);
+	//navigation.turnBy(90);
+	//:
+	//8.5 not turning enough
+	//10 turning way too much
+	//9.5 turning too much
+	//9.8 a litttttle too much
+	//9.9 not enough turn
+	//10.2
+	
+	
 	public static final int TRAVERSE_SPEED = 100;
 	private static final int bandCenter = 35;			// Offset from the wall (cm)
 	private static final int bandWidth = 3;				// Width of dead band (cm)
@@ -172,9 +194,28 @@ public class WiFiExample {
 			
 			//pass all these values to start the game:
 			if(fwdTeam == 3){ //play forward:
-				lsl.doLocalization(fwdCorner);
-				Forward forward = new Forward(fwdCorner, d1, w1, w2, bx, by, orientation);
-				forward.startFWD();
+				//POSITIVE IS CLOCKWISE: TurnBy(-90), turns left
+//				int counter=0;
+//				while(counter<5){
+//					navigation.goForward(60.96);
+//					navigation.turnBy(90);
+//					navigation.goForward(60.96);
+//					navigation.turnBy(90);
+//					navigation.goForward(60.96);
+//					navigation.turnBy(90);
+//					navigation.goForward(60.96);
+//					navigation.turnBy(90);
+//					counter++;
+//				}
+				navigation.travelTo(0,0); 
+				Sound.buzz();
+				navigation.travelTo(30.48,30.48);
+				Sound.beep();
+				navigation.travelTo(0,30.48);
+				Sound.twoBeeps();
+				//lsl.doLocalization(fwdCorner);
+				//Forward forward = new Forward(fwdCorner, d1, w1, w2, bx, by, orientation);
+				//forward.startFWD();
 			}
 			
 			if(defTeam == 3){//play defense:
