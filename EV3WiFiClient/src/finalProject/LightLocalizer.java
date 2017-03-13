@@ -58,6 +58,10 @@ public class LightLocalizer {
 		Sound.beepSequenceUp(); //make sound to indicate we now see a wall
 		
 		if(wallDetected()){//stop motors to give it time to latch angle
+			leftMotor.setSpeed(0); //set speeds to zero for both because stop() doesnt do both motors simultaneously
+			rightMotor.setSpeed(0);
+			leftMotor.forward();
+			rightMotor.forward();
 			leftMotor.stop();
 			rightMotor.stop();
 		}
@@ -80,6 +84,10 @@ public class LightLocalizer {
 		Sound.twoBeeps(); //make sound to indicate we now see a wall
 		
 		if(wallDetected()){//stop motors to give it time to latch angle
+			leftMotor.setSpeed(0); //set speeds to zero for both because stop() doesnt do both motors simultaneously
+			rightMotor.setSpeed(0);
+			leftMotor.forward();
+			rightMotor.forward();
 			leftMotor.stop();
 			rightMotor.stop();
 		}
@@ -105,7 +113,7 @@ public class LightLocalizer {
 		boolean[] updates = {false,false,true}; //booleans indicating if x,y,theta are being updated
 		//only theta is being updated so index 2 is true but x and y remain 0
 		odo.setPosition(pos, updates);
-		nav.turnTo(45);
+		nav.turnTo(0);
 		
 		//LIGHT LOCALIZATION:
 		while(helper == true){ //go to intersection of lines
