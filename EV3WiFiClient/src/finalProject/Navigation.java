@@ -40,14 +40,14 @@ public class Navigation extends Thread{
 		double delta_x = x_dest-odo_x;
 		
 		//calculate desired theta heading: theta = arctan(y/x)
-		theta_dest = Math.toDegrees(Math.atan2(delta_y,delta_x));
+		theta_dest = Math.toDegrees(Math.atan2(delta_x,delta_y));
 		
 		//distance to travel: d = sqrt(x^2+y^2)
 		double travelDist = Math.hypot(delta_x,delta_y);
 		//Math.hypot calculates the hypotenuse of its arguments (distance we want to find)
 		
 		//subtract odo_theta from theta_dest:
-		double theta_corr = theta_dest - odo_theta;
+		double theta_corr = (theta_dest - odo_theta);
 		
 		//DIRECTING ROBOT TO CORRECT ANGLE: 
 		if(theta_corr < -180){ //if theta_dest is between angles [-180,-360] 
@@ -89,5 +89,44 @@ public class Navigation extends Thread{
 	}
 	private static int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
+	}
+	public void travelToNoDrive(double x, double y){
+		//this method causes robot to travel to the absolute field location (x,y)
+
+		odo_x = odometer.getX();
+		odo_y = odometer.getY();
+		odo_theta = odometer.getAng();
+		
+		x_dest = x;
+		y_dest = y;
+		
+		//calculate the distance we want the robot to travel in x and y 
+		double delta_y = y_dest-odo_y;
+		double delta_x = x_dest-odo_x;
+		
+		//calculate desired theta heading: theta = arctan(y/x)
+		theta_dest = Math.toDegrees(Math.atan2(delta_y,delta_x));
+		
+		//distance to travel: d = sqrt(x^2+y^2)
+		double travelDist = Math.hypot(delta_x,delta_y);
+		//Math.hypot calculates the hypotenuse of its arguments (distance we want to find)
+		
+		//subtract odo_theta from theta_dest:
+		double theta_corr = -(theta_dest - odo_theta);
+		
+		//DIRECTING ROBOT TO CORRECT ANGLE: 
+		if(theta_corr < -180){ //if theta_dest is between angles [-180,-360] 
+			//add 360 degrees to theta_dest in order for the robot to turn the smallest angle
+			turnTo(theta_corr + 360);
+		}
+		else if(theta_corr > 180){ //if theta_dest is between angles [180,360]
+			//subtract 360 degrees from theta_dest in order for the robot to turn the smallest angle
+			turnTo(theta_corr - 360);
+		}
+		else{
+			turnTo(theta_corr);
+		}
+		
+		drive(0);
 	}
 }

@@ -35,7 +35,7 @@ import lejos.robotics.SampleProvider;
  */
 public class WiFiExample {
 	public static final double WHEEL_RADIUS = 2.1;
-	public static final double TRACK = 10.6; 
+	public static final double TRACK = 10.55; 
 
 	public static final int FORWARD_SPEED = 250;
 	public static final int ROTATE_SPEED = 150;
@@ -56,7 +56,8 @@ public class WiFiExample {
 	private static final Port usPort = LocalEV3.get().getPort("S1");
 
 	//Initialization of odometer and navigation objects.
-	public static Odometer odometer = new Odometer(leftMotor, rightMotor,30,true);
+//	public static Odometer odometer = new Odometer(leftMotor, rightMotor,30,true);
+	public static Odometer odometer = new Odometer(leftMotor, rightMotor);
 	public static Navigation navigation = new Navigation(odometer);
 	//	public static ballLauncher launch = new ballLauncher(launcherMotor,odometer,navigation);
 	BangBangController bangbang = new BangBangController(leftMotor, rightMotor,
@@ -114,41 +115,41 @@ public class WiFiExample {
 			Map data = conn.getData();
 
 			// Example 1: Print out all received data
-			System.out.println("Map:\n" + data);
+//			System.out.println("Map:\n" + data);
 
 			// Example 2 : Print out specific values
 			int fwdTeam = ((Long) data.get("FWD_TEAM")).intValue();
-			System.out.println("Forward Team: " + fwdTeam);
+//			System.out.println("Forward Team: " + fwdTeam);
 
 			int defTeam = ((Long) data.get("DEF_TEAM")).intValue();
-			System.out.println("Defense Team: " + defTeam);
+//			System.out.println("Defense Team: " + defTeam);
 
 			int fwdCorner = ((Long) data.get("FWD_CORNER")).intValue();
-			System.out.println("Forward Start Corner: " + fwdCorner);
+//			System.out.println("Forward Start Corner: " + fwdCorner);
 
 			int defCorner = ((Long) data.get("DEF_CORNER")).intValue();
-			System.out.println("Defense Start Corner: " + defCorner);
+//			System.out.println("Defense Start Corner: " + defCorner);
 
 			int w1 = ((Long) data.get("w1")).intValue();
 			int w2 = ((Long) data.get("w2")).intValue();
-			System.out.println("Defender zone dimmensions (w1,w2): (" + w1 + ", " + w2 +")");
+//			System.out.println("Defender zone dimmensions (w1,w2): (" + w1 + ", " + w2 +")");
 
 			int d1 = ((Long) data.get("d1")).intValue();
-			System.out.println("Forward line position d1: " + d1);
+//			System.out.println("Forward line position d1: " + d1);
 
 			int bx = ((Long) data.get("bx")).intValue();
 			int by = ((Long) data.get("by")).intValue();
-			System.out.println("Ball dispenser position (bx,by): (" + bx + ", " + by +")");
+//			System.out.println("Ball dispenser position (bx,by): (" + bx + ", " + by +")");
 
 
 			// Example 3: Compare value
 			String orientation = (String) data.get("omega");
-			if (orientation.equals("N")) {
-				System.out.println("Orientation is North");
-			}
-			else {
-				System.out.println("Orientation is not North");
-			}
+//			if (orientation.equals("N")) {
+//				System.out.println("Orientation is North");
+//			}
+//			else {
+//				System.out.println("Orientation is not North");
+//			}
 
 			//Setup color sensor
 			// 1. Create a port object attached to a physical port (done above)
@@ -177,31 +178,21 @@ public class WiFiExample {
 			OdometryDisplay odometryDisplay = new OdometryDisplay(odometer,t);
 			//pass all these values to start the game:
 			if(fwdTeam == 3){ //play forward:
-				navigation.start();
+				System.out.println();
+				System.out.println();
+				System.out.println();
+				System.out.println();
+				System.out.println();
+				System.out.println();
+				System.out.println();
+				odometer.start();
+				
 				odometryDisplay.start();
+				//navigation.start();
 				
-				//POSITIVE IS CLOCKWISE: TurnBy(-90), turns left
-				//				int counter=0;
-				//				while(counter<5){
-				//					navigation.goForward(60.96);
-				//					navigation.turnBy(90);
-				//					navigation.goForward(60.96);
-				//					navigation.turnBy(90);
-				//					navigation.goForward(60.96);
-				//					navigation.turnBy(90);
-				//					navigation.goForward(60.96);
-				//					navigation.turnBy(90);
-				//					counter++;
-				//				}
-
-//				navigation.travelTo(0,0); 
-//				Sound.buzz();
-//				navigation.travelTo(30.48,30.48);
-//				Sound.beep();
-//				navigation.travelTo(0,30.48);
-//				Sound.twoBeeps();
 				
-				//lsl.doLocalization(fwdCorner);
+				
+				lsl.doLocalization(fwdCorner);
 				//Forward forward = new Forward(fwdCorner, d1, w1, w2, bx, by, orientation);
 				//forward.startFWD();
 			}

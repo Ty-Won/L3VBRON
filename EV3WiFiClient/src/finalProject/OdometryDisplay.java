@@ -35,7 +35,8 @@ public class OdometryDisplay extends Thread {
 //			t.drawString("US:"+ Lab3.sample[0]*100, 0, 3);
 
 			// get the odometry information
-			odometer.getPosition(position);
+			boolean[] update = {true,true,true};
+			odometer.getPosition(position, update);
 
 			// display odometry information
 			for (int i = 0; i < 3; i++) {
