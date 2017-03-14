@@ -182,15 +182,16 @@ public class Localization {
 
 		//Calculation of total angle subtending the axes
 		theta_y = Math.abs(YTheta_Minus - YTheta_Plus);
-		theta_x = Math.abs(XTheta_Minus - XTheta_Plus);
+		theta_x = Math.abs(XTheta_Plus - XTheta_Minus);
 
 		//Calculation of the x and t positions considering that we are in the 3rd quadrant (in negative x and y coords):
 		x_pos = -(SENSOR_DIST)*Math.cos(Math.toRadians(theta_y/2)); 
 		y_pos = -(SENSOR_DIST)*Math.cos(Math.toRadians(theta_x/2));
 
 		deltaTheta = 90 + (theta_y/2) - (YTheta_Minus - 180);
-
-		this.odo.setPosition(new double[] {x_pos,y_pos, deltaTheta+odo.getAng()},new boolean[] {true,true,true});
+		this.odo.setX(x_pos);
+		this.odo.setY(y_pos);
+		//this.odo.setPosition(new double[] {x_pos,y_pos, deltaTheta+odo.getAng()},new boolean[] {true,true,false});
 
 		// When done, travel to (0,0) and turn to 0 degrees:
 		//this doesn't work, fix it:
