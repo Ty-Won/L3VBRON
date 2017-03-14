@@ -38,7 +38,7 @@ public class WiFiExample {
 	public static final double TRACK = 10.55; 
 
 	public static final int FORWARD_SPEED = 250;
-	public static final int ROTATE_SPEED = 150;
+	public static final int ROTATE_SPEED = 50;
 	private static final int bandCenter = 35;			// Offset from the wall (cm)
 	private static final int bandWidth = 3;				// Width of dead band (cm)
 	private static final int motorLow = 100;			// Speed of slower rotating wheel (deg/sec)
@@ -159,8 +159,8 @@ public class WiFiExample {
 			@SuppressWarnings("resource")
 			SensorModes colorSensor = new EV3ColorSensor(colorPort);
 			SampleProvider colorValue = colorSensor.getMode("Red");			// colorValue provides samples from this instance
-			float[] colorData = new float[colorValue.sampleSize()];			// colorData is the buffer in which data are returned
-
+			float[] colorData = new float[100];			// colorData is the buffer in which data are returned
+			float[] colorData2 = new float[100];
 
 			//Setup ultrasonic sensor
 			// 1. Create a port object attached to a physical port (done above)
@@ -172,7 +172,7 @@ public class WiFiExample {
 			SampleProvider usValue = usSensor.getMode("Distance");			// colorValue provides samples from this instance
 			float[] usData = new float[usValue.sampleSize()];				// colorData is the buffer in which data are returned
 
-			LightLocalizer lsl = new LightLocalizer(odometer,navigation, colorValue, colorData, leftMotor,rightMotor, usValue, usSensor, usData);
+			Localization lsl = new Localization(odometer,navigation, colorValue, colorData, colorData2, leftMotor,rightMotor, usValue, usSensor, usData);
 			final TextLCD t = LocalEV3.get().getTextLCD();
 			t.clear();
 			OdometryDisplay odometryDisplay = new OdometryDisplay(odometer,t);
@@ -189,14 +189,10 @@ public class WiFiExample {
 				
 				odometryDisplay.start();
 				//navigation.start();
-				
-				
-				
 				lsl.doLocalization(fwdCorner);
 				//Forward forward = new Forward(fwdCorner, d1, w1, w2, bx, by, orientation);
 				//forward.startFWD();
 			}
-
 			if(defTeam == 3){//play defense:
 				lsl.doLocalization(defCorner);
 				Defense defense = new Defense(defCorner, w1, w2);

@@ -1,10 +1,11 @@
 package finalProject;
+import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
 
-public class LightLocalizer {
+public class Localization {
 	private Odometer odo;
 	private Navigation nav;
 	private SampleProvider colorSensor;
@@ -13,6 +14,7 @@ public class LightLocalizer {
 	private float[] usData;
 	private EV3LargeRegulatedMotor leftMotor, rightMotor;
 	private float[] colorData;	
+	private float[] colorData2;
 	private double firstLinePos;
 	private double secondLinePos;
 	private boolean helper = true;
@@ -32,11 +34,12 @@ public class LightLocalizer {
 	static final double correction = 18;
 	boolean moving = true;
 
-	public LightLocalizer(Odometer odo, Navigation nav, SampleProvider colorSensor, float[] colorData, 
-			EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, SampleProvider usValue, SensorModes usSensor, float[] usData) {
+	public Localization(Odometer odo, Navigation nav, SampleProvider colorSensor, float[] colorData, 
+			float[] colorData2, EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, SampleProvider usValue, SensorModes usSensor, float[] usData) {
 		this.odo = odo;
 		this.colorSensor = colorSensor;
 		this.colorData = colorData;
+		this.colorData2 = colorData2;
 		this.usSensor = usSensor;
 		this.usData = usData;
 		this.usValue = usValue;
@@ -49,6 +52,7 @@ public class LightLocalizer {
 	}
 
 	public void doLocalization(int fwdCorner) {
+		
 		double [] pos = new double [3];
 		double angleA, angleB;
 		// rotate the robot until it sees no wall
@@ -101,14 +105,14 @@ public class LightLocalizer {
 		}
 
 		//latch angle B:
-		angleB = 360 - odo.getAng(); //get robot's angle from odometer
+		angleB = odo.getAng(); //get robot's angle from odometer
 
 		// angleA is clockwise from angleB, so assume the average of the
 		// angles to the right of angleB is 45 degrees past 'north'
 
 		//use formula from tutorial to determine delta theta:
 		if(angleA < angleB){
-			dTheta = 45 - ((angleA+angleB)/2);
+			dTheta = 225 - ((angleA+angleB)/2);
 		}
 		else if(angleA > angleB){
 			dTheta = 225 - ((angleA+angleB)/2);
@@ -121,67 +125,59 @@ public class LightLocalizer {
 		boolean[] updates = {false,false,true}; //booleans indicating if x,y,theta are being updated
 		//only theta is being updated so index 2 is true but x and y remain 0
 		odo.setPosition(pos, updates);
-		nav.travelToNoDrive(0,0);
+		nav.turnToSmart(45);
 		Sound.buzz();
 		
 
 		//LIGHT:
-		
-		//Lab4_Group4.leftMotor.forward();
-		//Lab4_Group4.rightMotor.forward();
 		while(moving){
 			leftMotor.rotate(convertDistance(WHEEL_RADIUS, 600), true);
 			rightMotor.rotate(convertDistance(WHEEL_RADIUS, 600), true);
-			colorSensor.fetchSample(colorData, 0);
-			int light_val = (int)(colorData[0]*100);
+			this.colorSensor.fetchSample(this.colorData2, 0);
+			int light_val = (int)(this.colorData2[0]*100);
 			if(light_val <= 28){
 				moving = false;
 			}
-			
 		}
+		Sound.beep();
+		
 		//After seeing line, move forward 5
 		leftMotor.rotate(convertDistance(WHEEL_RADIUS,5), true);
 		rightMotor.rotate(convertDistance(WHEEL_RADIUS,5), false);
 
-
 		//Set robot to rotate through 360 degrees clockwise:
 		leftMotor.rotate(convertAngle(WHEEL_RADIUS, TRACK, 360), true);
 		rightMotor.rotate(-convertAngle(WHEEL_RADIUS, TRACK, 360), true);
-
+		
 		//While rotating, get LS data:
 		while(line_count < 4){
 			// Acquire Color Data from sensor, store it in the array at the position
 			// of the line it is currently at.
-			colorSensor.fetchSample(colorData, line_count);
-			int light_val = (int)((colorData[line_count])*100);
-			
-//			Color_Sensor.fetchSample(colorData, line_count);
-//			int Lcolor = (int)colorData[line_count];
+			this.colorSensor.fetchSample(this.colorData, line_count);
+			int light_val = (int)((this.colorData[line_count])*100);
 
 			// Progress through the lines as they are detected and record the angles.
 			// As the cart starts at zero from the US localization, it is not necessary
 			// for us to consider the angle looping around: Our angles will always
 			// be within [0, 360].
-
-			// It was determined experimentally that the color 13 best detected the black
-			// gridlines on the floor in the Odometry correction lab.
 			if(line_count == 0 && light_val <= 28){
-				XTheta_Minus = odo.getAng();
+				XTheta_Plus = odo.getAng();
 				line_count++; //Increment the line counter
 				Sound.beep();
 			}
 			else if(line_count == 1 && light_val <= 28){
-				YTheta_Plus = odo.getAng();
+				YTheta_Minus = odo.getAng();
 				line_count++;
 				Sound.beep();
+
 			}
 			else if(line_count == 2 && light_val <= 28){
-				XTheta_Plus = odo.getAng();
+				XTheta_Minus = odo.getAng();
 				line_count++;
 				Sound.beep();
 			}
 			else if(line_count == 3 && light_val <= 28){
-				YTheta_Minus = odo.getAng();
+				YTheta_Plus = odo.getAng();
 				line_count++;
 				Sound.beep();
 			}			
@@ -205,7 +201,8 @@ public class LightLocalizer {
 		this.odo.setPosition(new double[] {x_pos,y_pos, deltaTheta+correction},new boolean[] {true,true,true});
 
 		// When done, travel to (0,0) and turn to 0 degrees: This is done in the main method in order to avoid premature motion.
-
+		nav.travelTo(0, 0);
+		nav.turnToSmart(0);
 
 
 		//		//LIGHT LOCALIZATION:
