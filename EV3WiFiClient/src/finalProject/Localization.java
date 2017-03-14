@@ -15,14 +15,8 @@ public class Localization {
 	private EV3LargeRegulatedMotor leftMotor, rightMotor;
 	private float[] colorData;	
 	private float[] colorData2;
-	private double firstLinePos;
-	private double secondLinePos;
-	private boolean helper = true;
-	private int moreHelp = 0;
-	private double[] lineLocationsX;
-	private double[] lineLocationsY;
-	private double[] thetaLocations;
-	private double SENSOR_DIST = 9;
+
+	private double SENSOR_DIST = 9.2;
 	private double dTheta; 	//delta theta 
 	private static final int FORWARD_SPEED = WiFiExample.FORWARD_SPEED;
 	private static final int ROTATION_SPEED = WiFiExample.ROTATE_SPEED;
@@ -46,9 +40,7 @@ public class Localization {
 		this.leftMotor = leftMotor;
 		this.rightMotor = rightMotor;
 		this.nav = nav;
-		this.lineLocationsX = new double [4];
-		this.lineLocationsY = new double [4];
-		this.thetaLocations = new double [4];
+
 	}
 
 	public void doLocalization(int fwdCorner) {
@@ -112,10 +104,10 @@ public class Localization {
 
 		//use formula from tutorial to determine delta theta:
 		if(angleA < angleB){
-			dTheta = 225 - ((angleA+angleB)/2);
+			dTheta = 230 - ((angleA+angleB)/2);
 		}
 		else if(angleA > angleB){
-			dTheta = 225 - ((angleA+angleB)/2);
+			dTheta = 230 - ((angleA+angleB)/2);
 		}
 
 		//dTheta is the angle to be added to the heading reported by odometer:
@@ -189,8 +181,8 @@ public class Localization {
 		double theta_y = 0, theta_x = 0;
 
 		//Calculation of total angle subtending the axes
-		theta_y = YTheta_Minus - YTheta_Plus;
-		theta_x = XTheta_Minus - XTheta_Plus;
+		theta_y = Math.abs(YTheta_Minus - YTheta_Plus);
+		theta_x = Math.abs(XTheta_Minus - XTheta_Plus);
 
 		//Calculation of the x and t positions considering that we are in the 3rd quadrant (in negative x and y coords):
 		x_pos = -(SENSOR_DIST)*Math.cos(Math.toRadians(theta_y/2)); 
@@ -198,13 +190,13 @@ public class Localization {
 
 		deltaTheta = 90 + (theta_y/2) - (YTheta_Minus - 180);
 
-		this.odo.setPosition(new double[] {x_pos,y_pos, deltaTheta+correction},new boolean[] {true,true,true});
+		this.odo.setPosition(new double[] {x_pos,y_pos, deltaTheta+odo.getAng()},new boolean[] {true,true,true});
 
 		// When done, travel to (0,0) and turn to 0 degrees:
 		//this doesn't work, fix it:
 		nav.travelTo(0, 0); 
 		Sound.beep();
-		nav.turnTo(0);
+		//nav.turnToSmart(0);
 
 
 		//		//LIGHT LOCALIZATION:
