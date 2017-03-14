@@ -38,7 +38,7 @@ public class WiFiExample {
 	public static final double TRACK = 10.55; 
 
 	public static final int FORWARD_SPEED = 250;
-	public static final int ROTATE_SPEED = 50;
+	public static final int ROTATE_SPEED = 150;
 	private static final int bandCenter = 35;			// Offset from the wall (cm)
 	private static final int bandWidth = 3;				// Width of dead band (cm)
 	private static final int motorLow = 100;			// Speed of slower rotating wheel (deg/sec)

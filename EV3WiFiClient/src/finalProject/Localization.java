@@ -200,9 +200,11 @@ public class Localization {
 
 		this.odo.setPosition(new double[] {x_pos,y_pos, deltaTheta+correction},new boolean[] {true,true,true});
 
-		// When done, travel to (0,0) and turn to 0 degrees: This is done in the main method in order to avoid premature motion.
-		nav.travelTo(0, 0);
-		nav.turnToSmart(0);
+		// When done, travel to (0,0) and turn to 0 degrees:
+		//this doesn't work, fix it:
+		nav.travelTo(0, 0); 
+		Sound.beep();
+		nav.turnTo(0);
 
 
 		//		//LIGHT LOCALIZATION:
