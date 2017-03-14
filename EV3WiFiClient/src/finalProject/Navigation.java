@@ -5,24 +5,24 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 public class Navigation extends Thread{
 	
 	double wheel_radius = WiFiExample.WHEEL_RADIUS;
-	double width = WiFiExample.TRACK;
-	private static final int FORWARD_SPEED = 250;
-	private static final int ROTATE_SPEED = 150;
+	double width =  WiFiExample.TRACK;
+	private static final int FORWARD_SPEED = WiFiExample.FORWARD_SPEED;
+	private static final int ROTATE_SPEED = WiFiExample.ROTATE_SPEED;
 	public double odo_x,odo_y, odo_theta;
 	public double x_dest, y_dest, theta_dest;
-	public static final EV3LargeRegulatedMotor leftMotor = WiFiExample.leftMotor;
-	public static final EV3LargeRegulatedMotor rightMotor = WiFiExample.rightMotor;
+	private EV3LargeRegulatedMotor leftMotor = WiFiExample.leftMotor;
+	private EV3LargeRegulatedMotor rightMotor = WiFiExample.rightMotor;
+	
 	//instantiate odometer:
-	public Odometer odometer;
+	public Odometer odometer = WiFiExample.odometer;
 	public Navigation(Odometer odometer){ //constructor
 		this.odometer = odometer;
 	}
-	
 	public void run(){
 		travelTo(60,30);
 		travelTo(30,30);
 		travelTo(30,60);
-		travelTo(60,0);		
+		travelTo(60,0);
 	}
 	
 	public void travelTo(double x, double y){
@@ -30,7 +30,7 @@ public class Navigation extends Thread{
 
 		odo_x = odometer.getX();
 		odo_y = odometer.getY();
-		odo_theta = odometer.getTheta();
+		odo_theta = odometer.getAng();
 		
 		x_dest = x;
 		y_dest = y;
@@ -39,7 +39,7 @@ public class Navigation extends Thread{
 		double delta_y = y_dest-odo_y;
 		double delta_x = x_dest-odo_x;
 		
-		//calculate desired theta heading: theta = arctan(x/y)
+		//calculate desired theta heading: theta = arctan(y/x)
 		theta_dest = Math.toDegrees(Math.atan2(delta_x,delta_y));
 		
 		//distance to travel: d = sqrt(x^2+y^2)
@@ -47,7 +47,7 @@ public class Navigation extends Thread{
 		//Math.hypot calculates the hypotenuse of its arguments (distance we want to find)
 		
 		//subtract odo_theta from theta_dest:
-		double theta_corr = theta_dest - odo_theta;
+		double theta_corr = (theta_dest - odo_theta);
 		
 		//DIRECTING ROBOT TO CORRECT ANGLE: 
 		if(theta_corr < -180){ //if theta_dest is between angles [-180,-360] 
@@ -83,14 +83,32 @@ public class Navigation extends Thread{
 		leftMotor.rotate(convertAngle(wheel_radius, width, theta), true);
 		rightMotor.rotate(-convertAngle(wheel_radius, width, theta), false);
 	}
-	public boolean isNavigating(){
-		
-		return true;
-	}
+
 	private static int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 	private static int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
+	}
+	public void turnToSmart(double angle){
+		//this method causes robot to travel to the absolute angle 
+
+		odo_theta = odometer.getAng();
+
+		//subtract odo_theta from theta_dest:
+		double theta_corr = angle - odo_theta;
+		
+		//DIRECTING ROBOT TO CORRECT ANGLE: 
+		if(theta_corr < -180){ //if theta_dest is between angles [-180,-360] 
+			//add 360 degrees to theta_dest in order for the robot to turn the smallest angle
+			turnTo(theta_corr + 360);
+		}
+		else if(theta_corr > 180){ //if theta_dest is between angles [180,360]
+			//subtract 360 degrees from theta_dest in order for the robot to turn the smallest angle
+			turnTo(theta_corr - 360);
+		}
+		else{
+			turnTo(theta_corr);
+		}
 	}
 }

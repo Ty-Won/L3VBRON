@@ -2,6 +2,7 @@ package finalProject;
 
 import java.util.Map;
 
+import finalProject.OdometryDisplay;
 import finalProject.BangBangController;
 import finalProject.Defense;
 import finalProject.Forward;
@@ -12,7 +13,9 @@ import finalProject.UltrasonicPoller;
 
 import wifi.WifiConnection;
 import lejos.hardware.Button;
+import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
+import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3ColorSensor;
@@ -29,13 +32,13 @@ import lejos.robotics.SampleProvider;
  * @author Michael Smith
  * @author Ilana Haddad
  * @version 2.0 
- * 
- *
  */
 public class WiFiExample {
-	public static final double WHEEL_RADIUS = 2.2;
-	public static final double TRACK = 11.5; 
-	public static final int TRAVERSE_SPEED = 100;
+	public static final double WHEEL_RADIUS = 2.1;
+	public static final double TRACK = 10.55; 
+
+	public static final int FORWARD_SPEED = 250;
+	public static final int ROTATE_SPEED = 150;
 	private static final int bandCenter = 35;			// Offset from the wall (cm)
 	private static final int bandWidth = 3;				// Width of dead band (cm)
 	private static final int motorLow = 100;			// Speed of slower rotating wheel (deg/sec)
@@ -48,16 +51,17 @@ public class WiFiExample {
 	// Ball Launcher Motor connected to output B
 	public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
-//	public static final EV3LargeRegulatedMotor launcherMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
+	//	public static final EV3LargeRegulatedMotor launcherMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
 	private static final Port colorPort = LocalEV3.get().getPort("S2");	
 	private static final Port usPort = LocalEV3.get().getPort("S1");
-	
+
 	//Initialization of odometer and navigation objects.
-	public static Odometer odometer = new Odometer(leftMotor, rightMotor,30,true);
+//	public static Odometer odometer = new Odometer(leftMotor, rightMotor,30,true);
+	public static Odometer odometer = new Odometer(leftMotor, rightMotor);
 	public static Navigation navigation = new Navigation(odometer);
-//	public static ballLauncher launch = new ballLauncher(launcherMotor,odometer,navigation);
+	//	public static ballLauncher launch = new ballLauncher(launcherMotor,odometer,navigation);
 	BangBangController bangbang = new BangBangController(leftMotor, rightMotor,
-			 bandCenter, bandWidth, motorLow, motorHigh);
+			bandCenter, bandWidth, motorLow, motorHigh);
 
 	/*
 	 * We use System.out.println() instead of LCD printing so that full debug
@@ -67,9 +71,9 @@ public class WiFiExample {
 	 * 
 	 * 
 	 * 					****
-	 			*** INSTRUCTIONS ***
-	 			 		****
-	 
+	 *** INSTRUCTIONS ***
+	 ****
+
 	 * There are two variables each team MUST set manually below:
 	 *  
 	 * 1. SERVER_IP: the IP address of the computer running the server
@@ -92,7 +96,7 @@ public class WiFiExample {
 
 		// Initialize WifiConnection class
 		WifiConnection conn = new WifiConnection(SERVER_IP, TEAM_NUMBER, ENABLE_DEBUG_WIFI_PRINT);
-	
+
 		// Connect to server and get the data, catching any errors that might occur
 		try {
 			/*
@@ -111,42 +115,42 @@ public class WiFiExample {
 			Map data = conn.getData();
 
 			// Example 1: Print out all received data
-			System.out.println("Map:\n" + data);
+//			System.out.println("Map:\n" + data);
 
 			// Example 2 : Print out specific values
 			int fwdTeam = ((Long) data.get("FWD_TEAM")).intValue();
-			System.out.println("Forward Team: " + fwdTeam);
-			
+//			System.out.println("Forward Team: " + fwdTeam);
+
 			int defTeam = ((Long) data.get("DEF_TEAM")).intValue();
-			System.out.println("Defense Team: " + defTeam);
-			
+//			System.out.println("Defense Team: " + defTeam);
+
 			int fwdCorner = ((Long) data.get("FWD_CORNER")).intValue();
-			System.out.println("Forward Start Corner: " + fwdCorner);
-			
+//			System.out.println("Forward Start Corner: " + fwdCorner);
+
 			int defCorner = ((Long) data.get("DEF_CORNER")).intValue();
-			System.out.println("Defense Start Corner: " + defCorner);
-			
+//			System.out.println("Defense Start Corner: " + defCorner);
+
 			int w1 = ((Long) data.get("w1")).intValue();
 			int w2 = ((Long) data.get("w2")).intValue();
-			System.out.println("Defender zone dimmensions (w1,w2): (" + w1 + ", " + w2 +")");
-			
+//			System.out.println("Defender zone dimmensions (w1,w2): (" + w1 + ", " + w2 +")");
+
 			int d1 = ((Long) data.get("d1")).intValue();
-			System.out.println("Forward line position d1: " + d1);
-			
+//			System.out.println("Forward line position d1: " + d1);
+
 			int bx = ((Long) data.get("bx")).intValue();
 			int by = ((Long) data.get("by")).intValue();
-			System.out.println("Ball dispenser position (bx,by): (" + bx + ", " + by +")");
-			
-			
+//			System.out.println("Ball dispenser position (bx,by): (" + bx + ", " + by +")");
+
+
 			// Example 3: Compare value
 			String orientation = (String) data.get("omega");
-			if (orientation.equals("N")) {
-				System.out.println("Orientation is North");
-			}
-			else {
-				System.out.println("Orientation is not North");
-			}
-			
+//			if (orientation.equals("N")) {
+//				System.out.println("Orientation is North");
+//			}
+//			else {
+//				System.out.println("Orientation is not North");
+//			}
+
 			//Setup color sensor
 			// 1. Create a port object attached to a physical port (done above)
 			// 2. Create a sensor instance and attach to port
@@ -155,9 +159,9 @@ public class WiFiExample {
 			@SuppressWarnings("resource")
 			SensorModes colorSensor = new EV3ColorSensor(colorPort);
 			SampleProvider colorValue = colorSensor.getMode("Red");			// colorValue provides samples from this instance
-			float[] colorData = new float[colorValue.sampleSize()];			// colorData is the buffer in which data are returned
+			float[] colorData = new float[100];			// colorData is the buffer in which data are returned
+			float[] colorData2 = new float[100];
 
-			
 			//Setup ultrasonic sensor
 			// 1. Create a port object attached to a physical port (done above)
 			// 2. Create a sensor instance and attach to port
@@ -168,22 +172,34 @@ public class WiFiExample {
 			SampleProvider usValue = usSensor.getMode("Distance");			// colorValue provides samples from this instance
 			float[] usData = new float[usValue.sampleSize()];				// colorData is the buffer in which data are returned
 
-			LightLocalizer lsl = new LightLocalizer(odometer,navigation, colorValue, colorData, leftMotor,rightMotor, usValue, usSensor, usData);
-			
+			Localization lsl = new Localization(odometer,navigation, colorValue, colorData, colorData2, leftMotor,rightMotor, usValue, usSensor, usData);
+			final TextLCD t = LocalEV3.get().getTextLCD();
+			t.clear();
+			OdometryDisplay odometryDisplay = new OdometryDisplay(odometer,t);
 			//pass all these values to start the game:
 			if(fwdTeam == 3){ //play forward:
+				System.out.println();
+				System.out.println();
+				System.out.println();
+				System.out.println();
+				System.out.println();
+				System.out.println();
+				System.out.println();
+				odometer.start();
+				
+				odometryDisplay.start();
+				//navigation.start();
 				lsl.doLocalization(fwdCorner);
-				Forward forward = new Forward(fwdCorner, d1, w1, w2, bx, by, orientation);
-				forward.startFWD();
+				//Forward forward = new Forward(fwdCorner, d1, w1, w2, bx, by, orientation);
+				//forward.startFWD();
 			}
-			
 			if(defTeam == 3){//play defense:
 				lsl.doLocalization(defCorner);
 				Defense defense = new Defense(defCorner, w1, w2);
 				defense.startDEF();
 			}
-
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
 		}
 
