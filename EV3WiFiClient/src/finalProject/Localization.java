@@ -194,7 +194,7 @@ public class Localization {
 		x_pos = -(SENSOR_DIST)*Math.cos(Math.toRadians(theta_y/2)); 
 		y_pos = -(SENSOR_DIST)*Math.cos(Math.toRadians(theta_x/2));
 		Sound.buzz();
-		deltaTheta = 90 + (theta_y/2) - (YTheta_Minus - 180);
+		deltaTheta = 90-((theta_y/2) - (XTheta_Minus-180));
 		odo.setX(x_pos);
 		odo.setY(y_pos);
 		odo.setAng(odo.getAng()+deltaTheta);
@@ -207,7 +207,7 @@ public class Localization {
 	
 		nav.turnToSmart(0);
 		Sound.beep();
-		nav.turnToSmart(0);
+		
 
 
 		//		//LIGHT LOCALIZATION:

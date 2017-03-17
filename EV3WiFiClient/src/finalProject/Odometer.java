@@ -78,11 +78,11 @@ public class Odometer extends Thread {
 
 				this.x = this.x + delta_x; // current x position
 				this.y = this.y + delta_y; // current y position
-				if(theta > 360){ //Code to ensure that the values of theta go from [0,360] inclusively, and don't go negative/ over 360
-					theta = 0;
-				}else if(theta < 0){
-					theta = 360;
-				}
+//				if(theta > 360){ //Code to ensure that the values of theta go from [0,360] inclusively, and don't go negative/ over 360
+//					theta = theta%360;
+//				}else if(theta < 0){
+//					theta = 360-theta;
+//				}
 			}
 
 			// this ensures that the odometer only runs once every period
