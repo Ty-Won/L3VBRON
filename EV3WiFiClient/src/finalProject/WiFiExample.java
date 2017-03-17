@@ -83,7 +83,7 @@ public class WiFiExample {
 	 * 
 	 * 2. TEAM_NUMBER: your project team number
 	 */
-	private static final String SERVER_IP = "192.168.2.18";
+	private static final String SERVER_IP = "192.168.2.34";
 	private static final int TEAM_NUMBER = 3;
 
 	// Enable/disable printing of debug info from the WiFi class
@@ -187,9 +187,14 @@ public class WiFiExample {
 				System.out.println();
 				odometer.start();
 				
-				odometryDisplay.start();
+//				odometryDisplay.start();
 				//navigation.start();
 				lsl.doLocalization(fwdCorner);
+				t.drawString(Double.toString(finalProject.Localization.YTheta_Plus), 0, 4);
+				t.drawString(Double.toString(finalProject.Localization.YTheta_Minus), 0, 5);
+				t.drawString(Double.toString(finalProject.Localization.XTheta_Plus), 0, 6);
+				t.drawString(Double.toString(finalProject.Localization.XTheta_Minus), 0, 7);
+				
 				//Forward forward = new Forward(fwdCorner, d1, w1, w2, bx, by, orientation);
 				//forward.startFWD();
 			}
