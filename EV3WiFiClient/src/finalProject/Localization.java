@@ -6,7 +6,7 @@ import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
 
 public class Localization {
-	private Odometer odo;
+	public static Odometer odo;
 	private Navigation nav;
 	private SampleProvider colorSensor;
 	private SampleProvider usValue;
@@ -16,7 +16,7 @@ public class Localization {
 	private float[] colorData;	
 	private float[] colorData2;
 
-	private double SENSOR_DIST = 6.0;
+	private double SENSOR_DIST = 6.5;
 	private double dTheta; 	//delta theta 
 	private static final int FORWARD_SPEED = WiFiExample.FORWARD_SPEED;
 	private static final int ROTATION_SPEED = WiFiExample.ROTATE_SPEED;
@@ -26,7 +26,7 @@ public class Localization {
 	public static double YTheta_Minus = 0;
 	public static double XTheta_Plus = 0;
 	public static double XTheta_Minus = 0;
-	private static double deltaTheta = 0;
+	public static double deltaTheta = 0;
 
 	private int line_count = 0; //Used to count the amount of gridlines the sensor has detected
 	static final double correction = 18;
@@ -48,104 +48,107 @@ public class Localization {
 	}
 
 	public void doLocalization(int fwdCorner) {
+
+		double [] pos = new double [3];
+		double angleA, angleB;
+		// rotate the robot until it sees no wall
+		while(wallDetected()){ //while robot sees a wall:
+			//rotate until wallDetected is false --> until it sees no wall
+			turnClockwise(); //clockwise rotation
+		}
+		Sound.beep();//make sound to indicate we have successfully rotated away from wall
+
+		// keep rotating until the robot sees a wall, then latch the angle
+		while(!wallDetected()){ //while robot doesn't see a wall:
+			//rotate until robot sees a wall (until !wallDetected is false)
+			turnClockwise(); //clockwise rotation
+		}
+		Sound.beepSequenceUp(); //make sound to indicate we now see a wall
+
+		if(wallDetected()){//stop motors to give it time to latch angle
+			leftMotor.setSpeed(0); //set speeds to zero for both because stop() doesnt do both motors simultaneously
+			rightMotor.setSpeed(0);
+			leftMotor.forward();
+			rightMotor.forward();
+			leftMotor.stop();
+			rightMotor.stop();
+		}
+
+		//latch angle A:
+		angleA = odo.getAng(); //get robot's angle from odometer
+
+		// switch direction and wait until it sees no wall
+		while(wallDetected()){ //while robot sees a wall:
+			//rotate until wallDetected is false --> until it sees no wall
+			turnCounterClockwise();  //switch direction to counterclockwise rotation
+		}
+		Sound.beepSequence();//make sound to indicate we have successfully rotated away from wall
+
+		// keep rotating until the robot sees a wall, then latch the angle
+		while(!wallDetected()){ //while robot doesn't see a wall:
+			//rotate until robot sees a wall (until !wallDetected is false)
+			turnCounterClockwise();  //counterclockwise rotation
+		}
+		Sound.twoBeeps(); //make sound to indicate we now see a wall
+
+		if(wallDetected()){//stop motors to give it time to latch angle
+			leftMotor.setSpeed(0); //set speeds to zero for both because stop() doesnt do both motors simultaneously
+			rightMotor.setSpeed(0);
+			leftMotor.forward();
+			rightMotor.forward();
+			leftMotor.stop();
+			rightMotor.stop();
+		}
+
+		//latch angle B:
+		angleB = odo.getAng(); //get robot's angle from odometer
+
+		// angleA is clockwise from angleB, so assume the average of the
+		// angles to the right of angleB is 45 degrees past 'north'
+
+		//use formula from tutorial to determine delta theta:
+		if(angleA < angleB){
+			dTheta = 230 - ((angleA+angleB)/2);
+		}
+		else if(angleA > angleB){
+			dTheta = 230 - ((angleA+angleB)/2);
+		}
+
+		//dTheta is the angle to be added to the heading reported by odometer:
+		pos[2] = (dTheta) + odo.getAng(); //pos[2] is where we update the angle
+
+		// update the odometer position (example to follow:)
+		boolean[] updates = {false,false,true}; //booleans indicating if x,y,theta are being updated
+		//only theta is being updated so index 2 is true but x and y remain 0
+		odo.setPosition(pos, updates);
+		nav.turnToSmart(45);
+		Sound.buzz();
 		
-//		double [] pos = new double [3];
-//		double angleA, angleB;
-//		// rotate the robot until it sees no wall
-//		while(wallDetected()){ //while robot sees a wall:
-//			//rotate until wallDetected is false --> until it sees no wall
-//			turnClockwise(); //clockwise rotation
-//		}
-//		Sound.beep();//make sound to indicate we have successfully rotated away from wall
-//
-//		// keep rotating until the robot sees a wall, then latch the angle
-//		while(!wallDetected()){ //while robot doesn't see a wall:
-//			//rotate until robot sees a wall (until !wallDetected is false)
-//			turnClockwise(); //clockwise rotation
-//		}
-//		Sound.beepSequenceUp(); //make sound to indicate we now see a wall
-//
-//		if(wallDetected()){//stop motors to give it time to latch angle
-//			leftMotor.setSpeed(0); //set speeds to zero for both because stop() doesnt do both motors simultaneously
-//			rightMotor.setSpeed(0);
-//			leftMotor.forward();
-//			rightMotor.forward();
-//			leftMotor.stop();
-//			rightMotor.stop();
-//		}
-//
-//		//latch angle A:
-//		angleA = odo.getAng(); //get robot's angle from odometer
-//
-//		// switch direction and wait until it sees no wall
-//		while(wallDetected()){ //while robot sees a wall:
-//			//rotate until wallDetected is false --> until it sees no wall
-//			turnCounterClockwise();  //switch direction to counterclockwise rotation
-//		}
-//		Sound.beepSequence();//make sound to indicate we have successfully rotated away from wall
-//
-//		// keep rotating until the robot sees a wall, then latch the angle
-//		while(!wallDetected()){ //while robot doesn't see a wall:
-//			//rotate until robot sees a wall (until !wallDetected is false)
-//			turnCounterClockwise();  //counterclockwise rotation
-//		}
-//		Sound.twoBeeps(); //make sound to indicate we now see a wall
-//
-//		if(wallDetected()){//stop motors to give it time to latch angle
-//			leftMotor.setSpeed(0); //set speeds to zero for both because stop() doesnt do both motors simultaneously
-//			rightMotor.setSpeed(0);
-//			leftMotor.forward();
-//			rightMotor.forward();
-//			leftMotor.stop();
-//			rightMotor.stop();
-//		}
-//
-//		//latch angle B:
-//		angleB = odo.getAng(); //get robot's angle from odometer
-//
-//		// angleA is clockwise from angleB, so assume the average of the
-//		// angles to the right of angleB is 45 degrees past 'north'
-//
-//		//use formula from tutorial to determine delta theta:
-//		if(angleA < angleB){
-//			dTheta = 230 - ((angleA+angleB)/2);
-//		}
-//		else if(angleA > angleB){
-//			dTheta = 230 - ((angleA+angleB)/2);
-//		}
-//
-//		//dTheta is the angle to be added to the heading reported by odometer:
-//		pos[2] = (dTheta) + odo.getAng(); //pos[2] is where we update the angle
-//
-//		// update the odometer position (example to follow:)
-//		boolean[] updates = {false,false,true}; //booleans indicating if x,y,theta are being updated
-//		//only theta is being updated so index 2 is true but x and y remain 0
-//		odo.setPosition(pos, updates);
-//		nav.turnToSmart(45);
-//		Sound.buzz();
-//		
-//
-//		//LIGHT:
-//		while(moving){
-//			leftMotor.rotate(convertDistance(WHEEL_RADIUS, 600), true);
-//			rightMotor.rotate(convertDistance(WHEEL_RADIUS, 600), true);
-//			this.colorSensor.fetchSample(this.colorData2, 0);
-//			int light_val = (int)(this.colorData2[0]*100);
-//			if(light_val <= 28){
-//				moving = false;
-//			}
-//		}
-//		Sound.beep();
-//		
-//		//After seeing line, move forward 5
-//		leftMotor.rotate(convertDistance(WHEEL_RADIUS,10), true);
-//		rightMotor.rotate(convertDistance(WHEEL_RADIUS,10), false);
+
+		//LIGHT:
+		while(moving){
+			leftMotor.rotate(convertDistance(WHEEL_RADIUS, 600), true);
+			rightMotor.rotate(convertDistance(WHEEL_RADIUS, 600), true);
+			this.colorSensor.fetchSample(this.colorData2, 0);
+			int light_val = (int)(this.colorData2[0]*100);
+			if(light_val <= 28){
+				moving = false;
+			}
+		}
+		Sound.beep();
+		
+		//After seeing line, move forward 5
+		leftMotor.rotate(convertDistance(WHEEL_RADIUS,10), true);
+		rightMotor.rotate(convertDistance(WHEEL_RADIUS,10), false);
 
 		//Set robot to rotate through 360 degrees clockwise:
 		leftMotor.setSpeed(ROTATION_SPEED); 	
 		rightMotor.setSpeed(ROTATION_SPEED); 
 		leftMotor.rotate(convertAngle(WHEEL_RADIUS, TRACK, 360), true);
 		rightMotor.rotate(-convertAngle(WHEEL_RADIUS, TRACK, 360), true);
+		
+		
+		
 		
 		//While rotating, get LS data:
 		while(line_count < 4){
@@ -194,75 +197,33 @@ public class Localization {
 		x_pos = -(SENSOR_DIST)*Math.cos(Math.toRadians(theta_y/2)); 
 		y_pos = -(SENSOR_DIST)*Math.cos(Math.toRadians(theta_x/2));
 		Sound.buzz();
-		deltaTheta = 90 + (theta_y/2) - (YTheta_Minus - 180);
+		
+		
+		deltaTheta = 90 + (theta_y/2) - (YTheta_Plus - 180);
+	
+		
 		odo.setX(x_pos);
 		odo.setY(y_pos);
+		
+		/*odo.setAng(odo.getAng()+deltaTheta); is original code*/
 		odo.setAng(odo.getAng()+deltaTheta);
+		
+		
 		//this.odo.setPosition(new double[] {x_pos,y_pos, deltaTheta+odo.getAng()},new boolean[] {true,true,false});
-
+		Sound.buzz();
+		
+		
+		
 		// When done, travel to (0,0) and turn to 0 degrees:
 		//this doesn't work, fix it:
 		nav.travelTo(0, 0); 
 		Sound.buzz();
-	
+		
 		nav.turnToSmart(0);
-		Sound.beep();
-		nav.turnToSmart(0);
-
-
-		//		//LIGHT LOCALIZATION:
-		//		while(helper == true){ //go to intersection of lines
-		//			rightMotor.setSpeed(80);
-		//			leftMotor.setSpeed(80);
-		//			leftMotor.forward();
-		//			rightMotor.forward();
-		//			colorSensor.fetchSample(colorData, 0); 
-		//			int light_val = (int)(colorData[0]*100);
-		//			if(light_val <= 28){
-		//				Sound.buzz();
-		//				firstLinePos = odo.getX();
-		//				helper = false;
-		//				break;
-		//			}
-		//		}
-		//		nav.drive(5);		
-		//
-		//		//start rotating and clock all 4 gridlines
-		//		//here we have the robot rotate until it finds four grid lines
-		//		//while doing this, it takes account of the position and angle of all of the points
-		//		//these numbers will be used to calculate the correct position and angle of the robot when it finishes
-		//		while(moreHelp < 4)
-		//		{
-		//			rightMotor.setSpeed(80);
-		//			leftMotor.setSpeed(80);
-		//
-		//			rightMotor.backward();
-		//			leftMotor.forward();
-		//			colorSensor.fetchSample(colorData, 0); 
-		//			int light_val = (int)(colorData[0]*100);
-		//			if(light_val <= 28)
-		//			{
-		//				Sound.beep();
-		//				lineLocationsX[moreHelp] = odo.getX();
-		//				lineLocationsY[moreHelp] = odo.getY();
-		//				thetaLocations[moreHelp] = odo.getAng();
-		//				moreHelp++;
-		//			}
-		//		}
-		//		Sound.beepSequenceUp();
-		//		
-		//		//we use the functions given in the lecture slides to calculate the values needed for the localization
-		//		//we then have the robot move to the position and turn to the correct heading
-		//		double deltaY = thetaLocations[0] - thetaLocations[2];
-		//		double deltaX = thetaLocations[3] - thetaLocations[1];
-		//		double x = -sensorDist*Math.cos(deltaY/2);
-		//		double y = -sensorDist*Math.cos(deltaX/2);
-		//		double deltaTheta = (90 + -(deltaY/2  - (thetaLocations[3] - 180)));
-		//		
-		//		odo.setPosition(new double [] {x, y, deltaTheta}, new boolean [] {true, true, true});
-		//		nav.travelTo(0, 0);
-		//		nav.turnTo(-deltaTheta);
-		//
+		
+		
+		
+		 
 
 	}
 	public void turnClockwise(){//robot turns clockwise 

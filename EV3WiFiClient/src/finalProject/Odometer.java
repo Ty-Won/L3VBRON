@@ -5,7 +5,8 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 public class Odometer extends Thread {
 
-	private double x, y, theta; // robot position
+	private double x, y; // robot position
+	double theta;
 	private int leftMotorTachoCount, rightMotorTachoCount;
 	private EV3LargeRegulatedMotor leftMotor = WiFiExample.leftMotor;
 	private EV3LargeRegulatedMotor rightMotor = WiFiExample.rightMotor;
@@ -42,7 +43,7 @@ public class Odometer extends Thread {
 
 		while (true) {
 			updateStart = System.currentTimeMillis();
-			//TODO put (some of) your odometer code here:
+		
 
 			double d_left, d_right, delta_d, displacement, delta_x, delta_y, theta_h; //Initializing variables
 
@@ -79,9 +80,9 @@ public class Odometer extends Thread {
 				this.x = this.x + delta_x; // current x position
 				this.y = this.y + delta_y; // current y position
 				if(theta > 360){ //Code to ensure that the values of theta go from [0,360] inclusively, and don't go negative/ over 360
-					theta = 0;
+					theta = theta%360;
 				}else if(theta < 0){
-					theta = 360;
+					theta = 360-theta;
 				}
 			}
 
