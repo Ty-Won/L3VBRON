@@ -6,7 +6,7 @@ import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
 
 public class Localization {
-	private Odometer odo;
+	public static Odometer odo;
 	private Navigation nav;
 	private SampleProvider colorSensor;
 	private SampleProvider usValue;
@@ -16,15 +16,19 @@ public class Localization {
 	private float[] colorData;	
 	private float[] colorData2;
 
-	private double SENSOR_DIST = 9.2;
+	private double SENSOR_DIST = 6.5;
 	private double dTheta; 	//delta theta 
 	private static final int FORWARD_SPEED = WiFiExample.FORWARD_SPEED;
 	private static final int ROTATION_SPEED = WiFiExample.ROTATE_SPEED;
 	double WHEEL_RADIUS = WiFiExample.WHEEL_RADIUS;
 	double TRACK =  WiFiExample.TRACK;
-	private double YTheta_Plus = 0, YTheta_Minus = 0, XTheta_Plus = 0, XTheta_Minus = 0, deltaTheta = 0; //Initializing theta variables
+	public static double YTheta_Plus = 0; //Initializing theta variables
+	public static double YTheta_Minus = 0;
+	public static double XTheta_Plus = 0;
+	public static double XTheta_Minus = 0;
+	public static double deltaTheta = 0;
 
-	private int line_count = 0; //Used to count the amount ofgridlines the sensor has detected
+	private int line_count = 0; //Used to count the amount of gridlines the sensor has detected
 	static final double correction = 18;
 	boolean moving = true;
 
@@ -44,7 +48,7 @@ public class Localization {
 	}
 
 	public void doLocalization(int fwdCorner) {
-		
+
 		double [] pos = new double [3];
 		double angleA, angleB;
 		// rotate the robot until it sees no wall
@@ -136,10 +140,15 @@ public class Localization {
 		//After seeing line, move forward 5
 		leftMotor.rotate(convertDistance(WHEEL_RADIUS,5), true);
 		rightMotor.rotate(convertDistance(WHEEL_RADIUS,5), false);
-
+		odo.setAng(0);
 		//Set robot to rotate through 360 degrees clockwise:
+		leftMotor.setSpeed(ROTATION_SPEED); 	
+		rightMotor.setSpeed(ROTATION_SPEED); 
 		leftMotor.rotate(convertAngle(WHEEL_RADIUS, TRACK, 360), true);
 		rightMotor.rotate(-convertAngle(WHEEL_RADIUS, TRACK, 360), true);
+		
+		
+		
 		
 		//While rotating, get LS data:
 		while(line_count < 4){
@@ -152,27 +161,27 @@ public class Localization {
 			// As the cart starts at zero from the US localization, it is not necessary
 			// for us to consider the angle looping around: Our angles will always
 			// be within [0, 360].
-			if(line_count == 0 && light_val <= 28){
+		
+			if(line_count == 0 && light_val <= 32){
 				XTheta_Plus = odo.getAng();
 				line_count++; //Increment the line counter
 				Sound.beep();
 			}
-			else if(line_count == 1 && light_val <= 28){
+			else if(line_count == 1 && light_val <= 32){
 				YTheta_Minus = odo.getAng();
 				line_count++;
 				Sound.beep();
-
 			}
-			else if(line_count == 2 && light_val <= 28){
+			else if(line_count == 2 && light_val <= 32){
 				XTheta_Minus = odo.getAng();
 				line_count++;
 				Sound.beep();
-			}
-			else if(line_count == 3 && light_val <= 28){
+			}			
+			else if(line_count == 3 && light_val <= 32){
 				YTheta_Plus = odo.getAng();
 				line_count++;
 				Sound.beep();
-			}			
+			}
 		}
 
 		// Do trigonometry to compute (x, y) position and fix angle, as specified
@@ -181,89 +190,52 @@ public class Localization {
 		double theta_y = 0, theta_x = 0;
 
 		//Calculation of total angle subtending the axes
-		theta_y = Math.abs(YTheta_Minus - YTheta_Plus);
-		theta_x = Math.abs(XTheta_Plus - XTheta_Minus);
+		theta_y = YTheta_Plus-YTheta_Minus;
+		theta_x = XTheta_Minus - XTheta_Plus;
 
 		//Calculation of the x and t positions considering that we are in the 3rd quadrant (in negative x and y coords):
-		x_pos = -(SENSOR_DIST)*Math.cos(Math.toRadians(theta_y/2)); 
-		y_pos = -(SENSOR_DIST)*Math.cos(Math.toRadians(theta_x/2));
-
-		deltaTheta = 90 + (theta_y/2) - (YTheta_Minus - 180);
-		this.odo.setX(x_pos);
-		this.odo.setY(y_pos);
+		x_pos = (SENSOR_DIST)*Math.cos(Math.toRadians(theta_y/2)); 
+		y_pos = (SENSOR_DIST)*Math.cos(Math.toRadians(theta_x/2));
+		Sound.buzz();
+		
+		
+		deltaTheta = 90 + (theta_y/2) - (YTheta_Plus - 180);
+	
+		
+		odo.setX(x_pos);
+		odo.setY(y_pos);
+		
+		/*odo.setAng(odo.getAng()+deltaTheta); is original code*/
+		odo.setAng(odo.getAng()+deltaTheta-7);
+		
+		
 		//this.odo.setPosition(new double[] {x_pos,y_pos, deltaTheta+odo.getAng()},new boolean[] {true,true,false});
-
+		Sound.buzz();
+		
+		
+		
 		// When done, travel to (0,0) and turn to 0 degrees:
 		//this doesn't work, fix it:
 		nav.travelTo(0, 0); 
-		Sound.beep();
-		//nav.turnToSmart(0);
+		Sound.buzz();
+		
+		nav.turnToSmart(0);
 
-
-		//		//LIGHT LOCALIZATION:
-		//		while(helper == true){ //go to intersection of lines
-		//			rightMotor.setSpeed(80);
-		//			leftMotor.setSpeed(80);
-		//			leftMotor.forward();
-		//			rightMotor.forward();
-		//			colorSensor.fetchSample(colorData, 0); 
-		//			int light_val = (int)(colorData[0]*100);
-		//			if(light_val <= 28){
-		//				Sound.buzz();
-		//				firstLinePos = odo.getX();
-		//				helper = false;
-		//				break;
-		//			}
-		//		}
-		//		nav.drive(5);		
-		//
-		//		//start rotating and clock all 4 gridlines
-		//		//here we have the robot rotate until it finds four grid lines
-		//		//while doing this, it takes account of the position and angle of all of the points
-		//		//these numbers will be used to calculate the correct position and angle of the robot when it finishes
-		//		while(moreHelp < 4)
-		//		{
-		//			rightMotor.setSpeed(80);
-		//			leftMotor.setSpeed(80);
-		//
-		//			rightMotor.backward();
-		//			leftMotor.forward();
-		//			colorSensor.fetchSample(colorData, 0); 
-		//			int light_val = (int)(colorData[0]*100);
-		//			if(light_val <= 28)
-		//			{
-		//				Sound.beep();
-		//				lineLocationsX[moreHelp] = odo.getX();
-		//				lineLocationsY[moreHelp] = odo.getY();
-		//				thetaLocations[moreHelp] = odo.getAng();
-		//				moreHelp++;
-		//			}
-		//		}
-		//		Sound.beepSequenceUp();
-		//		
-		//		//we use the functions given in the lecture slides to calculate the values needed for the localization
-		//		//we then have the robot move to the position and turn to the correct heading
-		//		double deltaY = thetaLocations[0] - thetaLocations[2];
-		//		double deltaX = thetaLocations[3] - thetaLocations[1];
-		//		double x = -sensorDist*Math.cos(deltaY/2);
-		//		double y = -sensorDist*Math.cos(deltaX/2);
-		//		double deltaTheta = (90 + -(deltaY/2  - (thetaLocations[3] - 180)));
-		//		
-		//		odo.setPosition(new double [] {x, y, deltaTheta}, new boolean [] {true, true, true});
-		//		nav.travelTo(0, 0);
-		//		nav.turnTo(-deltaTheta);
-		//
+		
+		
+		
+		 
 
 	}
 	public void turnClockwise(){//robot turns clockwise 
-		leftMotor.setSpeed(ROTATION_SPEED);
-		rightMotor.setSpeed(ROTATION_SPEED);	
+		leftMotor.setSpeed(225);
+		rightMotor.setSpeed(225);	
 		leftMotor.forward();
 		rightMotor.backward();
 	}
 	public void turnCounterClockwise(){ //robot turns counterclockwise
-		leftMotor.setSpeed(ROTATION_SPEED);
-		rightMotor.setSpeed(ROTATION_SPEED);	
+		leftMotor.setSpeed(225);
+		rightMotor.setSpeed(225);	
 		leftMotor.backward();
 		rightMotor.forward();
 	}
