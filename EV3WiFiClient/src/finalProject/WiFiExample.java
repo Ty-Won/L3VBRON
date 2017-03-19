@@ -35,7 +35,7 @@ import lejos.robotics.SampleProvider;
  */
 public class WiFiExample {
 	public static final double WHEEL_RADIUS = 2.1;
-	public static final double TRACK = 10.1; 
+	public static final double TRACK = 10.08; //10.11 works for travellimg
 
 	public static final int FORWARD_SPEED = 250;
 	public static final int ROTATE_SPEED = 150;
@@ -188,7 +188,7 @@ public class WiFiExample {
 				odometer.start();
 				
 //				odometryDisplay.start();
-				//navigation.start();
+				
 				lsl.doLocalization(fwdCorner);
 				t.drawString(Double.toString(finalProject.Localization.deltaTheta), 0, 2);
 				t.drawString(Double.toString(odometer.theta), 0, 3);
@@ -196,7 +196,9 @@ public class WiFiExample {
 				t.drawString(Double.toString(finalProject.Localization.YTheta_Minus), 0, 5);
 				t.drawString(Double.toString(finalProject.Localization.XTheta_Plus), 0, 6);
 				t.drawString(Double.toString(finalProject.Localization.XTheta_Minus), 0, 7);
-	
+				
+				//travel to ball dispencer
+				navigation.start();
 
 				//Forward forward = new Forward(fwdCorner, d1, w1, w2, bx, by, orientation);
 				//forward.startFWD();

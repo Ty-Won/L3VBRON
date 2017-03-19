@@ -19,10 +19,17 @@ public class Navigation extends Thread{
 		this.odometer = odometer;
 	}
 	public void run(){
-		travelTo(60,30);
-		travelTo(30,30);
-		travelTo(30,60);
-		travelTo(60,0);
+		//int i=4;
+		//while(i>0){
+		travelTo(0,30.48);
+		turnTo(90);
+//		leftMotor.rotate(convertDistance(wheel_radius,10), true);
+//		rightMotor.rotate(convertDistance(wheel_radius,10), false);
+//		travelTo(60.96,60.96);
+//		travelTo(60.96,0);
+//		travelTo(0,0);
+		//i--;
+		//}
 	}
 	
 	public void travelTo(double x, double y){
@@ -78,18 +85,31 @@ public class Navigation extends Thread{
 		
 		//make robot turn to angle theta:
 		leftMotor.setSpeed(ROTATE_SPEED);
+		leftMotor.setAcceleration(2000);
 		rightMotor.setSpeed(ROTATE_SPEED);
+		rightMotor.setAcceleration(2000);
+		
 		
 		leftMotor.rotate(convertAngle(wheel_radius, width, theta), true);
 		rightMotor.rotate(-convertAngle(wheel_radius, width, theta), false);
+		
+		//returns default acceleration values after turn
+		leftMotor.setAcceleration(6000);
+		rightMotor.setAcceleration(6000);
 	}
 
+	
+	
 	private static int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 	private static int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
+	
+	
+	
+	
 	public void turnToSmart(double angle){
 		//this method causes robot to travel to the absolute angle 
 

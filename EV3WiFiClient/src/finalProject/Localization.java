@@ -138,9 +138,9 @@ public class Localization {
 		Sound.beep();
 		
 		//After seeing line, move forward 5
-		leftMotor.rotate(convertDistance(WHEEL_RADIUS,10), true);
-		rightMotor.rotate(convertDistance(WHEEL_RADIUS,10), false);
-
+		leftMotor.rotate(convertDistance(WHEEL_RADIUS,5), true);
+		rightMotor.rotate(convertDistance(WHEEL_RADIUS,5), false);
+		odo.setAng(0);
 		//Set robot to rotate through 360 degrees clockwise:
 		leftMotor.setSpeed(ROTATION_SPEED); 	
 		rightMotor.setSpeed(ROTATION_SPEED); 
@@ -194,8 +194,8 @@ public class Localization {
 		theta_x = XTheta_Minus - XTheta_Plus;
 
 		//Calculation of the x and t positions considering that we are in the 3rd quadrant (in negative x and y coords):
-		x_pos = -(SENSOR_DIST)*Math.cos(Math.toRadians(theta_y/2)); 
-		y_pos = -(SENSOR_DIST)*Math.cos(Math.toRadians(theta_x/2));
+		x_pos = (SENSOR_DIST)*Math.cos(Math.toRadians(theta_y/2)); 
+		y_pos = (SENSOR_DIST)*Math.cos(Math.toRadians(theta_x/2));
 		Sound.buzz();
 		
 		
@@ -206,7 +206,7 @@ public class Localization {
 		odo.setY(y_pos);
 		
 		/*odo.setAng(odo.getAng()+deltaTheta); is original code*/
-		odo.setAng(odo.getAng()+deltaTheta);
+		odo.setAng(odo.getAng()+deltaTheta-7);
 		
 		
 		//this.odo.setPosition(new double[] {x_pos,y_pos, deltaTheta+odo.getAng()},new boolean[] {true,true,false});
@@ -220,6 +220,7 @@ public class Localization {
 		Sound.buzz();
 		
 		nav.turnToSmart(0);
+
 		
 		
 		
@@ -227,14 +228,14 @@ public class Localization {
 
 	}
 	public void turnClockwise(){//robot turns clockwise 
-		leftMotor.setSpeed(ROTATION_SPEED);
-		rightMotor.setSpeed(ROTATION_SPEED);	
+		leftMotor.setSpeed(225);
+		rightMotor.setSpeed(225);	
 		leftMotor.forward();
 		rightMotor.backward();
 	}
 	public void turnCounterClockwise(){ //robot turns counterclockwise
-		leftMotor.setSpeed(ROTATION_SPEED);
-		rightMotor.setSpeed(ROTATION_SPEED);	
+		leftMotor.setSpeed(225);
+		rightMotor.setSpeed(225);	
 		leftMotor.backward();
 		rightMotor.forward();
 	}
