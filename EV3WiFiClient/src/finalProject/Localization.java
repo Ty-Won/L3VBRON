@@ -6,7 +6,7 @@ import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
 
 public class Localization {
-	private Odometer odo;
+	public static Odometer odo;
 	private Navigation nav;
 	private SampleProvider colorSensor;
 	private SampleProvider usValue;
@@ -26,7 +26,7 @@ public class Localization {
 	public static double YTheta_Minus = 0;
 	public static double XTheta_Plus = 0;
 	public static double XTheta_Minus = 0;
-	private static double deltaTheta = 0;
+	public static double deltaTheta = 0;
 
 	private int line_count = 0; //Used to count the amount of gridlines the sensor has detected
 	static final double correction = 18;
@@ -147,6 +147,9 @@ public class Localization {
 		leftMotor.rotate(convertAngle(WHEEL_RADIUS, TRACK, 360), true);
 		rightMotor.rotate(-convertAngle(WHEEL_RADIUS, TRACK, 360), true);
 		
+		
+		
+		
 		//While rotating, get LS data:
 		while(line_count < 4){
 			// Acquire Color Data from sensor, store it in the array at the position
@@ -194,22 +197,41 @@ public class Localization {
 		x_pos = -(SENSOR_DIST)*Math.cos(Math.toRadians(theta_y/2)); 
 		y_pos = -(SENSOR_DIST)*Math.cos(Math.toRadians(theta_x/2));
 		Sound.buzz();
-		deltaTheta = 90 + (theta_y/2) - (YTheta_Minus - 180);
+		
+		
+		deltaTheta = 90 + (theta_y/2) - (YTheta_Plus - 180);
+	
+		
 		odo.setX(x_pos);
 		odo.setY(y_pos);
+		
+		/*odo.setAng(odo.getAng()+deltaTheta); is original code*/
 		odo.setAng(odo.getAng()+deltaTheta);
+		
+		
 		//this.odo.setPosition(new double[] {x_pos,y_pos, deltaTheta+odo.getAng()},new boolean[] {true,true,false});
-
+		Sound.buzz();
+		
+		
+		/*
 		// When done, travel to (0,0) and turn to 0 degrees:
 		//this doesn't work, fix it:
 		nav.travelTo(0, 0); 
 		Sound.buzz();
-	
+		*/
+		
+		
+		
 		nav.turnToSmart(0);
-		Sound.beep();
-		nav.turnToSmart(0);
+		
 
-
+		
+		
+		
+		
+		
+		
+		
 		//		//LIGHT LOCALIZATION:
 		//		while(helper == true){ //go to intersection of lines
 		//			rightMotor.setSpeed(80);
@@ -263,6 +285,7 @@ public class Localization {
 		//		nav.travelTo(0, 0);
 		//		nav.turnTo(-deltaTheta);
 		//
+		 
 
 	}
 	public void turnClockwise(){//robot turns clockwise 
