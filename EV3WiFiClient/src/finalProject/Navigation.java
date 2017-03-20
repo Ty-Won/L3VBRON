@@ -2,19 +2,83 @@ package finalProject;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
+/**
+ * The navigator is used to change either the robot's position 
+ * or heading in a controlled manner. The navigator intakes values 
+ * from the odometer continuously and takes a value for either 
+ * angle or position from another class and computes the difference 
+ * in heading before using the difference in wheel angle count of the 
+ * robot to find the amount of change needed to have the correct 
+ * heading. Once the robot has the correct heading, if the robot 
+ * needs to move to another position the robot calculates the 
+ * amount of distance it needs to travel to reach the correct 
+ * position before going there and stopping.
+ * 
+ * 
+ * 
+ * @author Ian Gauthier
+ * @author Ilana Haddad
+ * @author Tristan Bouchard
+ * @author Tyrone Wong
+ * @author Alexandre Tessier
+ * 
+ * @version 1.0
+ *
+ */
 public class Navigation extends Thread{
 	
 	double wheel_radius = WiFiExample.WHEEL_RADIUS;
 	double width =  WiFiExample.TRACK;
 	private static final int FORWARD_SPEED = WiFiExample.FORWARD_SPEED;
 	private static final int ROTATE_SPEED = WiFiExample.ROTATE_SPEED;
-	public double odo_x,odo_y, odo_theta;
-	public double x_dest, y_dest, theta_dest;
+	/**
+	 * The odometer value of the X position
+	 */
+	public double odo_x;
+	/**
+	 * The odometer value of the Y position of the robot.
+	 */
+	public double odo_y;
+	/**
+	 * The odometer value of the angle of the robot.
+	 */
+	public double odo_theta;
+	
+	/**
+	 * The X coordinate of the destination point.
+	 */
+	public double x_dest;
+	
+	/**
+	 * The Y coordinate of the destination point.
+	 */
+	public double y_dest;
+	
+	/**
+	 * The desired heading of the robot.
+	 */
+	public double theta_dest;
+	
+	/**
+	 * The left wheel's motor.
+	 */
 	private EV3LargeRegulatedMotor leftMotor = WiFiExample.leftMotor;
+	
+	/**
+	 * The right wheel's motor.
+	 */
 	private EV3LargeRegulatedMotor rightMotor = WiFiExample.rightMotor;
 	
 	//instantiate odometer:
+	/**
+	 * The odometer of the robot.
+	 */
 	public Odometer odometer = WiFiExample.odometer;
+	
+	/**
+	 * 
+	 * @param odometer the odometer of the robot
+	 */
 	public Navigation(Odometer odometer){ //constructor
 		this.odometer = odometer;
 	}
@@ -32,6 +96,15 @@ public class Navigation extends Thread{
 		//}
 	}
 	
+	/**
+	 * The method should move the robot to the position that is input into the 
+	 * method. This should call the turn to method to turn to the correct heading 
+	 * of the robot before finding the distance and moving that distance in 
+	 * a straight heading.
+	 * 
+	 * @param x the X coordinate that should be moved to
+	 * @param y the Y coordinate that should be moved to
+	 */
 	public void travelTo(double x, double y){
 		//this method causes robot to travel to the absolute field location (x,y)
 
@@ -71,6 +144,13 @@ public class Navigation extends Thread{
 		drive(travelDist);
 
 	}
+	
+	/**
+	 * The method should convert the distance into an angle in terms of
+	 * the radius of the wheel and then travel forward that amount.
+	 * 
+	 * @param distance the distance to be converted in terms of cm
+	 */
 	public void drive(double distance){
 		//set both motors to forward speed desired
 		leftMotor.setSpeed(FORWARD_SPEED);
@@ -80,6 +160,11 @@ public class Navigation extends Thread{
 		rightMotor.rotate(convertDistance(wheel_radius, distance), false);
 	}
 	
+	/**
+	 * The method should intake an angle and then turn the robot to that angle.
+	 * 
+	 * @param theta the angle which should be turned to
+	 */
 	public void turnTo(double theta){
 		//this method causes the robot to turn (on point) to the absolute heading theta
 		
@@ -99,17 +184,41 @@ public class Navigation extends Thread{
 	}
 
 	
-	
+	/**
+	 * The method should convert the input distance into a form that is equal to
+	 * the amount of rotation that a wheel of the given radius must rotate
+	 * in order to move that distance
+	 * 
+	 * @param radius the radius of the wheels of the robot
+	 * @param distance the distance which will be converted
+	 * @return the converted distance
+	 */
 	private static int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
+	
+	/**
+	 * The method should convert the input angle into a form that can be performed
+	 * by the robot with the given wheel radius and width.
+	 * 
+	 * 
+	 * @param radius the radius of the wheel
+	 * @param width the width of the robot
+	 * @param angle the angle to be converted
+	 * @return the angle now in the form of amount of rotation needed by the robot's wheel to perform that angle of turn
+	 */
 	private static int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
 	
 	
 	
-	
+	/**
+	 * The method causes the robot to turn to an angle in relation to its current
+	 * heading meaning that if 150 is input, the robot should turn 150 degrees
+	 * 
+	 * @param angle the amount to be turned
+	 */
 	public void turnToSmart(double angle){
 		//this method causes robot to travel to the absolute angle 
 

@@ -3,6 +3,25 @@ package finalProject;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
+/**
+ * 
+ * The odometer is the class that is used to continuously 
+ * update the position of the robot based on the movement 
+ * across the field of play. Whenever the robot moves the 
+ * odometer updates to reflect that change in position and 
+ * keep a tally of the current position in relation to the 
+ * initial position (which after initial localization should 
+ * be set to the initial position).
+ * 
+ * @author Ian Gauthier
+ * @author Ilana Haddad
+ * @author Tristan Bouchard
+ * @author Tyrone Wong
+ * @author Alexandre Tessier
+ * 
+ * @version 1.0
+ *
+ */
 public class Odometer extends Thread {
 
 	private double x, y; // robot position
@@ -18,6 +37,11 @@ public class Odometer extends Thread {
 	private Object lock;
 
 	// default constructor
+	/**
+	 * 
+	 * @param leftMotor the robot's left wheel motor
+	 * @param rightMotor the robot's right wheel motor
+	 */
 	public Odometer(EV3LargeRegulatedMotor leftMotor,EV3LargeRegulatedMotor rightMotor) {
 		this.leftMotor = leftMotor;
 		this.rightMotor = rightMotor;
@@ -32,6 +56,12 @@ public class Odometer extends Thread {
 	}
 
 	// run method (required for Thread)
+	/**
+	 * The run method should be performed continuously 
+	 * and intake the changes in position of the wheels 
+	 * and use those to update the current value of the 
+	 * position based on the changes in tacho count.
+	 */
 	public void run() {
 		long updateStart, updateEnd;
 
@@ -101,6 +131,13 @@ public class Odometer extends Thread {
 	}
 
 	// accessors
+	/**
+	 * The method is called and based on which of the values of x pos, y pos and angle
+	 * are asked for, those should be returned in the given array. 
+	 * 
+	 * @param position an array into which the positions of the robot can be input
+	 * @param update an array of booleans to say which of the positions should be returned
+	 */
 	public void getPosition(double[] position, boolean[] update) {
 		// ensure that the values don't change while the odometer is running
 		synchronized (lock) {
@@ -113,6 +150,11 @@ public class Odometer extends Thread {
 		}
 	}
 
+	/**
+	 * Returns the currnt X position of the robot
+	 * 
+	 * @return the robot's X position
+	 */
 	public double getX() {
 		double result;
 
@@ -123,6 +165,11 @@ public class Odometer extends Thread {
 		return result;
 	}
 
+	/**
+	 * Returns the current Y position of the robot
+	 * 
+	 * @return the robot's Y position
+	 */
 	public double getY() {
 		double result;
 
@@ -133,6 +180,11 @@ public class Odometer extends Thread {
 		return result;
 	}
 
+	/**
+	 * Returns the current angle of the robot
+	 * 
+	 * @return the position of the angle
+	 */
 	public double getAng() {
 		double result;
 
@@ -144,6 +196,14 @@ public class Odometer extends Thread {
 	}
 
 	// mutators
+	/**
+	 * The method should intake an array of values for the position of the robot and a 
+	 * second array that says which of the values should be updated. It then updates
+	 * the selected values to be equal to the input values.
+	 * 
+	 * @param position the robot's x, y and theta positions
+	 * @param update an array of booleans that are true for each of the parameters to be change and false for all others
+	 */
 	public void setPosition(double[] position, boolean[] update) {
 		// ensure that the values don't change while the odometer is running
 		synchronized (lock) {
@@ -156,18 +216,33 @@ public class Odometer extends Thread {
 		}
 	}
 
+	/**
+	 * Updates the X position of the robot in the odometer.
+	 * 
+	 * @param x the new X position
+	 */
 	public void setX(double x) {
 		synchronized (lock) {
 			this.x = x;
 		}
 	}
 
+	/**
+	 * Updates the Y position of the robot in the odometer.
+	 * 
+	 * @param y the new Y position
+	 */
 	public void setY(double y) {
 		synchronized (lock) {
 			this.y = y;
 		}
 	}
 
+	/**
+	 * Updates the angle value of the robot in the odometer.
+	 * 
+	 * @param theta the new angle value of the robot
+	 */
 	public void setAng(double theta) {
 		synchronized (lock) {
 			this.theta = theta;
@@ -175,6 +250,9 @@ public class Odometer extends Thread {
 	}
 
 	/**
+	 * Return the value of the amount of degrees which the left motor has 
+	 * rotated.
+	 * 
 	 * @return the leftMotorTachoCount
 	 */
 	public int getLeftMotorTachoCount() {
@@ -182,6 +260,8 @@ public class Odometer extends Thread {
 	}
 
 	/**
+	 * Sets the amount of degrees which the left motor has rotated.
+	 * 
 	 * @param leftMotorTachoCount the leftMotorTachoCount to set
 	 */
 	public void setLeftMotorTachoCount(int leftMotorTachoCount) {
@@ -191,6 +271,9 @@ public class Odometer extends Thread {
 	}
 
 	/**
+	 * Return the value of the amount of degrees which the right motor has 
+	 * rotated.
+	 * 
 	 * @return the rightMotorTachoCount
 	 */
 	public int getRightMotorTachoCount() {
@@ -198,6 +281,8 @@ public class Odometer extends Thread {
 	}
 
 	/**
+	 * Sets the amount of degrees which the right motor has rotated.
+	 * 
 	 * @param rightMotorTachoCount the rightMotorTachoCount to set
 	 */
 	public void setRightMotorTachoCount(int rightMotorTachoCount) {
