@@ -35,7 +35,7 @@ import lejos.robotics.SampleProvider;
  */
 public class WiFiExample {
 	public static final double WHEEL_RADIUS = 2.1;
-	public static final double TRACK = 10.55; 
+	public static final double TRACK = 10.08; //10.11 works for travelling
 
 	public static final int FORWARD_SPEED = 250;
 	public static final int ROTATE_SPEED = 150;
@@ -83,7 +83,7 @@ public class WiFiExample {
 	 * 
 	 * 2. TEAM_NUMBER: your project team number
 	 */
-	private static final String SERVER_IP = "192.168.2.34";
+	private static final String SERVER_IP = "192.168.2.22";
 	private static final int TEAM_NUMBER = 3;
 
 	// Enable/disable printing of debug info from the WiFi class
@@ -187,14 +187,18 @@ public class WiFiExample {
 				System.out.println();
 				odometer.start();
 				
-				odometryDisplay.start();
-				//navigation.start();
+				//odometryDisplay.start();
 				
 				lsl.doLocalization(fwdCorner);
+				t.drawString(Double.toString(finalProject.Localization.deltaTheta), 0, 2);
+				t.drawString(Double.toString(odometer.theta), 0, 3);
 				t.drawString(Double.toString(finalProject.Localization.YTheta_Plus), 0, 4);
 				t.drawString(Double.toString(finalProject.Localization.YTheta_Minus), 0, 5);
 				t.drawString(Double.toString(finalProject.Localization.XTheta_Plus), 0, 6);
 				t.drawString(Double.toString(finalProject.Localization.XTheta_Minus), 0, 7);
+				
+				//travel to ball dispenser
+				navigation.start();
 				
 				//Forward forward = new Forward(fwdCorner, d1, w1, w2, bx, by, orientation);
 				//forward.startFWD();
