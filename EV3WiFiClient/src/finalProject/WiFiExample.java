@@ -66,6 +66,7 @@ public class WiFiExample {
 	public static EV3ColorSensor colorSensorR = new EV3ColorSensor(colorPortR);
 	public static Odometer odometer = new Odometer(leftMotor, rightMotor);
 	public static Navigation navigation = new Navigation(odometer,colorSensorL,colorSensorR);
+
 	//	public static ballLauncher launch = new ballLauncher(launcherMotor,odometer,navigation);
 	BangBangController bangbang = new BangBangController(leftMotor, rightMotor,
 			bandCenter, bandWidth, motorLow, motorHigh);
@@ -108,6 +109,9 @@ public class WiFiExample {
 		@SuppressWarnings("resource")
 
 		SampleProvider colorValueF = colorSensorF.getMode("Red");			// colorValue provides samples from this instance
+		SampleProvider colorValueR = colorSensorR.getMode("Red");
+		SampleProvider colorValueL = colorSensorL.getMode("Red");
+		
 		float[] colorData = new float[100];			// colorData is the buffer in which data are returned
 		float[] colorData2 = new float[100];
 
@@ -202,7 +206,8 @@ public class WiFiExample {
 //				Sound.beep();
 //				Launcher.Enter_Launch_Position(); //PULLS ARM DOWN
 //				Button.waitForAnyPress();
-				Correction correction = new Correction(odometer, navigation, colorSensorR, colorSensorL, colorSensorF, leftMotor, rightMotor);
+				
+				Correction correction = new Correction(odometer, navigation, colorValueR, colorValueL, colorValueF, leftMotor, rightMotor);
 				correction.LightCorrection();
 				
 //				t.drawString(Double.toString(finalProject.Localization.deltaTheta), 0, 2);

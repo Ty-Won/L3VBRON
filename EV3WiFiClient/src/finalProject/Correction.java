@@ -1,5 +1,6 @@
 package finalProject;
 
+import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorModes;
@@ -9,9 +10,11 @@ public class Correction {
 	
 		public static Odometer odo;
 		private Navigation nav;
-		private EV3ColorSensor colorSensorR; 
-		private EV3ColorSensor colorSensorL; 
-		public EV3ColorSensor colorSensorF;
+		private SampleProvider colorSensorR; 
+		private SampleProvider colorSensorL; 
+		private SampleProvider colorSensorF;
+		private float[] colorDataL = {0};	
+		private float[] colorDataR = {0};	
 
 		private EV3LargeRegulatedMotor leftMotor, rightMotor;
 
@@ -34,14 +37,14 @@ public class Correction {
 		private int line_count = 0; //Used to count the amount of gridlines the sensor has detected
 		static final double correction = 18;
 		boolean moving = true;
-		public LocalizationFilter filterL = new LocalizationFilter(colorSensorL);
-		public LocalizationFilter filterR = new LocalizationFilter(colorSensorR);
-		public LocalizationFilter filterF = new LocalizationFilter(colorSensorF);
+//		public LocalizationFilter filterL = new LocalizationFilter(colorSensorL);
+//		public LocalizationFilter filterR = new LocalizationFilter(colorSensorR);
+//		public LocalizationFilter filterF = new LocalizationFilter(colorSensorF);
 		public boolean correcting = false; 
 		public boolean leftline = false;
 		public boolean rightline= false; 
 		
-		public Correction(Odometer odo, Navigation nav, EV3ColorSensor colorSensorR, EV3ColorSensor colorSensorL, EV3ColorSensor colorSensorF, EV3LargeRegulatedMotor leftMotor,EV3LargeRegulatedMotor rightMotor) {
+		public Correction(Odometer odo, Navigation nav, SampleProvider colorSensorR, SampleProvider colorSensorL, SampleProvider colorSensorF, EV3LargeRegulatedMotor leftMotor,EV3LargeRegulatedMotor rightMotor) {
 			this.odo = odo;
 			this.colorSensorR = colorSensorR;
 			this.colorSensorL = colorSensorL;
@@ -55,23 +58,26 @@ public class Correction {
 		//robot adjusts motors to correct the orientation of the robot
 		public void LightCorrection (){
 		correcting = true; 
+	    leftMotor.setSpeed(FORWARD_SPEED);
+        rightMotor.setSpeed(FORWARD_SPEED);
+        leftMotor.forward();
+        rightMotor.forward();
+        
+        leftline = false;
+        rightline= false; 
 		
-	     leftMotor.setSpeed(FORWARD_SPEED);
-         rightMotor.setSpeed(FORWARD_SPEED);
-         leftMotor.forward();
-         rightMotor.forward();
-		
-		while(leftline != true || rightline !=true){
-			leftline = filterL.filterData();
-			rightline = filterR.filterData();
+		 
+		while(leftline == false && rightline == false){
+			leftline = lineDetected(colorSensorL, colorDataL);
+			rightline = lineDetected(colorSensorR, colorDataR);
 			}
 		
-		if(leftline = true){
-		
+		if(leftline == true){
+		Sound.twoBeeps();
 			do{ 
 				leftMotor.setSpeed(0);
-				rightline = filterR.filterData();
-			} while (rightline = false);
+				rightline = lineDetected(colorSensorR, colorDataR);
+			} while (rightline == false);
 			
 			updateOdo();
 			
@@ -79,14 +85,15 @@ public class Correction {
 	        rightMotor.setSpeed(FORWARD_SPEED);
 	        leftMotor.forward();
 	        rightMotor.forward();
+	        LightCorrection();
 			}
 		
-		else if(rightline = true){
-			
+		else if(rightline == true){
+			Sound.beepSequenceUp();
 			do{ 
 				rightMotor.setSpeed(0);
-				leftline = filterL.filterData();
-			} while (leftline = false);
+				leftline = lineDetected(colorSensorL, colorDataL);
+			} while (leftline == false);
 			
 			updateOdo();
 			
@@ -94,6 +101,7 @@ public class Correction {
 	        rightMotor.setSpeed(FORWARD_SPEED);
 	        leftMotor.forward();
 	        rightMotor.forward();
+	        LightCorrection();
 			}
 		
 		else {
@@ -157,5 +165,17 @@ public class Correction {
 		return correcting;
 	}
 		
+	public boolean lineDetected(SampleProvider colorSensor, float[] colorData){
+		colorSensor.fetchSample(colorData, 0);
+		int light_val = (int)((colorData[0])*100);
+		if(light_val <= 32){
+			Sound.buzz();
+			return true;
+		}
+		else
+			return false;
+	}
+	
+	
 }
 
