@@ -66,53 +66,66 @@ public class Correction {
         leftline = false;
         rightline= false; 
 		
-		 
+		 Sound.twoBeeps();
 		while(leftline == false && rightline == false){
 			leftline = lineDetected(colorSensorL, colorDataL);
 			rightline = lineDetected(colorSensorR, colorDataR);
 			}
 		
+		if(leftline == true && rightline ==true){
+			updateOdo();
+			
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {}
+			
+			LightCorrection();
+			
+		
+		}
+		
 		if(leftline == true){
-		Sound.twoBeeps();
 			do{ 
-				leftMotor.setSpeed(0);
+				leftMotor.setSpeed(10);
 				rightline = lineDetected(colorSensorR, colorDataR);
 			} while (rightline == false);
 			
+			leftMotor.setSpeed(FORWARD_SPEED);
 			updateOdo();
 			
-		    leftMotor.setSpeed(FORWARD_SPEED);
-	        rightMotor.setSpeed(FORWARD_SPEED);
-	        leftMotor.forward();
-	        rightMotor.forward();
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {}
+
 	        LightCorrection();
 			}
 		
 		else if(rightline == true){
-			Sound.beepSequenceUp();
 			do{ 
-				rightMotor.setSpeed(0);
+				rightMotor.setSpeed(10);
 				leftline = lineDetected(colorSensorL, colorDataL);
 			} while (leftline == false);
 			
+		    rightMotor.setSpeed(FORWARD_SPEED);
 			updateOdo();
+
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {}
+
 			
-			leftMotor.setSpeed(FORWARD_SPEED);
-	        rightMotor.setSpeed(FORWARD_SPEED);
-	        leftMotor.forward();
-	        rightMotor.forward();
 	        LightCorrection();
 			}
 		
-		else {
-			
-			try {
-				Thread.sleep(300);
-			} catch (InterruptedException e) {}
-			
-			LightCorrection();
-			}
-		
+//		else {
+//			
+//			try {
+//				Thread.sleep(300);
+//			} catch (InterruptedException e) {}
+//			
+//			LightCorrection();
+//			}
+//		
 		}
 		
 		public void updateOdo(){
@@ -169,7 +182,6 @@ public class Correction {
 		colorSensor.fetchSample(colorData, 0);
 		int light_val = (int)((colorData[0])*100);
 		if(light_val <= 32){
-			Sound.buzz();
 			return true;
 		}
 		else
