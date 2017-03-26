@@ -188,7 +188,7 @@ public class WiFiExample {
 					colorData2, leftMotor,rightMotor, usValue, usSensor, usData);
 			final TextLCD t = LocalEV3.get().getTextLCD();
 			t.clear();
-//			OdometryDisplay odometryDisplay = new OdometryDisplay(odometer,t);
+			OdometryDisplay odometryDisplay = new OdometryDisplay(odometer,t);
 			//pass all these values to start the game:
 			if(fwdTeam == 3){ //play forward:
 				System.out.println();
@@ -201,7 +201,7 @@ public class WiFiExample {
 				System.out.println();
 				
 				odometer.start();
-					
+				odometryDisplay.start();
 //				lsl.doLocalization(fwdCorner);
 //				Sound.beep();
 //				Launcher.Enter_Launch_Position(); //PULLS ARM DOWN

@@ -117,15 +117,6 @@ public class Correction {
 	        LightCorrection();
 			}
 		
-//		else {
-//			
-//			try {
-//				Thread.sleep(300);
-//			} catch (InterruptedException e) {}
-//			
-//			LightCorrection();
-//			}
-//		
 		}
 		
 		public void updateOdo(){
@@ -140,8 +131,8 @@ public class Correction {
         	if ((odo.getAng()>90-angleThreshold && odo.getAng()<90+angleThreshold)){
         	
         		line = (int)((x + tilelength/2) / tilelength); 
-        		position = line*tilelength;
-        		odo.setPosition(new double [] {position, 0.0 , 0}, new boolean [] {true, false, true});	
+        		position = (line*tilelength)+11.6;
+        		odo.setPosition(new double [] {position, 0.0 , 90}, new boolean [] {true, false, true});	
         		
         	}
         	// if the robot is going (decreasing) along the x-direction, update the x-position and the heading
@@ -149,7 +140,7 @@ public class Correction {
         		// determine which line the robot has crossed by dividing the y-position returned by the odometer
         		line = (int)((x + tilelength/2) / tilelength); 
         		// multiply by the length of a tile to know the y-position
-        		position = line*tilelength;
+        		position = (line*tilelength)-11.6;
         		odo.setPosition(new double [] {position, 0.0 , 180}, new boolean [] {true, false, true});	
         	}
         	
@@ -158,7 +149,7 @@ public class Correction {
         		// determine which line the robot has crossed by dividing the y-position returned by the odometer
         		line = (int)((y + tilelength/2) / tilelength); 
         		// multiply by the length of a tile to know the y-position
-        		position = line*tilelength;
+        		position = (line*tilelength)-11.6;
         		odo.setPosition(new double [] {0.0, position , 270}, new boolean [] {false, true, true});	
         	}
         	
@@ -167,8 +158,8 @@ public class Correction {
         		// determine which line the robot has crossed by dividing the y-position returned by the odometer
         		line = (int)((y + tilelength/2) / tilelength); 
         		// multiply by the length of a tile to know the y-position
-        		position = line*tilelength;
-        		odo.setPosition(new double [] {0.0, position , 90}, new boolean [] {false, true, true});
+        		position = (line*tilelength)+11.6;
+        		odo.setPosition(new double [] {0.0, position , 0}, new boolean [] {false, true, true});
         		
         	}
         	
