@@ -23,13 +23,11 @@ public class LocalizationFilter {
 	 * if that's completely perfect yet, but it's just a thought.
 	*/
 	EV3ColorSensor colorSensor;
-	private float[] colorData;
 	public int lastVal;
 	
-	public LocalizationFilter(EV3ColorSensor colorSensor, float[] colorData)
+	public LocalizationFilter(EV3ColorSensor colorSensor)
 	{
 		this.colorSensor = colorSensor;
-		this.colorData = colorData;
 		this.lastVal = -1;
 	}
 	

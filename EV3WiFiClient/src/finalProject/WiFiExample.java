@@ -2,7 +2,6 @@ package finalProject;
 
 import java.util.Map;
 
-import finalProject.OdometryDisplay;
 import finalProject.BangBangController;
 import finalProject.Defense;
 import finalProject.Forward;
@@ -35,7 +34,7 @@ import lejos.robotics.SampleProvider;
  */
 public class WiFiExample {
 	public static final double WHEEL_RADIUS = 2.0768;
-	public static final double TRACK = 10.83; //changed it
+	public static final double TRACK = 10.60; //changed it
 	public static final int FORWARD_SPEED = 250;
 	public static final int ROTATE_SPEED = 150;
 	private static final int bandCenter = 35;			// Offset from the wall (cm)
@@ -61,12 +60,10 @@ public class WiFiExample {
 	
 	
 	
-	
 	//Initialization of odometer and navigation objects.
-//	public static Odometer odometer = new Odometer(leftMotor, rightMotor,30,true);
-	
-	static SensorModes colorSensorL = new EV3ColorSensor(colorPortL);
-	static SensorModes colorSensorR = new EV3ColorSensor(colorPortR);
+	public static EV3ColorSensor colorSensorF = new EV3ColorSensor(colorPortF);
+	public static EV3ColorSensor colorSensorL = new EV3ColorSensor(colorPortL);
+	public static EV3ColorSensor colorSensorR = new EV3ColorSensor(colorPortR);
 	public static Odometer odometer = new Odometer(leftMotor, rightMotor);
 	public static Navigation navigation = new Navigation(odometer,colorSensorL,colorSensorR);
 	//	public static ballLauncher launch = new ballLauncher(launcherMotor,odometer,navigation);
@@ -92,7 +89,7 @@ public class WiFiExample {
 	 * 
 	 * 2. TEAM_NUMBER: your project team number
 	 */
-	private static final String SERVER_IP = "192.168.2.7";
+	private static final String SERVER_IP = "192.168.2.13";
 	private static final int TEAM_NUMBER = 3;
 
 	// Enable/disable printing of debug info from the WiFi class
@@ -109,7 +106,7 @@ public class WiFiExample {
 		// 3. Create a sample provider instance for the above and initialize operating mode
 		// 4. Create a buffer for the sensor data
 		@SuppressWarnings("resource")
-		SensorModes colorSensorF = new EV3ColorSensor(colorPortF);
+
 		SampleProvider colorValueF = colorSensorF.getMode("Red");			// colorValue provides samples from this instance
 		float[] colorData = new float[100];			// colorData is the buffer in which data are returned
 		float[] colorData2 = new float[100];
@@ -198,27 +195,25 @@ public class WiFiExample {
 				System.out.println();
 				System.out.println();
 				System.out.println();
+				
 				odometer.start();
-				
-//				odometryDisplay.start();
-		
-				navigation.turnTo(360);
-//				
-				lsl.doLocalization(fwdCorner);
-				Sound.beep();
-				Launcher.Enter_Launch_Position(); //PULLS ARM DOWN
+					
+//				lsl.doLocalization(fwdCorner);
+//				Sound.beep();
+//				Launcher.Enter_Launch_Position(); //PULLS ARM DOWN
 //				Button.waitForAnyPress();
+				Correction correction = new Correction(odometer, navigation, colorSensorR, colorSensorL, colorSensorF, leftMotor, rightMotor);
+				correction.LightCorrection();
 				
-
 //				t.drawString(Double.toString(finalProject.Localization.deltaTheta), 0, 2);
-				t.drawString(Double.toString(odometer.theta), 0, 3);
+//				t.drawString(Double.toString(odometer.theta), 0, 3);
 //				t.drawString(Double.toString(finalProject.Localization.angleA), 0, 4);
 //				t.drawString(Double.toString(finalProject.Localization.angleB), 0, 5);
 //				t.drawString(Double.toString(finalProject.Localization.XTheta_Plus), 0, 6);
 //				t.drawString(Double.toString(finalProject.Localization.XTheta_Minus), 0, 7);
-				Forward forward = new Forward(navigation, fwdCorner, d1, w1, w2, bx, by, orientation);
+//				Forward forward = new Forward(navigation, fwdCorner, d1, w1, w2, bx, by, orientation);
+//				forward.startFWD(); 
 				
-				forward.startFWD(); 
 			}
 			if(defTeam == 3){//play defense:
 				lsl.doLocalization(defCorner);

@@ -40,8 +40,6 @@ public class Forward {
 
 	public static Navigation nav;
 //	public static ballLauncher launch =  WiFiExample.launch;
-
-	
 		
 	public Forward(Navigation navigation, int corner, int d1, int w1, int w2, int bx, int by, String omega) {
 		this.corner = corner;
@@ -55,19 +53,12 @@ public class Forward {
 	}
 	
 	public void startFWD() {
-		//already localized
-		//DEMO:
-		//step 1 = travel to shooting zone (under fwdLinePosition)
-		//step 2 = shoot ball 
-		
-		//travel to shooting zone
-//		nav.travelTo(CENTER_X_COORD*TILE_LENGTH, 0);
+	
 		nav.travelTo(CENTER_X_COORD*TILE_LENGTH, 0);
 		nav.travelTo(CENTER_X_COORD*TILE_LENGTH, ((FIELD_DIST-OUTER_TILES-fwdLinePosition)*TILE_LENGTH)-ROBOT_FRONT_TOCENTER_DIST);
 		nav.turnToSmart(0); //faceTarget
 		Launcher.Fire(4);
 		
-		// travel to: (5*30.48, (10-d1)*(30.48-7))
 		
 		
 	}
