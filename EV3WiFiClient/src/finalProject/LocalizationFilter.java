@@ -23,13 +23,11 @@ public class LocalizationFilter {
 	 * if that's completely perfect yet, but it's just a thought.
 	*/
 	EV3ColorSensor colorSensor;
-	private float[] colorData;
 	public int lastVal;
 	
-	public LocalizationFilter(EV3ColorSensor colorSensor, float[] colorData)
+	public LocalizationFilter(EV3ColorSensor colorSensor)
 	{
 		this.colorSensor = colorSensor;
-		this.colorData = colorData;
 		this.lastVal = -1;
 	}
 	
@@ -38,22 +36,25 @@ public class LocalizationFilter {
 		float[] colorSample = {0};
 		
 		while(true)
-		{
+		{	Sound.twoBeeps();
 			colorSensor.getRedMode().fetchSample(colorSample, 0); 
 			int light_val = (int)(colorSample[0]*100);
+			Sound.twoBeeps();
 			if(this.lastVal == -1)
 			{
 				this.lastVal = light_val;
+				Sound.buzz();
 			}
 			else if(this.lastVal - light_val > 7)
 			{
-				Sound.buzz();
 				this.lastVal = light_val;
+				Sound.buzz();
 				return true;
 			}
 			else
 			{
 				this.lastVal = light_val;
+				Sound.buzz();
 				return false;
 			}
 		}

@@ -2,104 +2,44 @@ package finalProject;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
 
-/**
- * The class runs before either forward or defense are called and is used to 
- * set an original position for the robot. The first action taken is to perform 
- * an ultrasonic localization in order to determine a general area for the robot. 
- * Then the robot moves toward the perpendicular cross of the grid lines in order 
- * to be able to clock the grid lines. Once it moves to the perpendicular cross, 
- * the robot rotates until four lines have been crossed, using the light sensor 
- * to determine when this occurs. Once this has happened, the robot uses trigonometry 
- * to calculate its position and angle error and centers itself on the cross with 
- * its direction pointed to zero degrees.
- * 
- * @author Ian Gauthier
- * @author Ilana Haddad
- * @author Tristan Bouchard
- * @author Tyrone Wong
- * @author Alexandre Tessier
- * 
- * @version 3.0
- *
- */
 public class Localization {
 	public static Odometer odo;
 	private Navigation nav;
-	private SampleProvider colorSensor;
+	private SampleProvider colorSensorF; //stands for color sensor in front
 	private SampleProvider usValue;
 	private SensorModes usSensor;
 	private float[] usData;
 	private EV3LargeRegulatedMotor leftMotor, rightMotor;
+	private EV3ColorSensor colorsensor = WiFiExample.colorSensorF;
 	private float[] colorData;	
 	private float[] colorData2;
 
 	private double SENSOR_DIST = 6.5;
 	private double dTheta; 	//delta theta 
-	
-	/**
-	 * The rotational speed of the robot's wheels when moving forward.
-	 */
 	private static final int FORWARD_SPEED = WiFiExample.FORWARD_SPEED;
-	
-	/**
-	 * The rotational speed of the robot's wheels when turning.
-	 */
 	private static final int ROTATION_SPEED = WiFiExample.ROTATE_SPEED;
 	double WHEEL_RADIUS = WiFiExample.WHEEL_RADIUS;
 	double TRACK =  WiFiExample.TRACK;
-	
-	/**
-	 * The Y position of the fourth line found during light localization.
-	 */
 	public static double YTheta_Plus = 0; //Initializing theta variables
-	
-	/**
-	 * The Y position of the second line found during light localization.
-	 */
 	public static double YTheta_Minus = 0;
-	
-	/**
-	 * The X position of the first line found during light localization.
-	 */
 	public static double XTheta_Plus = 0;
-	
-	/**
-	 * The X position of the third line found during light localization.
-	 */
 	public static double XTheta_Minus = 0;
-	
-	/**
-	 * The difference between the current heading and the actual zero heading.
-	 */
 	public static double deltaTheta = 0;
-
-	/**
-	 * Counter to hold the amount of lines that have already been clocked during light localization.
-	 */
+	public static double angleA, angleB;
+	
 	private int line_count = 0; //Used to count the amount of gridlines the sensor has detected
 	static final double correction = 18;
 	boolean moving = true;
-
-	/**
-	 * 
-	 * @param odo the odometer of the robot
-	 * @param nav the navigation system for the robot
-	 * @param colorSensor the color sensor to be used in localization
-	 * @param colorData the data from the color sensor
-	 * @param colorData2
-	 * @param leftMotor the robot's left wheel motor
-	 * @param rightMotor the robot's right wheel motor
-	 * @param usValue
-	 * @param usSensor the ultrasonic sensor used for localization
-	 * @param usData the data used for the ultrasonic sensor
-	 */
-	public Localization(Odometer odo, Navigation nav, SampleProvider colorSensor, float[] colorData, 
+	public LocalizationFilter filter = new LocalizationFilter(colorsensor);
+	
+	public Localization(Odometer odo, Navigation nav, SampleProvider colorSensorF, float[] colorData, 
 			float[] colorData2, EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, SampleProvider usValue, SensorModes usSensor, float[] usData) {
 		this.odo = odo;
-		this.colorSensor = colorSensor;
+		this.colorSensorF = colorSensorF;
 		this.colorData = colorData;
 		this.colorData2 = colorData2;
 		this.usSensor = usSensor;
@@ -108,38 +48,25 @@ public class Localization {
 		this.leftMotor = leftMotor;
 		this.rightMotor = rightMotor;
 		this.nav = nav;
-
 	}
 
-	/**
-	 * The method should first perform a ultrasonic localization to find the
-	 *  direction to the perpendicular cross of the grid lines. The robot
-	 *  should then move to that cross and past it in order to make the
-	 *  robot within reach of all four grid lines that need to be clocked. 
-	 *  The robot should then rotate until it finds four grid lines and then 
-	 *  take note of all of them using the light sensor. Finally the brick 
-	 *  should perform trig to find both the error in position and heading 
-	 *  and then move to a heading and position of zero.
-	 * 
-	 * @param fwdCorner the corner in which the robot begins
-	 */
 	public void doLocalization(int fwdCorner) {
 
 		double [] pos = new double [3];
-		double angleA, angleB;
 		// rotate the robot until it sees no wall
 		while(wallDetected()){ //while robot sees a wall:
+			
 			//rotate until wallDetected is false --> until it sees no wall
 			turnClockwise(); //clockwise rotation
 		}
-		Sound.beep();//make sound to indicate we have successfully rotated away from wall
+	//	Sound.beep();//make sound to indicate we have successfully rotated away from wall
 
 		// keep rotating until the robot sees a wall, then latch the angle
 		while(!wallDetected()){ //while robot doesn't see a wall:
 			//rotate until robot sees a wall (until !wallDetected is false)
 			turnClockwise(); //clockwise rotation
 		}
-		Sound.beepSequenceUp(); //make sound to indicate we now see a wall
+	//	Sound.beepSequenceUp(); //make sound to indicate we now see a wall
 
 		if(wallDetected()){//stop motors to give it time to latch angle
 			leftMotor.setSpeed(0); //set speeds to zero for both because stop() doesnt do both motors simultaneously
@@ -158,14 +85,14 @@ public class Localization {
 			//rotate until wallDetected is false --> until it sees no wall
 			turnCounterClockwise();  //switch direction to counterclockwise rotation
 		}
-		Sound.beepSequence();//make sound to indicate we have successfully rotated away from wall
+//		Sound.beepSequence();//make sound to indicate we have successfully rotated away from wall
 
 		// keep rotating until the robot sees a wall, then latch the angle
 		while(!wallDetected()){ //while robot doesn't see a wall:
 			//rotate until robot sees a wall (until !wallDetected is false)
 			turnCounterClockwise();  //counterclockwise rotation
 		}
-		Sound.twoBeeps(); //make sound to indicate we now see a wall
+//		Sound.twoBeeps(); //make sound to indicate we now see a wall
 
 		if(wallDetected()){//stop motors to give it time to latch angle
 			leftMotor.setSpeed(0); //set speeds to zero for both because stop() doesnt do both motors simultaneously
@@ -187,7 +114,7 @@ public class Localization {
 			dTheta = 230 - ((angleA+angleB)/2);
 		}
 		else if(angleA > angleB){
-			dTheta = 230 - ((angleA+angleB)/2);
+			dTheta = 43 - ((angleA+angleB)/2);
 		}
 
 		//dTheta is the angle to be added to the heading reported by odometer:
@@ -197,25 +124,26 @@ public class Localization {
 		boolean[] updates = {false,false,true}; //booleans indicating if x,y,theta are being updated
 		//only theta is being updated so index 2 is true but x and y remain 0
 		odo.setPosition(pos, updates);
-		nav.turnToSmart(45);
-		Sound.buzz();
+		nav.turnToSmart(55);
+//		Sound.buzz();
 		
+		odo.setAng(45);
 
+		
 		//LIGHT:
 		while(moving){
 			leftMotor.rotate(convertDistance(WHEEL_RADIUS, 600), true);
 			rightMotor.rotate(convertDistance(WHEEL_RADIUS, 600), true);
-			this.colorSensor.fetchSample(this.colorData2, 0);
-			int light_val = (int)(this.colorData2[0]*100);
-			if(light_val <= 28){
+			this.colorSensorF.fetchSample(this.colorData, 0);
+			boolean line = filter.filterData();
+			if(line=true){
 				moving = false;
 			}
 		}
-		Sound.beep();
 		
 		//After seeing line, move forward 5
-		leftMotor.rotate(convertDistance(WHEEL_RADIUS,5), true);
-		rightMotor.rotate(convertDistance(WHEEL_RADIUS,5), false);
+		leftMotor.rotate(convertDistance(WHEEL_RADIUS,7), true);
+		rightMotor.rotate(convertDistance(WHEEL_RADIUS,7), false);
 		odo.setAng(0);
 		//Set robot to rotate through 360 degrees clockwise:
 		leftMotor.setSpeed(ROTATION_SPEED); 	
@@ -223,14 +151,11 @@ public class Localization {
 		leftMotor.rotate(convertAngle(WHEEL_RADIUS, TRACK, 360), true);
 		rightMotor.rotate(-convertAngle(WHEEL_RADIUS, TRACK, 360), true);
 		
-		
-		
-		
 		//While rotating, get LS data:
 		while(line_count < 4){
 			// Acquire Color Data from sensor, store it in the array at the position
 			// of the line it is currently at.
-			this.colorSensor.fetchSample(this.colorData, line_count);
+			this.colorSensorF.fetchSample(this.colorData, line_count);
 			int light_val = (int)((this.colorData[line_count])*100);
 
 			// Progress through the lines as they are detected and record the angles.
@@ -272,75 +197,38 @@ public class Localization {
 		//Calculation of the x and t positions considering that we are in the 3rd quadrant (in negative x and y coords):
 		x_pos = (SENSOR_DIST)*Math.cos(Math.toRadians(theta_y/2)); 
 		y_pos = (SENSOR_DIST)*Math.cos(Math.toRadians(theta_x/2));
-		Sound.buzz();
-		
 		
 		deltaTheta = 90 + (theta_y/2) - (YTheta_Plus - 180);
-	
 		
 		odo.setX(x_pos);
 		odo.setY(y_pos);
 		
 		/*odo.setAng(odo.getAng()+deltaTheta); is original code*/
-		odo.setAng(odo.getAng()+deltaTheta-7);
-		
-		
-		//this.odo.setPosition(new double[] {x_pos,y_pos, deltaTheta+odo.getAng()},new boolean[] {true,true,false});
-		Sound.buzz();
-		
-		
-		
+		odo.setAng(odo.getAng()+deltaTheta);
+				
 		// When done, travel to (0,0) and turn to 0 degrees:
-		//this doesn't work, fix it:
 		nav.travelTo(0, 0); 
-		Sound.buzz();
-		
 		nav.turnToSmart(0);
-
 		
 		
-		
-		 
-
+		odo.setAng(0);
 	}
-	
-	/**
-	 * Turn the robot clockwise when called until told to stop.
-	 */
 	public void turnClockwise(){//robot turns clockwise 
 		leftMotor.setSpeed(225);
 		rightMotor.setSpeed(225);	
 		leftMotor.forward();
 		rightMotor.backward();
 	}
-	
-	/**
-	 * Turn the robot counter clockwise when called until told to stop.
-	 */
 	public void turnCounterClockwise(){ //robot turns counterclockwise
 		leftMotor.setSpeed(225);
 		rightMotor.setSpeed(225);	
 		leftMotor.backward();
 		rightMotor.forward();
 	}
-	
-	/**
-	 * Test whether or not the ultrasonic sensor has seen the wall or not.
-	 * 
-	 * @return true if there has been a walled detected and false if it has not
-	 */
 	public boolean wallDetected(){
 		//if getFilteredData is less than 50, a wall is detected, so return true
 		return getFilteredData()<30;
 	}
-	
-	/**
-	 * Should first poll the ultrasonic sensor for data and then perform a filtering
-	 * of it which sets the distance to be equal to 255 cm if the polled distance is
-	 * larger than 50 cm.
-	 * 
-	 * @return the filtered ultrasonic sensor distance
-	 */
 	private float getFilteredData() {
 		usSensor.fetchSample(usData, 0);
 		float distance = usData[0];
@@ -352,31 +240,10 @@ public class Localization {
 		return distance;
 	}
 	//convertDistance method: It takes the radius of the wheel and the distance required to travel and calculates the required wheel rotation
-	
-	/**
-	 * The method should convert the input distance into a form that is equal to
-	 * the amount of rotation that a wheel of the given radius must rotate
-	 * in order to move that distance
-	 * 
-	 * @param radius the radius of the wheels of the robot
-	 * @param distance the distance which will be converted
-	 * @return the converted distance
-	 */
 	private static int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 	//convertAngle method: This method takes the radius of wheel, width of cart and the angle required to be turned and calculated the required wheel rotation
-	
-	/**
-	 * The method should convert the input angle into a form that can be performed
-	 * by the robot with the given wheel radius and width.
-	 * 
-	 * 
-	 * @param radius the radius of the wheel
-	 * @param width the width of the robot
-	 * @param angle the angle to be converted
-	 * @return the angle now in the form of amount of rotation needed by the robot's wheel to perform that angle of turn
-	 */
 	private static int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}

@@ -7,9 +7,8 @@ public class ballLauncher {
 	private static final int CLOSE_SPEED = 700; //900 for low batt	//speed for when we are facing the middle target
 	private static final int ACCELERATION = 5000;
 	private EV3LargeRegulatedMotor launcherMotor;
-	private Odometer odo = Forward.odometer;
-	private Navigation nav = new Navigation(odo);
-	
+	private Odometer odo;
+	private Navigation nav;
 	
 	
 	public ballLauncher(EV3LargeRegulatedMotor launcherMotor, Odometer odometer, Navigation navigation){
