@@ -207,9 +207,8 @@ public class WiFiExample {
 //				Sound.beep();
 //				Launcher.Enter_Launch_Position(); //PULLS ARM DOWN
 //				Button.waitForAnyPress();
-
+				navigation = new Navigation(odometer);
 				correction = new Correction(odometer, navigation, colorValueR, colorValueL, colorValueF, leftMotor, rightMotor);
-				navigation = new Navigation(odometer,colorSensorL,colorSensorR);
 				navigation.start();
 				correction.start();
 				

@@ -7,8 +7,6 @@ import lejos.robotics.SampleProvider;
 public class Navigation extends Thread{
 	
 	double wheel_radius = WiFiExample.WHEEL_RADIUS;
-	private SampleProvider colorSensorL;
-	private SampleProvider colorSensorR;
 	double width =  WiFiExample.TRACK;
 	private static final int FORWARD_SPEED = WiFiExample.FORWARD_SPEED;
 	private static final int ROTATE_SPEED = WiFiExample.ROTATE_SPEED;
@@ -19,12 +17,12 @@ public class Navigation extends Thread{
 	private float[] correctionLine;//meant to store the value of the R and L light sensors to determine if a black line is detected
 	public static boolean turning=false; 
 	public boolean localizing=false;
-	private Correction correcting = WiFiExample.correction;
+//	private Correction correcting = WiFiExample.correction;
 	
 	//instantiate odometer:
 	public Odometer odometer = WiFiExample.odometer;
-	public Correction correction = WiFiExample.correction;
-	public Navigation(Odometer odometer,SampleProvider colorSensorL,SampleProvider colorSensorR){ //constructor
+//	public Correction correction = WiFiExample.correction;
+	public Navigation(Odometer odometer){ //constructor
 		this.odometer = odometer;
 	}
 	
@@ -45,6 +43,7 @@ public class Navigation extends Thread{
 	
 	public void travelTo(double x, double y){
 		//this method causes robot to travel to the absolute field location (x,y)
+		Sound.buzz();
 		int travelTocount=0;
 		odo_x = odometer.getX();
 		odo_y = odometer.getY();
@@ -57,7 +56,6 @@ public class Navigation extends Thread{
 		double delta_x = x_dest-odo_x;
 		
 		drive(delta_x,delta_y);
-		Sound.twoBeeps();
 //		if(travelTocount==0)
 //			travelTo(x_dest,y_dest);
 		
@@ -107,13 +105,13 @@ public class Navigation extends Thread{
 	public void drive(double delta_x,double delta_y){
 		//set both motors to forward speed desired
 		
-		localizing=correction.islocalizing();
-		while(localizing==true){
-			try {
-				localizing=correction.islocalizing();
-				Thread.sleep(500);
-			} catch (InterruptedException e) {}
-		}				
+//		localizing=WiFiExample.correction.islocalizing();
+//		while(localizing==true){
+//			try {
+//				localizing=WiFiExample.correction.islocalizing();
+//				Thread.sleep(300);
+//			} catch (InterruptedException e) {}
+//		}				
 		
 		leftMotor.setSpeed(FORWARD_SPEED);
 		rightMotor.setSpeed(FORWARD_SPEED);
@@ -146,13 +144,13 @@ public class Navigation extends Thread{
 	
 	public void driveDiag(double travelDist){
 		
-		localizing=correction.islocalizing();
-		while(localizing==true){
-			try {
-				localizing=correction.islocalizing();
-				Thread.sleep(500);
-			} catch (InterruptedException e) {}
-		}
+//		localizing=WiFiExample.correction.islocalizing();
+//		while(localizing==true){
+//			try {
+//				localizing=WiFiExample.correction.islocalizing();
+//				Thread.sleep(300);
+//			} catch (InterruptedException e) {}
+//		}
 		
 		//set both motors to forward speed desired
 		leftMotor.setSpeed(FORWARD_SPEED);
@@ -166,16 +164,15 @@ public class Navigation extends Thread{
 	public void turnTo(double theta){
 		//this method causes the robot to turn (on point) to the absolute heading theta
 		
-		localizing=correction.islocalizing();
-		while(localizing==true){
-			try {
-				localizing=correction.islocalizing();
-				Thread.sleep(500);
-			} catch (InterruptedException e) {}
-		}
+//		localizing=WiFiExample.correction.islocalizing();
+//		while(localizing==true){
+//			try {
+//				localizing=WiFiExample.correction.islocalizing();
+//				Thread.sleep(500);
+//			} catch (InterruptedException e) {}
+//		}
 		
 		turning = true;
-		Sound.twoBeeps();
 	
 		//make robot turn to angle theta:
 		leftMotor.setSpeed(ROTATE_SPEED);
@@ -234,15 +231,18 @@ public class Navigation extends Thread{
 		return turning; 
 	}
 
-//	public void stopNav(){
-//		localizing=correction.islocalizing();
-//		while(localizing==true){
-//			try {
-//				localizing=correction.islocalizing();
-//				Thread.sleep(500);
-//			} catch (InterruptedException e) {}
-//		}	
-//	}
+	public void stopNav(){
+		localizing=WiFiExample.correction.islocalizing();
+		while(localizing==true){
+			try {
+				localizing=WiFiExample.correction.islocalizing();
+				Thread.sleep(300);
+			} catch (InterruptedException e) {}
+		}	
+		Sound.beepSequenceUp();
+		travelTo(Correction.Dest_ini[0],Correction.Dest_ini[1]);
+		Sound.beepSequence();
+	}
 
 
 }
