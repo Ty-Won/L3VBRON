@@ -18,11 +18,12 @@ public class Navigation extends Thread{
 	private EV3LargeRegulatedMotor rightMotor = WiFiExample.rightMotor;
 	private float[] correctionLine;//meant to store the value of the R and L light sensors to determine if a black line is detected
 	public static boolean turning=false; 
+	public boolean localizing=false;
 	private Correction correcting = WiFiExample.correction;
-	
 	
 	//instantiate odometer:
 	public Odometer odometer = WiFiExample.odometer;
+	public Correction correction = WiFiExample.correction;
 	public Navigation(Odometer odometer,SampleProvider colorSensorL,SampleProvider colorSensorR){ //constructor
 		this.odometer = odometer;
 	}
@@ -44,6 +45,7 @@ public class Navigation extends Thread{
 	
 	public void travelTo(double x, double y){
 		//this method causes robot to travel to the absolute field location (x,y)
+		int travelTocount=0;
 		odo_x = odometer.getX();
 		odo_y = odometer.getY();
 		odo_theta = odometer.getAng();
@@ -55,7 +57,10 @@ public class Navigation extends Thread{
 		double delta_x = x_dest-odo_x;
 		
 		drive(delta_x,delta_y);
-
+		Sound.twoBeeps();
+//		if(travelTocount==0)
+//			travelTo(x_dest,y_dest);
+		
 	}
 	
 	public void travelToDiag(double x, double y){
@@ -101,6 +106,15 @@ public class Navigation extends Thread{
 	//Insert x and y coordinates and the EV3 travels on the x,y planes to reach the destination
 	public void drive(double delta_x,double delta_y){
 		//set both motors to forward speed desired
+		
+		localizing=correction.islocalizing();
+		while(localizing==true){
+			try {
+				localizing=correction.islocalizing();
+				Thread.sleep(500);
+			} catch (InterruptedException e) {}
+		}				
+		
 		leftMotor.setSpeed(FORWARD_SPEED);
 		rightMotor.setSpeed(FORWARD_SPEED);
 		
@@ -131,6 +145,15 @@ public class Navigation extends Thread{
 	}
 	
 	public void driveDiag(double travelDist){
+		
+		localizing=correction.islocalizing();
+		while(localizing==true){
+			try {
+				localizing=correction.islocalizing();
+				Thread.sleep(500);
+			} catch (InterruptedException e) {}
+		}
+		
 		//set both motors to forward speed desired
 		leftMotor.setSpeed(FORWARD_SPEED);
 		rightMotor.setSpeed(FORWARD_SPEED);
@@ -142,6 +165,14 @@ public class Navigation extends Thread{
 	
 	public void turnTo(double theta){
 		//this method causes the robot to turn (on point) to the absolute heading theta
+		
+		localizing=correction.islocalizing();
+		while(localizing==true){
+			try {
+				localizing=correction.islocalizing();
+				Thread.sleep(500);
+			} catch (InterruptedException e) {}
+		}
 		
 		turning = true;
 		Sound.twoBeeps();
@@ -190,7 +221,29 @@ public class Navigation extends Thread{
 
 	}
 	
+	public double[] getDest(){
+		double[] coordinates = {0.0,0.0,0.0};
+		coordinates[0]=x_dest;
+		coordinates[1]=y_dest;
+		coordinates[2]=theta_dest;
+		
+		return coordinates;
+	}
+	
 	public boolean isTurning(){
 		return turning; 
 	}
+
+//	public void stopNav(){
+//		localizing=correction.islocalizing();
+//		while(localizing==true){
+//			try {
+//				localizing=correction.islocalizing();
+//				Thread.sleep(500);
+//			} catch (InterruptedException e) {}
+//		}	
+//	}
+
+
 }
+

@@ -65,7 +65,7 @@ public class WiFiExample {
 	public static EV3ColorSensor colorSensorL = new EV3ColorSensor(colorPortL);
 	public static EV3ColorSensor colorSensorR = new EV3ColorSensor(colorPortR);
 	public static Odometer odometer = new Odometer(leftMotor, rightMotor);
-	public static Navigation navigation = new Navigation(odometer,colorSensorL,colorSensorR);
+	public static Navigation navigation;
 	public static Correction correction;
 
 	//	public static ballLauncher launch = new ballLauncher(launcherMotor,odometer,navigation);
@@ -187,7 +187,7 @@ public class WiFiExample {
 
 			Localization lsl = new Localization(odometer,navigation, colorValueF, colorData, 
 					colorData2, leftMotor,rightMotor, usValue, usSensor, usData);
-			final TextLCD t = LocalEV3.get().getTextLCD();
+			final TextLCD t = LocalEV3.get().getTextLCD(); 
 			t.clear();
 			OdometryDisplay odometryDisplay = new OdometryDisplay(odometer,t);
 			//pass all these values to start the game:
@@ -202,16 +202,18 @@ public class WiFiExample {
 				System.out.println();
 				
 				odometer.start();
-				navigation.start();
 				odometryDisplay.start();
-				lsl.doLocalization(fwdCorner);
-				Sound.beep();
-				Launcher.Enter_Launch_Position(); //PULLS ARM DOWN
+//				lsl.doLocalization(fwdCorner);
+//				Sound.beep();
+//				Launcher.Enter_Launch_Position(); //PULLS ARM DOWN
 //				Button.waitForAnyPress();
-				
+
 				correction = new Correction(odometer, navigation, colorValueR, colorValueL, colorValueF, leftMotor, rightMotor);
+				navigation = new Navigation(odometer,colorSensorL,colorSensorR);
+				navigation.start();
 				correction.start();
-				navigation.travelTo(304.8, 60.96);
+				
+				navigation.travelTo(91.44, 91.44);
 				
 //				t.drawString(Double.toString(finalProject.Localization.deltaTheta), 0, 2);
 //				t.drawString(Double.toString(odometer.theta), 0, 3);
