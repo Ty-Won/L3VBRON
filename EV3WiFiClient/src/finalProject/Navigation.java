@@ -43,8 +43,6 @@ public class Navigation extends Thread{
 	
 	public void travelTo(double x, double y){
 		//this method causes robot to travel to the absolute field location (x,y)
-		Sound.buzz();
-		int travelTocount=0;
 		odo_x = odometer.getX();
 		odo_y = odometer.getY();
 		odo_theta = odometer.getAng();
@@ -56,9 +54,6 @@ public class Navigation extends Thread{
 		double delta_x = x_dest-odo_x;
 		
 		drive(delta_x,delta_y);
-//		if(travelTocount==0)
-//			travelTo(x_dest,y_dest);
-		
 	}
 	
 	public void travelToDiag(double x, double y){
@@ -104,18 +99,8 @@ public class Navigation extends Thread{
 	//Insert x and y coordinates and the EV3 travels on the x,y planes to reach the destination
 	public void drive(double delta_x,double delta_y){
 		//set both motors to forward speed desired
-		
-//		localizing=WiFiExample.correction.islocalizing();
-//		while(localizing==true){
-//			try {
-//				localizing=WiFiExample.correction.islocalizing();
-//				Thread.sleep(300);
-//			} catch (InterruptedException e) {}
-//		}				
-		
 		leftMotor.setSpeed(FORWARD_SPEED);
 		rightMotor.setSpeed(FORWARD_SPEED);
-		
 		
 		//X-travel
 		if(delta_x>0){
@@ -173,6 +158,7 @@ public class Navigation extends Thread{
 //		}
 		
 		turning = true;
+		Sound.twoBeeps(); //DONT REMOVE THIS
 	
 		//make robot turn to angle theta:
 		leftMotor.setSpeed(ROTATE_SPEED);
