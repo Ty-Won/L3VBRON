@@ -59,14 +59,14 @@ public class Correction extends Thread {
 
 	public void run(){ 
 		pauseWhileTurning();
-//		if(gridcount==2){
-//			//			leftMotor.setSpeed(0);
-//			//			rightMotor.setSpeed(0);
-//			//			leftMotor.stop();
-//			//			rightMotor.stop();
-//			localize();
-//			gridcount=0;	
-//		}
+		if(gridcount==2){
+			//			leftMotor.setSpeed(0);
+			//			rightMotor.setSpeed(0);
+			//			leftMotor.stop();
+			//			rightMotor.stop();
+			localize();
+			gridcount=0;	
+		}
 
 		LightCorrection();
 
@@ -84,6 +84,7 @@ public class Correction extends Thread {
 		leftline = false; 
 		rightline= false; 
 
+		Sound.twoBeeps();	//MAYBE? 
 		while(!leftline  && !rightline){
 			leftline = lineDetected(colorSensorL, colorDataL);
 			rightline = lineDetected(colorSensorR, colorDataR);
