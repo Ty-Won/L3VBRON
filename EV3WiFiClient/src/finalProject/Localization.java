@@ -14,7 +14,6 @@ public class Localization {
 	private SensorModes usSensor;
 	private float[] usData;
 	private EV3LargeRegulatedMotor leftMotor, rightMotor;
-	private EV3ColorSensor colorsensor = WiFiExample.colorSensorF;
 	private float[] colorData;	
 	private float[] colorData2;
 
@@ -34,7 +33,6 @@ public class Localization {
 	private int line_count = 0; //Used to count the amount of gridlines the sensor has detected
 	static final double correction = 18;
 	boolean moving = true;
-	public LocalizationFilter filter = new LocalizationFilter(colorsensor);
 	
 	public Localization(Odometer odo, Navigation nav, SampleProvider colorSensorF, float[] colorData, 
 			float[] colorData2, EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, SampleProvider usValue, SensorModes usSensor, float[] usData) {
@@ -130,13 +128,13 @@ public class Localization {
 		odo.setAng(45);
 
 		
-		//LIGHT:
+		//LIGHT:		
 		while(moving){
 			leftMotor.rotate(convertDistance(WHEEL_RADIUS, 600), true);
 			rightMotor.rotate(convertDistance(WHEEL_RADIUS, 600), true);
-			this.colorSensorF.fetchSample(this.colorData, 0);
-			boolean line = filter.filterData();
-			if(line=true){
+			this.colorSensorF.fetchSample(this.colorData2, 0);
+			int light_val = (int)(this.colorData2[0]*100);
+			if(light_val <= 28){
 				moving = false;
 			}
 		}
@@ -207,7 +205,7 @@ public class Localization {
 		odo.setAng(odo.getAng()+deltaTheta);
 				
 		// When done, travel to (0,0) and turn to 0 degrees:
-		nav.travelTo(0, 0); 
+		nav.travelToDiag(0, 0); 
 		nav.turnToSmart(0);
 		
 		

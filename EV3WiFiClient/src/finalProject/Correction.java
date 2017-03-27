@@ -37,9 +37,7 @@ public class Correction extends Thread {
 		private int line_count = 0; //Used to count the amount of gridlines the sensor has detected
 		static final double correction = 18;
 		boolean moving = true;
-//		public LocalizationFilter filterL = new LocalizationFilter(colorSensorL);
-//		public LocalizationFilter filterR = new LocalizationFilter(colorSensorR);
-//		public LocalizationFilter filterF = new LocalizationFilter(colorSensorF);
+
 		public boolean correcting = false; 
 		public boolean leftline = false;
 		public boolean rightline= false; 
@@ -56,25 +54,17 @@ public class Correction extends Thread {
 		}
 		
 		public void run(){
-//			if(turning==true){
-//				try {
-//					Thread.sleep(500);
-//				} catch (InterruptedException e) {}
-//			}
-//			else{
-//			while(true){
-			turning=nav.isTurning();
-				while(turning==true){
-					try {
-						turning=nav.isTurning();
-						Sound.beepSequenceUp();
-						Thread.sleep(500);
-					} catch (InterruptedException e) {}
-				}				
-					LightCorrection();
-				
-		
-//			}
+
+		turning=nav.isTurning();
+			while(turning==true){
+				try {
+					turning=nav.isTurning();
+					Sound.beepSequenceUp();
+					Thread.sleep(500);
+				} catch (InterruptedException e) {}
+			}				
+		LightCorrection();
+			
 		}
 		
 		//Travel orientation correct, uses light sensors on the side of the robot to detect grid lines, if one side detects a line first,
@@ -83,8 +73,6 @@ public class Correction extends Thread {
 		correcting = true; 
 	    leftMotor.setSpeed(FORWARD_SPEED);
         rightMotor.setSpeed(FORWARD_SPEED);
-//        leftMotor.forward();
-//        rightMotor.forward();
         
         leftline = false;
         rightline= false; 
@@ -106,10 +94,6 @@ public class Correction extends Thread {
 		if(leftline == true && rightline ==true){
 			updateOdo();
 			
-//			try {
-//				Thread.sleep(500);
-//			} catch (InterruptedException e) {}
-			
 			turning=nav.isTurning();
 			while(turning==true){
 				turning=nav.isTurning();
@@ -117,10 +101,8 @@ public class Correction extends Thread {
 					Thread.sleep(500);
 				} catch (InterruptedException e) {}
 			}
-			
-			
+				
 			run();
-//			LightCorrection();
 		}
 		
 		if(leftline == true){
@@ -139,13 +121,8 @@ public class Correction extends Thread {
 					Thread.sleep(500);
 				} catch (InterruptedException e) {}
 			}
-			
-//			try {
-//				Thread.sleep(500);
-//			} catch (InterruptedException e) {}
 
 			run();
-//	        LightCorrection();
 			}
 		
 		else if(rightline == true){
@@ -165,12 +142,8 @@ public class Correction extends Thread {
 				} catch (InterruptedException e) {}
 			}
 			
-//			try {
-//				Thread.sleep(500);
-//			} catch (InterruptedException e) {}
-			
 			run();
-//	        LightCorrection();
+
 			}
 		
 		}

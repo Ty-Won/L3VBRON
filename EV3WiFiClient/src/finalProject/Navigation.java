@@ -145,11 +145,6 @@ public class Navigation extends Thread{
 		
 		turning = true;
 		Sound.twoBeeps();
-//		try {
-//		leftMotor.setSpeed(0);
-//		rightMotor.setSpeed(0);
-//		Thread.sleep(500);
-//		} catch (InterruptedException e) {}
 	
 		//make robot turn to angle theta:
 		leftMotor.setSpeed(ROTATE_SPEED);
@@ -175,8 +170,6 @@ public class Navigation extends Thread{
 	}
 	
 	public void turnToSmart(double angle){
-		//this method causes robot to travel to the absolute angle 
-//		turning = true;
 		
 		odo_theta = odometer.getAng();
 		
@@ -194,8 +187,7 @@ public class Navigation extends Thread{
 		else{
 			turnTo(theta_corr);
 		}
-//		turning = false;
-//		Correction.currentThread().run();
+
 	}
 	
 	public boolean isTurning(){
