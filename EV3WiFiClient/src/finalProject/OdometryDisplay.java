@@ -1,3 +1,4 @@
+
 /*
  * OdometryDisplay.java
  */
@@ -28,7 +29,7 @@ public class OdometryDisplay extends Thread {
 
 	// constructor
 	/**
-	 * 
+	 * Constructor for Odometry Display
 	 * @param odometer the odometer of the robot
 	 * @param t the screen of the brick to be drawn on
 	 */
@@ -55,7 +56,7 @@ public class OdometryDisplay extends Thread {
 			t.drawString("X:              ", 0, 0);
 			t.drawString("Y:              ", 0, 1);
 			t.drawString("T:              ", 0, 2);
-//			t.drawString("US:"+ Lab3.sample[0]*100, 0, 3);
+			//				t.drawString("US:"+ Lab3.sample[0]*100, 0, 3);
 
 			// get the odometry information
 			boolean[] update = {true,true,true};
@@ -79,7 +80,7 @@ public class OdometryDisplay extends Thread {
 			}
 		}
 	}
-	
+
 	/**
 	 * The method should intake a double value and then format it so that is can be displayed on the screen.
 	 * This entails placing a negative sign in front of the number if it is negative,
@@ -95,11 +96,11 @@ public class OdometryDisplay extends Thread {
 		String result = "";
 		String stack = "";
 		long t;
-		
+
 		// put in a minus sign as needed
 		if (x < 0.0)
 			result += "-";
-		
+
 		// put in a leading 0
 		if (-1.0 < x && x < 1.0)
 			result += "0";
@@ -107,19 +108,19 @@ public class OdometryDisplay extends Thread {
 			t = (long)x;
 			if (t < 0)
 				t = -t;
-			
+
 			while (t > 0) {
 				stack = Long.toString(t % 10) + stack;
 				t /= 10;
 			}
-			
+
 			result += stack;
 		}
-		
+
 		// put the decimal, if needed
 		if (places > 0) {
 			result += ".";
-		
+
 			// put the appropriate number of decimals
 			for (int i = 0; i < places; i++) {
 				x = Math.abs(x);
@@ -128,8 +129,9 @@ public class OdometryDisplay extends Thread {
 				result += Long.toString((long)x);
 			}
 		}
-		
+
 		return result;
 	}
 
 }
+

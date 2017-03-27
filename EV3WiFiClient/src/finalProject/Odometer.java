@@ -2,7 +2,6 @@
 package finalProject;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
-
 /**
  * 
  * The odometer is the class that is used to continuously 
@@ -36,9 +35,9 @@ public class Odometer extends Thread {
 	// lock object for mutual exclusion
 	private Object lock;
 
-	// default constructor
+
 	/**
-	 * 
+	 * Odometer Constructor
 	 * @param leftMotor the robot's left wheel motor
 	 * @param rightMotor the robot's right wheel motor
 	 */
@@ -51,8 +50,6 @@ public class Odometer extends Thread {
 		this.leftMotorTachoCount = 0;//leftMotor.getTachoCount();
 		this.rightMotorTachoCount = 0;//rightMotor.getTachoCount();
 		lock = new Object();
-
-
 	}
 
 	// run method (required for Thread)
@@ -150,9 +147,9 @@ public class Odometer extends Thread {
 		}
 	}
 
+
 	/**
-	 * Returns the currnt X position of the robot
-	 * 
+	 * Getter for X position
 	 * @return the robot's X position
 	 */
 	public double getX() {
@@ -164,10 +161,8 @@ public class Odometer extends Thread {
 
 		return result;
 	}
-
 	/**
-	 * Returns the current Y position of the robot
-	 * 
+	 * Getter for Y position
 	 * @return the robot's Y position
 	 */
 	public double getY() {
@@ -179,10 +174,9 @@ public class Odometer extends Thread {
 
 		return result;
 	}
-
+	
 	/**
-	 * Returns the current angle of the robot
-	 * 
+	 * Getter method for the current angle of the robot
 	 * @return the position of the angle
 	 */
 	public double getAng() {
@@ -215,10 +209,8 @@ public class Odometer extends Thread {
 				theta = position[2];
 		}
 	}
-
 	/**
 	 * Updates the X position of the robot in the odometer.
-	 * 
 	 * @param x the new X position
 	 */
 	public void setX(double x) {
@@ -226,10 +218,8 @@ public class Odometer extends Thread {
 			this.x = x;
 		}
 	}
-
 	/**
 	 * Updates the Y position of the robot in the odometer.
-	 * 
 	 * @param y the new Y position
 	 */
 	public void setY(double y) {
@@ -237,10 +227,8 @@ public class Odometer extends Thread {
 			this.y = y;
 		}
 	}
-
 	/**
 	 * Updates the angle value of the robot in the odometer.
-	 * 
 	 * @param theta the new angle value of the robot
 	 */
 	public void setAng(double theta) {
@@ -252,7 +240,6 @@ public class Odometer extends Thread {
 	/**
 	 * Return the value of the amount of degrees which the left motor has 
 	 * rotated.
-	 * 
 	 * @return the leftMotorTachoCount
 	 */
 	public int getLeftMotorTachoCount() {
@@ -261,7 +248,6 @@ public class Odometer extends Thread {
 
 	/**
 	 * Sets the amount of degrees which the left motor has rotated.
-	 * 
 	 * @param leftMotorTachoCount the leftMotorTachoCount to set
 	 */
 	public void setLeftMotorTachoCount(int leftMotorTachoCount) {
@@ -273,7 +259,6 @@ public class Odometer extends Thread {
 	/**
 	 * Return the value of the amount of degrees which the right motor has 
 	 * rotated.
-	 * 
 	 * @return the rightMotorTachoCount
 	 */
 	public int getRightMotorTachoCount() {
@@ -282,7 +267,6 @@ public class Odometer extends Thread {
 
 	/**
 	 * Sets the amount of degrees which the right motor has rotated.
-	 * 
 	 * @param rightMotorTachoCount the rightMotorTachoCount to set
 	 */
 	public void setRightMotorTachoCount(int rightMotorTachoCount) {
