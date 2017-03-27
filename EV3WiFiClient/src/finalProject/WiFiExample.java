@@ -204,7 +204,7 @@ public class WiFiExample {
 				odometer.start();
 				navigation.start();
 				odometryDisplay.start();
-				lsl.doLocalization(fwdCorner);
+				lsl.doLocalization();
 				Sound.beep();
 				Launcher.Enter_Launch_Position(); //PULLS ARM DOWN
 //				Button.waitForAnyPress();
@@ -224,7 +224,7 @@ public class WiFiExample {
 				
 			}
 			if(defTeam == 3){//play defense:
-				lsl.doLocalization(defCorner);
+				lsl.doLocalization();
 				Defense defense = new Defense(defCorner, w1, w2);
 				defense.startDEF();
 			}
