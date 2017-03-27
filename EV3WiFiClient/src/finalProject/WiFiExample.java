@@ -201,6 +201,7 @@ public class WiFiExample {
 				System.out.println();
 				
 				odometer.start();
+				navigation.start();
 				odometryDisplay.start();
 //				lsl.doLocalization(fwdCorner);
 //				Sound.beep();
@@ -208,7 +209,8 @@ public class WiFiExample {
 //				Button.waitForAnyPress();
 				
 				Correction correction = new Correction(odometer, navigation, colorValueR, colorValueL, colorValueF, leftMotor, rightMotor);
-				correction.LightCorrection();
+				correction.start();
+				navigation.travelTo(60.96, 60.96);
 				
 //				t.drawString(Double.toString(finalProject.Localization.deltaTheta), 0, 2);
 //				t.drawString(Double.toString(odometer.theta), 0, 3);

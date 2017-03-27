@@ -16,7 +16,7 @@ public class Navigation extends Thread{
 	private EV3LargeRegulatedMotor leftMotor = WiFiExample.leftMotor;
 	private EV3LargeRegulatedMotor rightMotor = WiFiExample.rightMotor;
 	private float[] correctionLine;//meant to store the value of the R and L light sensors to determine if a black line is detected
-	
+	public static boolean turning=false; 
 	
 	
 	//instantiate odometer:
@@ -24,19 +24,20 @@ public class Navigation extends Thread{
 	public Navigation(Odometer odometer,SampleProvider colorSensorL,SampleProvider colorSensorR){ //constructor
 		this.odometer = odometer;
 	}
-	public void run(){
-		//int i=4;
-		//while(i>0){
-		travelTo(0,30.48);
-		
-//		leftMotor.rotate(convertDistance(wheel_radius,10), true);
-//		rightMotor.rotate(convertDistance(wheel_radius,10), false);
-//		travelTo(60.96,60.96);
-//		travelTo(60.96,0);
-//		travelTo(0,0);
-		//i--;
-		//}
-	}
+	
+//	public void run(){
+//		//int i=4;
+//		//while(i>0){
+//		travelTo(0,30.48);
+//		
+////		leftMotor.rotate(convertDistance(wheel_radius,10), true);
+////		rightMotor.rotate(convertDistance(wheel_radius,10), false);
+////		travelTo(60.96,60.96);
+////		travelTo(60.96,0);
+////		travelTo(0,0);
+//		//i--;
+//		//}
+//	}
 	
 	
 	public void travelTo(double x, double y){
@@ -139,20 +140,28 @@ public class Navigation extends Thread{
 	
 	public void turnTo(double theta){
 		//this method causes the robot to turn (on point) to the absolute heading theta
+		turning = true;
+//		try {
+//			Correction.currentThread().wait();
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
 		
+
 		//make robot turn to angle theta:
 		leftMotor.setSpeed(ROTATE_SPEED);
 		leftMotor.setAcceleration(2000);
 		rightMotor.setSpeed(ROTATE_SPEED);
 		rightMotor.setAcceleration(2000);
 		
-		
 		leftMotor.rotate(convertAngle(wheel_radius, width, theta), true);
 		rightMotor.rotate(-convertAngle(wheel_radius, width, theta), false);
-		
 		//returns default acceleration values after turn
 		leftMotor.setAcceleration(6000);
 		rightMotor.setAcceleration(6000);
+		turning = false;
+//		Correction.currentThread().notify();
+
 	}
 
 	
@@ -165,12 +174,12 @@ public class Navigation extends Thread{
 	
 	public void turnToSmart(double angle){
 		//this method causes robot to travel to the absolute angle 
-
+//		turning = true;
+		
 		odo_theta = odometer.getAng();
-
+		
 		//subtract odo_theta from theta_dest:
 		double theta_corr = angle - odo_theta;
-		
 		//DIRECTING ROBOT TO CORRECT ANGLE: 
 		if(theta_corr < -180){ //if theta_dest is between angles [-180,-360] 
 			//add 360 degrees to theta_dest in order for the robot to turn the smallest angle
@@ -183,5 +192,7 @@ public class Navigation extends Thread{
 		else{
 			turnTo(theta_corr);
 		}
+//		turning = false;
+//		Correction.currentThread().run();
 	}
 }

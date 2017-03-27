@@ -6,7 +6,7 @@ import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
 
-public class Correction {
+public class Correction extends Thread {
 	
 		public static Odometer odo;
 		private Navigation nav;
@@ -43,6 +43,7 @@ public class Correction {
 		public boolean correcting = false; 
 		public boolean leftline = false;
 		public boolean rightline= false; 
+		public boolean turning = Navigation.turning;
 		
 		public Correction(Odometer odo, Navigation nav, SampleProvider colorSensorR, SampleProvider colorSensorL, SampleProvider colorSensorF, EV3LargeRegulatedMotor leftMotor,EV3LargeRegulatedMotor rightMotor) {
 			this.odo = odo;
@@ -54,14 +55,34 @@ public class Correction {
 			this.rightMotor = rightMotor; 
 		}
 		
+		public void run(){
+//			if(turning==true){
+//				try {
+//					Thread.sleep(500);
+//				} catch (InterruptedException e) {}
+//			}
+//			else{
+//			while(true){
+
+				if(turning==true){
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {}
+				}
+				else{
+					LightCorrection();
+				}
+//			}
+		}
+		
 		//Travel orientation correct, uses light sensors on the side of the robot to detect grid lines, if one side detects a line first,
 		//robot adjusts motors to correct the orientation of the robot
 		public void LightCorrection (){
 		correcting = true; 
 	    leftMotor.setSpeed(FORWARD_SPEED);
         rightMotor.setSpeed(FORWARD_SPEED);
-        leftMotor.forward();
-        rightMotor.forward();
+//        leftMotor.forward();
+//        rightMotor.forward();
         
         leftline = false;
         rightline= false; 
@@ -79,9 +100,8 @@ public class Correction {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {}
 			
-			LightCorrection();
-			
-		
+			run();
+//			LightCorrection();
 		}
 		
 		if(leftline == true){
@@ -97,7 +117,8 @@ public class Correction {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {}
 
-	        LightCorrection();
+			run();
+//	        LightCorrection();
 			}
 		
 		else if(rightline == true){
@@ -112,9 +133,9 @@ public class Correction {
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {}
-
 			
-	        LightCorrection();
+			run();
+//	        LightCorrection();
 			}
 		
 		}

@@ -27,8 +27,6 @@ public class Odometer extends Thread {
 		this.leftMotorTachoCount = 0;//leftMotor.getTachoCount();
 		this.rightMotorTachoCount = 0;//rightMotor.getTachoCount();
 		lock = new Object();
-
-
 	}
 
 	// run method (required for Thread)
