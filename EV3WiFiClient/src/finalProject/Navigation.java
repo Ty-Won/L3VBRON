@@ -1,4 +1,5 @@
 package finalProject;
+import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
@@ -17,6 +18,7 @@ public class Navigation extends Thread{
 	private EV3LargeRegulatedMotor rightMotor = WiFiExample.rightMotor;
 	private float[] correctionLine;//meant to store the value of the R and L light sensors to determine if a black line is detected
 	public static boolean turning=false; 
+	private Correction correcting = WiFiExample.correction;
 	
 	
 	//instantiate odometer:
@@ -140,14 +142,15 @@ public class Navigation extends Thread{
 	
 	public void turnTo(double theta){
 		//this method causes the robot to turn (on point) to the absolute heading theta
-		turning = true;
-//		try {
-//			Correction.currentThread().wait();
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
 		
-
+		turning = true;
+		Sound.twoBeeps();
+//		try {
+//		leftMotor.setSpeed(0);
+//		rightMotor.setSpeed(0);
+//		Thread.sleep(500);
+//		} catch (InterruptedException e) {}
+	
 		//make robot turn to angle theta:
 		leftMotor.setSpeed(ROTATE_SPEED);
 		leftMotor.setAcceleration(2000);
@@ -160,7 +163,6 @@ public class Navigation extends Thread{
 		leftMotor.setAcceleration(6000);
 		rightMotor.setAcceleration(6000);
 		turning = false;
-//		Correction.currentThread().notify();
 
 	}
 
@@ -194,5 +196,9 @@ public class Navigation extends Thread{
 		}
 //		turning = false;
 //		Correction.currentThread().run();
+	}
+	
+	public boolean isTurning(){
+		return turning; 
 	}
 }

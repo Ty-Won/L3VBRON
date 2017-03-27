@@ -63,15 +63,17 @@ public class Correction extends Thread {
 //			}
 //			else{
 //			while(true){
-
-				if(turning==true){
+			turning=nav.isTurning();
+				while(turning==true){
 					try {
+						turning=nav.isTurning();
+						Sound.beepSequenceUp();
 						Thread.sleep(500);
 					} catch (InterruptedException e) {}
-				}
-				else{
+				}				
 					LightCorrection();
-				}
+				
+		
 //			}
 		}
 		
@@ -87,18 +89,35 @@ public class Correction extends Thread {
         leftline = false;
         rightline= false; 
 		
-		 Sound.twoBeeps();
+		Sound.twoBeeps();
 		while(leftline == false && rightline == false){
 			leftline = lineDetected(colorSensorL, colorDataL);
 			rightline = lineDetected(colorSensorR, colorDataR);
+			
+			turning=nav.isTurning();
+			while(turning==true){
+				turning=nav.isTurning();
+				try {Sound.buzz();
+					Thread.sleep(500);
+				} catch (InterruptedException e) {}
+			}
 			}
 		
 		if(leftline == true && rightline ==true){
 			updateOdo();
 			
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {}
+//			try {
+//				Thread.sleep(500);
+//			} catch (InterruptedException e) {}
+			
+			turning=nav.isTurning();
+			while(turning==true){
+				turning=nav.isTurning();
+				try {Sound.buzz();
+					Thread.sleep(500);
+				} catch (InterruptedException e) {}
+			}
+			
 			
 			run();
 //			LightCorrection();
@@ -113,9 +132,17 @@ public class Correction extends Thread {
 			leftMotor.setSpeed(FORWARD_SPEED);
 			updateOdo();
 			
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {}
+			turning=nav.isTurning();
+			while(turning==true){
+				turning=nav.isTurning();
+				try {Sound.buzz();
+					Thread.sleep(500);
+				} catch (InterruptedException e) {}
+			}
+			
+//			try {
+//				Thread.sleep(500);
+//			} catch (InterruptedException e) {}
 
 			run();
 //	        LightCorrection();
@@ -129,10 +156,18 @@ public class Correction extends Thread {
 			
 		    rightMotor.setSpeed(FORWARD_SPEED);
 			updateOdo();
-
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {}
+			
+			turning=nav.isTurning();
+			while(turning==true){
+				turning=nav.isTurning();
+				try {Sound.buzz();
+					Thread.sleep(500);
+				} catch (InterruptedException e) {}
+			}
+			
+//			try {
+//				Thread.sleep(500);
+//			} catch (InterruptedException e) {}
 			
 			run();
 //	        LightCorrection();
@@ -151,7 +186,7 @@ public class Correction extends Thread {
         	// if the robot is going (increasing) along the x-direction, update the x-position and the heading
         	if ((odo.getAng()>90-angleThreshold && odo.getAng()<90+angleThreshold)){
         	
-        		line = (int)((x + tilelength/2) / tilelength); 
+        		line = (int)((x) / tilelength); 
         		position = (line*tilelength)+11.6;
         		odo.setPosition(new double [] {position, 0.0 , 90}, new boolean [] {true, false, true});	
         		
@@ -159,25 +194,25 @@ public class Correction extends Thread {
         	// if the robot is going (decreasing) along the x-direction, update the x-position and the heading
         	else if (odo.getAng()>270-angleThreshold && odo.getAng()<270+angleThreshold){
         		// determine which line the robot has crossed by dividing the y-position returned by the odometer
-        		line = (int)((x + tilelength/2) / tilelength); 
+        		line = (int)((x) / tilelength); 
         		// multiply by the length of a tile to know the y-position
         		position = (line*tilelength)-11.6;
-        		odo.setPosition(new double [] {position, 0.0 , 180}, new boolean [] {true, false, true});	
+        		odo.setPosition(new double [] {position, 0.0 , 270}, new boolean [] {true, false, true});	
         	}
         	
         	// if the robot is going (decreasing) along the y-direction, update the y-position and the heading
         	else if (odo.getAng()>180-angleThreshold && odo.getAng()<180+angleThreshold) {
         		// determine which line the robot has crossed by dividing the y-position returned by the odometer
-        		line = (int)((y + tilelength/2) / tilelength); 
+        		line = (int)((y) / tilelength); 
         		// multiply by the length of a tile to know the y-position
         		position = (line*tilelength)-11.6;
-        		odo.setPosition(new double [] {0.0, position , 270}, new boolean [] {false, true, true});	
+        		odo.setPosition(new double [] {0.0, position , 180}, new boolean [] {false, true, true});	
         	}
         	
         	// if the robot is (increasingly) going along the y-direction, update the y-position and the heading
         	else {
         		// determine which line the robot has crossed by dividing the y-position returned by the odometer
-        		line = (int)((y + tilelength/2) / tilelength); 
+        		line = (int)((y) / tilelength); 
         		// multiply by the length of a tile to know the y-position
         		position = (line*tilelength)+11.6;
         		odo.setPosition(new double [] {0.0, position , 0}, new boolean [] {false, true, true});

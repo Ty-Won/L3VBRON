@@ -66,6 +66,7 @@ public class WiFiExample {
 	public static EV3ColorSensor colorSensorR = new EV3ColorSensor(colorPortR);
 	public static Odometer odometer = new Odometer(leftMotor, rightMotor);
 	public static Navigation navigation = new Navigation(odometer,colorSensorL,colorSensorR);
+	public static Correction correction;
 
 	//	public static ballLauncher launch = new ballLauncher(launcherMotor,odometer,navigation);
 	BangBangController bangbang = new BangBangController(leftMotor, rightMotor,
@@ -208,7 +209,7 @@ public class WiFiExample {
 //				Launcher.Enter_Launch_Position(); //PULLS ARM DOWN
 //				Button.waitForAnyPress();
 				
-				Correction correction = new Correction(odometer, navigation, colorValueR, colorValueL, colorValueF, leftMotor, rightMotor);
+				correction = new Correction(odometer, navigation, colorValueR, colorValueL, colorValueF, leftMotor, rightMotor);
 				correction.start();
 				navigation.travelTo(60.96, 60.96);
 				
