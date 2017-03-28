@@ -60,16 +60,12 @@ public class Correction extends Thread {
 	public void run(){ 
 		pauseWhileTurning();
 		if(gridcount==4){
-			//			leftMotor.setSpeed(0);
-			//			rightMotor.setSpeed(0);
-			//			leftMotor.stop();
-			//			rightMotor.stop();
 			localize();
 			gridcount=0;	
 		}
 		LightCorrection();
-
 	}
+	
 	/**
 	 * Travel orientation correct, uses light sensors on the side of the robot to detect grid lines, 
 	 * if one side detects a line first, robot adjusts motors to correct the orientation of the robot
@@ -88,11 +84,11 @@ public class Correction extends Thread {
 		leftline = false; 
 		rightline= false; 
 
-		Sound.twoBeeps();	//MAYBE? 
+		Sound.twoBeeps();	//DO NOT REMOVE 
 		while(!leftline  && !rightline){
 			leftline = lineDetected(colorSensorL, colorDataL);
 			rightline = lineDetected(colorSensorR, colorDataR);
-			//if one of them starts seing a line, this loop exits
+			//if one of them starts seeing a line, this loop exits
 			pauseWhileTurning();
 		}
 		
@@ -135,6 +131,7 @@ public class Correction extends Thread {
 		}
 
 	}
+	
 	public void pauseWhileTurning(){
 		turning = nav.isTurning();
 		while(turning){ //puts correction thread to sleep while turning
@@ -144,54 +141,61 @@ public class Correction extends Thread {
 			} catch (InterruptedException e) {}
 		}
 	}
+	
 	public void localize(){
 
 		Dest_ini=nav.getDest();
 
-		//			nav.driveDiag(-11.6);
-		//			nav.turnToSmart(45);
-//		Sound.beepSequenceUp();
-//		nav.stopNav();
 		nav.stop=true;
 		localizing = true;
 
 		double X_ini=odo.getX();
 		double Y_ini=odo.getY();
 
-		boolean moving = true;
-		while(moving){ //keep going until line detected
-			leftMotor.rotate(-convertDistance(wheel_radius, 600), true);
-			rightMotor.rotate(-convertDistance(wheel_radius, 600), true);
-			if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){
-				moving = false;
-			}
-		}
+		//synchronize both motors so they can only be accessed by one thread (the Correction thread in this case)
+		synchronized(leftMotor){
+			synchronized(rightMotor){
 				
-		//at this point, the light sensors at back detected a line so we want to localize
-		drive(-11.6); //go backward sensor dist for center of rotation to be at intersection
-		
-		turnTo(90); //turn right
+				boolean moving = true;
+				while(moving){ //keep going until line detected
+					leftMotor.rotate(-convertDistance(wheel_radius, 600), true);
+					rightMotor.rotate(-convertDistance(wheel_radius, 600), true);
+					if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){
+						moving = false;
+					}
+				}
+						
+				//at this point, the light sensors at back detected a line so we want to localize
+				drive(-11.6); //go backward sensor dist for center of rotation to be at intersection
+				
+				turnTo(90); //turn right
 
-		moving = true;
-		while(moving){ //keep going until line detected
-			leftMotor.rotate(convertDistance(wheel_radius, 600), true);
-			rightMotor.rotate(convertDistance(wheel_radius, 600), true);
-			if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){
-				moving = false;
-			}
+				moving = true;
+				while(moving){ //keep going until line detected
+					leftMotor.rotate(convertDistance(wheel_radius, 600), true);
+					rightMotor.rotate(convertDistance(wheel_radius, 600), true);
+					if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){
+						moving = false;
+					}
+				}
+				
+				drive(-11.6); //drive back sensor dist
+				turnTo(-90); //turn back to original heading
+			}		
 		}
 		
-		drive(-11.6); //drive back sensor dist
-		turnTo(-90);
+		//calculate the position of the gridline intersection the robot just crossed
 		double[] nearestIntersection={0,0,0};
 		nearestIntersection=getIntersection(X_ini, Y_ini);
 		odo.setPosition(nearestIntersection, new boolean[]{true, true, false});
+		
+		//FIGURE OUT HOW TO GIVE CONTROL BACK TO NAVIGATION so the robot can travel to the original x and y... 
+		//it needs to be in navigation since we need to exit the localize method for the LightCorrection loop to regain control of the thread
+		//this is the only way to have correction while navigating back to the original coordinates
+		
 		localizing = false;
-
 		nav.stop=false;
-//		nav.restartNav();
-//		run();
-		//			nav.travelTo(Dest_ini[0], Dest_ini[1]);
+		run();
 	}
 
 	public void updateOdo(){
@@ -239,9 +243,7 @@ public class Correction extends Thread {
 			// multiply by the length of a tile to know the y-position
 			position = (line*tilelength)+11.6;
 			odo.setPosition(new double [] {0.0, position , 0}, new boolean [] {false, true, true});
-
 		}
-
 	}
 
 	public boolean iscorrecting(){
