@@ -28,7 +28,6 @@ public class Navigation{
 		
 	public void travelTo(double x, double y){
 		//this method causes robot to travel to the absolute field location (x,y)
-		correcting = WiFiExample.correction;
 		if(stop){
 			return;
 		}
@@ -94,96 +93,89 @@ public class Navigation{
 	//Insert x and y coordinates and the EV3 travels on the x,y planes to reach the destination
 	public void drive(double delta_x,double delta_y){
 		//set both motors to forward speed desired
-		
-//		stopNav();
-		if(stop){
-			return;
+		synchronized(leftMotor){
+			synchronized(rightMotor){
+		//		stopNav();
+				if(stop){
+					return;
+				}
+				
+				leftMotor.setSpeed(FORWARD_SPEED);
+				rightMotor.setSpeed(FORWARD_SPEED);
+				
+				//X-travel
+				if(delta_x>0){
+					turnToSmart(90);
+				}
+				else{
+					turnTo(270);
+				}
+				
+				leftMotor.rotate(convertDistance(wheel_radius, delta_x), true);
+				rightMotor.rotate(convertDistance(wheel_radius, delta_x), false);
+				
+				//Y-travel
+				if(delta_y>0){
+					turnToSmart(0);
+				}
+				else{
+					turnToSmart(180);
+				}
+				
+				leftMotor.rotate(convertDistance(wheel_radius, delta_y), true);
+				rightMotor.rotate(convertDistance(wheel_radius, delta_y), false);
+			}
 		}
-		
-		leftMotor.setSpeed(FORWARD_SPEED);
-		rightMotor.setSpeed(FORWARD_SPEED);
-		
-		//X-travel
-		if(delta_x>0){
-			turnToSmart(90);
-		}
-		else{
-			turnTo(270);
-		}
-		
-		leftMotor.rotate(convertDistance(wheel_radius, delta_x), true);
-		rightMotor.rotate(convertDistance(wheel_radius, delta_x), false);
-		
-//		boolean check = true;
-//		while(check && delta_x>3*30.48){
-//			//only if we are going more than 3 grid lines, go until u see the third line, then stop moving
-//			leftMotor.rotate(convertDistance(wheel_radius, delta_x), true);
-//			rightMotor.rotate(convertDistance(wheel_radius, delta_x), true);
-//			if(correcting.gridcount==3){
-//				check = false;
-//			}
-//		}
-//		if(correcting.gridcount==3){ //at third line, localize
-//			correcting.localize();
-//			correcting.gridcount = 0;
-//		}
-		
-//		leftMotor.rotate(convertDistance(wheel_radius, delta_x), true);
-//		rightMotor.rotate(convertDistance(wheel_radius, delta_x), false);
-//		
-		
-		//Y-travel
-		if(delta_y>0){
-			turnToSmart(0);
-		}
-		else{
-			turnToSmart(180);
-		}
-		
-		leftMotor.rotate(convertDistance(wheel_radius, delta_y), true);
-		rightMotor.rotate(convertDistance(wheel_radius, delta_y), false);
-		
 	}
 	
 	public void driveDiag(double travelDist){
 		
-//		stopNav();
-		if(stop){
-			return;
+		synchronized(leftMotor){
+			synchronized(rightMotor){
+		//		stopNav();
+				if(stop){
+					return;
+				}
+				
+				//set both motors to forward speed desired
+				leftMotor.setSpeed(FORWARD_SPEED);
+				rightMotor.setSpeed(FORWARD_SPEED);
+				
+				leftMotor.rotate(convertDistance(wheel_radius, travelDist), true);
+				rightMotor.rotate(convertDistance(wheel_radius, travelDist), false);
+			}
 		}
-		
-		//set both motors to forward speed desired
-		leftMotor.setSpeed(FORWARD_SPEED);
-		rightMotor.setSpeed(FORWARD_SPEED);
-		
-		leftMotor.rotate(convertDistance(wheel_radius, travelDist), true);
-		rightMotor.rotate(convertDistance(wheel_radius, travelDist), false);
 	}
 	
 	
 	public void turnTo(double theta){
 		//this method causes the robot to turn (on point) to the absolute heading theta
 		
-//		stopNav();
-//		if(stop){
-//			return;
-//		}
 		
-		turning = true;
-//		Sound.twoBeeps(); //DONT REMOVE THIS
-	
-		//make robot turn to angle theta:
-		leftMotor.setSpeed(ROTATE_SPEED);
-		leftMotor.setAcceleration(2000);
-		rightMotor.setSpeed(ROTATE_SPEED);
-		rightMotor.setAcceleration(2000);
-		
-		leftMotor.rotate(convertAngle(wheel_radius, width, theta), true);
-		rightMotor.rotate(-convertAngle(wheel_radius, width, theta), false);
-		//returns default acceleration values after turn
-		leftMotor.setAcceleration(6000);
-		rightMotor.setAcceleration(6000);
-		turning = false;
+		synchronized(leftMotor){
+			synchronized(rightMotor){
+		//		stopNav();
+				if(stop){
+					return;
+				}
+				
+				turning = true;
+		//		Sound.twoBeeps(); //DONT REMOVE THIS
+			
+				//make robot turn to angle theta:
+				leftMotor.setSpeed(ROTATE_SPEED);
+				leftMotor.setAcceleration(2000);
+				rightMotor.setSpeed(ROTATE_SPEED);
+				rightMotor.setAcceleration(2000);
+				
+				leftMotor.rotate(convertAngle(wheel_radius, width, theta), true);
+				rightMotor.rotate(-convertAngle(wheel_radius, width, theta), false);
+				//returns default acceleration values after turn
+				leftMotor.setAcceleration(6000);
+				rightMotor.setAcceleration(6000);
+				turning = false;
+			}
+		}
 
 	}
 
@@ -230,29 +222,6 @@ public class Navigation{
 	public boolean isTurning(){
 		return turning; 
 	}
-
-//	public void stopNav(){
-////		localizing=WiFiExample.correction.islocalizing();
-////		while(localizing==true){
-////		interrupt();
-////			try {
-////				localizing=WiFiExample.correction.islocalizing();
-////				Thread.sleep(100);
-////			} catch (InterruptedException e) {}
-////		}	
-////		notify();
-////		Sound.beepSequenceUp();
-////		travelTo(Correction.Dest_ini[0],Correction.Dest_ini[1]);
-////		Sound.beepSequence();
-//		
-//		
-//		
-//	}
-	
-//	public void restartNav(){
-//		
-////		this.notify();
-//	}
 
 	public void stopNav(){
 		
