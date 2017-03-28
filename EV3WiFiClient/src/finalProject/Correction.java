@@ -188,15 +188,14 @@ public class Correction extends Thread {
 		//calculate the position of the gridline intersection the robot just crossed
 		double[] nearestIntersection={0,0,0};
 		nearestIntersection=getIntersection(X_ini, Y_ini);
-		odo.setPosition(nearestIntersection, new boolean[]{true, true, false});
+		odo.setPosition(nearestIntersection, new boolean[]{false, false, false});
 		
 		//FIGURE OUT HOW TO GIVE CONTROL BACK TO NAVIGATION so the robot can travel to the original x and y... 
 		//it needs to be in navigation since we need to exit the localize method for the LightCorrection loop to regain control of the thread
 		//this is the only way to have correction while navigating back to the original coordinates
-		
+		gridcount = 0; //dont remove this
 		localizing = false;
 		nav.stop=false;
-	//	drive(-30.48); //when done localizing, go back a tile
 		run();
 	}
 
@@ -314,8 +313,8 @@ public class Correction extends Thread {
 //		leftMotor.setAcceleration(4000);
 //		rightMotor.setAcceleration(4000);
 		
-		leftMotor.setSpeed(FORWARD_SPEED);
-		rightMotor.setSpeed(FORWARD_SPEED);
+//		leftMotor.setSpeed(FORWARD_SPEED);
+//		rightMotor.setSpeed(FORWARD_SPEED);
 
 		leftMotor.rotate(convertDistance(wheel_radius, travelDist), true);
 		rightMotor.rotate(convertDistance(wheel_radius, travelDist), false);
