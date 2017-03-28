@@ -64,6 +64,7 @@ public class Correction extends Thread {
 			gridcount=0;	
 		}
 		LightCorrection();
+		
 	}
 	
 	/**
@@ -161,7 +162,7 @@ public class Correction extends Thread {
 					leftMotor.rotate(-convertDistance(wheel_radius, 600), true);
 					rightMotor.rotate(-convertDistance(wheel_radius, 600), true);
 					if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){
-						moving = false;
+						moving = false; //if line detected from back sensors, stop going backward
 					}
 				}
 						
@@ -170,12 +171,12 @@ public class Correction extends Thread {
 				
 				turnTo(90); //turn right
 
-				moving = true;
-				while(moving){ //keep going until line detected
+				boolean moving2 = true;
+				while(moving2){ //keep going until line detected
 					leftMotor.rotate(convertDistance(wheel_radius, 600), true);
 					rightMotor.rotate(convertDistance(wheel_radius, 600), true);
 					if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){
-						moving = false;
+						moving2 = false; //go forward until line from back sensors is detected
 					}
 				}
 				
@@ -195,6 +196,7 @@ public class Correction extends Thread {
 		
 		localizing = false;
 		nav.stop=false;
+	//	drive(-30.48); //when done localizing, go back a tile
 		run();
 	}
 
@@ -279,7 +281,7 @@ public class Correction extends Thread {
 
 	public void turnTo(double theta){
 		turning = true;
-//		Sound.twoBeeps(); //DONT REMOVE THIS
+		Sound.twoBeeps(); //DONT REMOVE THIS
 	
 		//make robot turn to angle theta:
 		leftMotor.setSpeed(ROTATE_SPEED);

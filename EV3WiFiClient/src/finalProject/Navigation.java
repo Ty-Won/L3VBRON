@@ -160,7 +160,7 @@ public class Navigation{
 				}
 				
 				turning = true;
-		//		Sound.twoBeeps(); //DONT REMOVE THIS
+				Sound.twoBeeps(); //DONT REMOVE THIS
 			
 				//make robot turn to angle theta:
 				leftMotor.setSpeed(ROTATE_SPEED);
