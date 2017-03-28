@@ -17,8 +17,8 @@ public class Navigation extends Thread{
 	private float[] correctionLine;//meant to store the value of the R and L light sensors to determine if a black line is detected
 	public static boolean turning=false; 
 	public boolean localizing=false;
-//	private Correction correcting = WiFiExample.correction;
-	
+	public boolean stop = false;
+	private Correction correcting ;
 	//instantiate odometer:
 	public Odometer odometer = WiFiExample.odometer;
 //	public Correction correction = WiFiExample.correction;
@@ -27,22 +27,24 @@ public class Navigation extends Thread{
 	}
 	
 //	public void run(){
-//		//int i=4;
-//		//while(i>0){
-//		travelTo(0,30.48);
-//		
-////		leftMotor.rotate(convertDistance(wheel_radius,10), true);
-////		rightMotor.rotate(convertDistance(wheel_radius,10), false);
-////		travelTo(60.96,60.96);
-////		travelTo(60.96,0);
-////		travelTo(0,0);
-//		//i--;
-//		//}
+//		while(stop){
+//			return;
+//		}
+//		if(correcting.gridcount==4){
+//			correcting.localize();
+//			correcting.gridcount=0;
+//		}
+//			
 //	}
 	
-	
+		
 	public void travelTo(double x, double y){
 		//this method causes robot to travel to the absolute field location (x,y)
+		correcting = WiFiExample.correction;
+		if(stop){
+			return;
+		}
+		
 		odo_x = odometer.getX();
 		odo_y = odometer.getY();
 		odo_theta = odometer.getAng();
@@ -58,6 +60,11 @@ public class Navigation extends Thread{
 	
 	public void travelToDiag(double x, double y){
 		//this method causes robot to travel to the absolute field location (x,y)
+		
+		if(stop){
+			return;
+		}
+		
 		odo_x = odometer.getX();
 		odo_y = odometer.getY();
 		odo_theta = odometer.getAng();
@@ -99,6 +106,12 @@ public class Navigation extends Thread{
 	//Insert x and y coordinates and the EV3 travels on the x,y planes to reach the destination
 	public void drive(double delta_x,double delta_y){
 		//set both motors to forward speed desired
+		
+//		stopNav();
+		if(stop){
+			return;
+		}
+		
 		leftMotor.setSpeed(FORWARD_SPEED);
 		rightMotor.setSpeed(FORWARD_SPEED);
 		
@@ -109,10 +122,24 @@ public class Navigation extends Thread{
 		else{
 			turnTo(270);
 		}
-	
-		leftMotor.rotate(convertDistance(wheel_radius, delta_x), true);
-		rightMotor.rotate(convertDistance(wheel_radius, delta_x), false);
 		
+		boolean check = true;
+		while(check && delta_x>3*30.48){
+			//only if we are going more than 3 grid lines, go until u see the third line, then stop moving
+			leftMotor.rotate(convertDistance(wheel_radius, delta_x), true);
+			rightMotor.rotate(convertDistance(wheel_radius, delta_x), true);
+			if(correcting.gridcount==3){
+				check = false;
+			}
+		}
+		if(correcting.gridcount==3){ //at third line, localize
+			correcting.localize();
+			correcting.gridcount = 0;
+		}
+		
+//		leftMotor.rotate(convertDistance(wheel_radius, delta_x), true);
+//		rightMotor.rotate(convertDistance(wheel_radius, delta_x), false);
+//		
 		
 		//Y-travel
 		if(delta_y>0){
@@ -129,13 +156,10 @@ public class Navigation extends Thread{
 	
 	public void driveDiag(double travelDist){
 		
-//		localizing=WiFiExample.correction.islocalizing();
-//		while(localizing==true){
-//			try {
-//				localizing=WiFiExample.correction.islocalizing();
-//				Thread.sleep(300);
-//			} catch (InterruptedException e) {}
-//		}
+//		stopNav();
+		if(stop){
+			return;
+		}
 		
 		//set both motors to forward speed desired
 		leftMotor.setSpeed(FORWARD_SPEED);
@@ -149,16 +173,13 @@ public class Navigation extends Thread{
 	public void turnTo(double theta){
 		//this method causes the robot to turn (on point) to the absolute heading theta
 		
-//		localizing=WiFiExample.correction.islocalizing();
-//		while(localizing==true){
-//			try {
-//				localizing=WiFiExample.correction.islocalizing();
-//				Thread.sleep(500);
-//			} catch (InterruptedException e) {}
+//		stopNav();
+//		if(stop){
+//			return;
 //		}
 		
 		turning = true;
-		Sound.twoBeeps(); //DONT REMOVE THIS
+//		Sound.twoBeeps(); //DONT REMOVE THIS
 	
 		//make robot turn to angle theta:
 		leftMotor.setSpeed(ROTATE_SPEED);
@@ -184,7 +205,9 @@ public class Navigation extends Thread{
 	}
 	
 	public void turnToSmart(double angle){
-		
+		if(stop){
+			return;
+		}
 		odo_theta = odometer.getAng();
 		
 		//subtract odo_theta from theta_dest:
@@ -217,19 +240,38 @@ public class Navigation extends Thread{
 		return turning; 
 	}
 
+//	public void stopNav(){
+////		localizing=WiFiExample.correction.islocalizing();
+////		while(localizing==true){
+////		interrupt();
+////			try {
+////				localizing=WiFiExample.correction.islocalizing();
+////				Thread.sleep(100);
+////			} catch (InterruptedException e) {}
+////		}	
+////		notify();
+////		Sound.beepSequenceUp();
+////		travelTo(Correction.Dest_ini[0],Correction.Dest_ini[1]);
+////		Sound.beepSequence();
+//		
+//		
+//		
+//	}
+	
+//	public void restartNav(){
+//		
+////		this.notify();
+//	}
+
 	public void stopNav(){
-		localizing=WiFiExample.correction.islocalizing();
-		while(localizing==true){
+		
+		while(stop==true){
 			try {
 				localizing=WiFiExample.correction.islocalizing();
-				Thread.sleep(300);
+				Thread.sleep(500);
 			} catch (InterruptedException e) {}
-		}	
-		Sound.beepSequenceUp();
-		travelTo(Correction.Dest_ini[0],Correction.Dest_ini[1]);
-		Sound.beepSequence();
+		}
 	}
-
 
 }
 
