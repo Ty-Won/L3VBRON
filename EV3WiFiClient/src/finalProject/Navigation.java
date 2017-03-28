@@ -4,7 +4,7 @@ import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
 
-public class Navigation extends Thread{
+public class Navigation{
 	
 	double wheel_radius = WiFiExample.WHEEL_RADIUS;
 	double width =  WiFiExample.TRACK;
@@ -25,18 +25,6 @@ public class Navigation extends Thread{
 	public Navigation(Odometer odometer){ //constructor
 		this.odometer = odometer;
 	}
-	
-//	public void run(){
-//		while(stop){
-//			return;
-//		}
-//		if(correcting.gridcount==4){
-//			correcting.localize();
-//			correcting.gridcount=0;
-//		}
-//			
-//	}
-	
 		
 	public void travelTo(double x, double y){
 		//this method causes robot to travel to the absolute field location (x,y)
@@ -123,19 +111,22 @@ public class Navigation extends Thread{
 			turnTo(270);
 		}
 		
-		boolean check = true;
-		while(check && delta_x>3*30.48){
-			//only if we are going more than 3 grid lines, go until u see the third line, then stop moving
-			leftMotor.rotate(convertDistance(wheel_radius, delta_x), true);
-			rightMotor.rotate(convertDistance(wheel_radius, delta_x), true);
-			if(correcting.gridcount==3){
-				check = false;
-			}
-		}
-		if(correcting.gridcount==3){ //at third line, localize
-			correcting.localize();
-			correcting.gridcount = 0;
-		}
+		leftMotor.rotate(convertDistance(wheel_radius, delta_x), true);
+		rightMotor.rotate(convertDistance(wheel_radius, delta_x), false);
+		
+//		boolean check = true;
+//		while(check && delta_x>3*30.48){
+//			//only if we are going more than 3 grid lines, go until u see the third line, then stop moving
+//			leftMotor.rotate(convertDistance(wheel_radius, delta_x), true);
+//			rightMotor.rotate(convertDistance(wheel_radius, delta_x), true);
+//			if(correcting.gridcount==3){
+//				check = false;
+//			}
+//		}
+//		if(correcting.gridcount==3){ //at third line, localize
+//			correcting.localize();
+//			correcting.gridcount = 0;
+//		}
 		
 //		leftMotor.rotate(convertDistance(wheel_radius, delta_x), true);
 //		rightMotor.rotate(convertDistance(wheel_radius, delta_x), false);

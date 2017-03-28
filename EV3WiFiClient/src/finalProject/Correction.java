@@ -59,15 +59,14 @@ public class Correction extends Thread {
 
 	public void run(){ 
 		pauseWhileTurning();
-//		if(gridcount==4){
-//			//			leftMotor.setSpeed(0);
-//			//			rightMotor.setSpeed(0);
-//			//			leftMotor.stop();
-//			//			rightMotor.stop();
-//			localize();
-//			gridcount=0;	
-//		}
-
+		if(gridcount==4){
+			//			leftMotor.setSpeed(0);
+			//			rightMotor.setSpeed(0);
+			//			leftMotor.stop();
+			//			rightMotor.stop();
+			localize();
+			gridcount=0;	
+		}
 		LightCorrection();
 
 	}
@@ -96,9 +95,6 @@ public class Correction extends Thread {
 			//if one of them starts seing a line, this loop exits
 			pauseWhileTurning();
 		}
-
-//		nav.stop=true;
-
 		
 		if(leftline && rightline){
 			updateOdo();
@@ -150,17 +146,15 @@ public class Correction extends Thread {
 	}
 	public void localize(){
 
-		int line_count=0;
 		Dest_ini=nav.getDest();
 
 		//			nav.driveDiag(-11.6);
 		//			nav.turnToSmart(45);
 //		Sound.beepSequenceUp();
 //		nav.stopNav();
-//		nav.stop=true;
+		nav.stop=true;
 		localizing = true;
 
-		double Ang_ini=odo.getAng();
 		double X_ini=odo.getX();
 		double Y_ini=odo.getY();
 
@@ -172,14 +166,9 @@ public class Correction extends Thread {
 				moving = false;
 			}
 		}
-		
-		Sound.beepSequence();
-		
+				
 		//at this point, the light sensors at back detected a line so we want to localize
-//		drive(-11.6); //go backward sensor dist for center of rotation to be at intersection
-		leftMotor.rotate(convertDistance(wheel_radius, -11.6), true);
-		rightMotor.rotate(convertDistance(wheel_radius, -11.6), false);
-		
+		drive(-11.6); //go backward sensor dist for center of rotation to be at intersection
 		
 		turnTo(90); //turn right
 
@@ -192,21 +181,16 @@ public class Correction extends Thread {
 			}
 		}
 		
-		Sound.beepSequence();
-
-		
-//		drive(-11.6); //drive back sensor dist
-		leftMotor.rotate(convertDistance(wheel_radius, -11.6), true);
-		rightMotor.rotate(convertDistance(wheel_radius, -11.6), false);
+		drive(-11.6); //drive back sensor dist
 		turnTo(-90);
 		double[] nearestIntersection={0,0,0};
 		nearestIntersection=getIntersection(X_ini, Y_ini);
 		odo.setPosition(nearestIntersection, new boolean[]{true, true, false});
 		localizing = false;
 
-//		nav.stop=false;
+		nav.stop=false;
 //		nav.restartNav();
-		//			run();
+//		run();
 		//			nav.travelTo(Dest_ini[0], Dest_ini[1]);
 	}
 
