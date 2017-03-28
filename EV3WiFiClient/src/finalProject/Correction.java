@@ -6,6 +6,24 @@ import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
 
+/**
+ * This class should fix errors in the navigation program of the robot. The program should use two
+ * light sensors located on the back of the robot in order to determine the heading of the robot
+ * in relation to the correct heading of the robot. When the sensors pass over a grid
+ * line, the program calculates the difference in position of the two sensors based
+ * on when the two pass over the grid line in relation to each other. The wheel located on the 
+ * side of the robot which the first sensor passed over the grid line should stop rotating until
+ * the other sensor crosses over the grid line thus straightening the robot and correcting its
+ * heading.
+ * In addition, after the robot crosses over four grid lines, the system should perform
+ * an additional localization in order to more exactly correct its position and heading.
+ * 
+ * @author Ilana Haddad
+ * @author Tristan Bouchard
+ * @author Tyrone Wong
+ * @author Alexandre Tessier
+ *
+ */
 public class Correction extends Thread {
 
 	public static Odometer odo;
@@ -47,6 +65,16 @@ public class Correction extends Thread {
 	public boolean turning = false;
 	public static boolean localizing = false;
 
+	/**
+	 * 
+	 * @param odo the odometer of the robot.
+	 * @param nav the navigation system of the robot.
+	 * @param colorSensorR the right rear color sensor, located parallel to the right wheel.
+	 * @param colorSensorL the left rear color sensor, located parallel to the left wheel.
+	 * @param colorSensorF the front color sensor, located in the center front of the robot.
+	 * @param leftMotor the left wheel motor.
+	 * @param rightMotor the right wheel motor.
+	 */
 	public Correction(Odometer odo, Navigation nav, SampleProvider colorSensorR, SampleProvider colorSensorL, SampleProvider colorSensorF, EV3LargeRegulatedMotor leftMotor,EV3LargeRegulatedMotor rightMotor) {
 		this.odo = odo;
 		this.colorSensorR = colorSensorR;
@@ -57,6 +85,13 @@ public class Correction extends Thread {
 		this.rightMotor = rightMotor; 
 	}
 
+	/**
+	 * This method should continuously check the amount of grid lines that the robot has passed
+	 * while going forward (the program should halt the check while the robot is turning
+	 * as it may pass many lines in this action but not change it's position at all) and after
+	 * the robot has crossed over four, should call for the robot to localize to correct its
+	 * position and heading.
+	 */
 	public void run(){ 
 		pauseWhileTurning();
 		if(gridcount==4){
@@ -68,8 +103,12 @@ public class Correction extends Thread {
 	}
 	
 	/**
-	 * Travel orientation correct, uses light sensors on the side of the robot to detect grid lines, 
-	 * if one side detects a line first, robot adjusts motors to correct the orientation of the robot
+	 * Orientation correction: this method should use the two light sensors affixed to the rear
+	 * of the robot in order to determine inaccuracies in the heading of the robot. If one of the
+	 * two light sensors crosses before the other the motor corresponding to that light sensor
+	 * should stop rotating until the other sensor catches up and crosses the grid line, thus returning
+	 * the robot to a forward heading.
+	 * 
 	 */
 	public void LightCorrection (){
 		
@@ -133,6 +172,9 @@ public class Correction extends Thread {
 
 	}
 	
+	/**
+	 * This method is used to stop the robot from performing correction while the robot is turning.
+	 */
 	public void pauseWhileTurning(){
 		turning = nav.isTurning();
 		while(turning){ //puts correction thread to sleep while turning
@@ -143,6 +185,13 @@ public class Correction extends Thread {
 		}
 	}
 	
+	/**
+	 * The localization program that is to be used during the navigation of the robot. This should be called
+	 * after the robot has passed four grid lines since its last localization. Once this occurs, the robot should
+	 * back up in order for its center of rotation so be located as close to the intersection of the grid lines
+	 * as possible. Then the robot should turn 90 degrees and again move forward until the sensors find the grid line
+	 * before backing up so that the center of rotation is directly on top of the intersection.
+	 */
 	public void localize(){
 
 		Dest_ini=nav.getDest();
@@ -199,6 +248,10 @@ public class Correction extends Thread {
 		run();
 	}
 
+	/**
+	 * The method should update the x and y postion of the robot to correspond with the corrections made
+	 * in other methods in the code.
+	 */
 	public void updateOdo(){
 		// get the x and y position read by the odometry
 		double x = odo.getX();
@@ -246,15 +299,30 @@ public class Correction extends Thread {
 			odo.setPosition(new double [] {0.0, position , 0}, new boolean [] {false, true, true});
 		}
 	}
-
+	
+	/**
+	 * 
+	 * @return a boolean which is true if the robot is correcting and false if not
+	 */
 	public boolean iscorrecting(){
 		return correcting;
 	}
-
+	
+	/**
+	 * 
+	 * @return a boolean which is true if the robot is localizing and false if not
+	 */
 	public boolean islocalizing(){
 		return localizing;
 	}
 
+	/**
+	 * Determines whether the color sensor has detected a line or not.
+	 * 
+	 * @param colorSensor the color sensor of the robot
+	 * @param colorData the array which will hold the color sensor data
+	 * @return true if a grid line has been detected and false if not
+	 */
 	public boolean lineDetected(SampleProvider colorSensor, float[] colorData){
 		colorSensor.fetchSample(colorData, 0);
 		int light_val = (int)((colorData[0])*100);
@@ -266,6 +334,12 @@ public class Correction extends Thread {
 			return false;
 	}
 
+	/**
+	 * 
+	 * @param x the current position in the x direction
+	 * @param y the current position in the y direction
+	 * @return the location of the intersection closest to the current postion
+	 */
 	public double[] getIntersection(double x, double y){
 		double[] intersection={0.0,0.0,0.0};
 		double lineX = (int)(x)/tilelength;
@@ -278,6 +352,12 @@ public class Correction extends Thread {
 		return intersection;
 	}
 
+	/**
+	 * This method should turn the robot to the given heading. Very similar to the method of the same name in 
+	 * navigation.
+	 * 
+	 * @param theta the angle to which the robot should turn.
+	 */
 	public void turnTo(double theta){
 		turning = true;
 		Sound.twoBeeps(); //DONT REMOVE THIS
@@ -307,7 +387,13 @@ public class Correction extends Thread {
 ////		leftMotor.setAcceleration(6000);
 ////		rightMotor.setAcceleration(6000);
 	}
-
+	
+	/**
+	 * This method should move the robot forward by the given amount. Very similar to the method of the 
+	 * same name located in navigation.
+	 * 
+	 * @param travelDist the distance by which the robot should travel straight
+	 */
 	public void drive(double travelDist){
 		//set both motors to forward speed desired
 //		leftMotor.setAcceleration(4000);
@@ -324,10 +410,29 @@ public class Correction extends Thread {
 	}
 
 	//convertDistance method: It takes the radius of the wheel and the distance required to travel and calculates the required wheel rotation
+	/**
+	 * The method should convert the input distance into a form that is equal to
+	 * the amount of rotation that a wheel of the given radius must rotate
+	 * in order to move that distance
+	 * 
+	 * @param radius the radius of the wheels of the robot
+	 * @param distance the distance which will be converted
+	 * @return the converted distance
+	 */
 	private static int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 	//convertAngle method: This method takes the radius of wheel, width of cart and the angle required to be turned and calculated the required wheel rotation
+	/**
+	 * The method should convert the input angle into a form that can be performed
+	 * by the robot with the given wheel radius and width.
+	 * 
+	 * 
+	 * @param radius the radius of the wheel
+	 * @param width the width of the robot
+	 * @param angle the angle to be converted
+	 * @return the angle now in the form of amount of rotation needed by the robot's wheel to perform that angle of turn
+	 */
 	private static int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}

@@ -324,10 +324,18 @@ public class Navigation{
 		return coordinates;
 	}
 
+	/**
+	 * 
+	 * @return a boolean that is true if the robot it turning and false if it not
+	 */
 	public boolean isTurning(){
 		return turning; 
 	}
 
+	/**
+	 * This method should return an exception when the robot's navigation has been interrupted
+	 * to alert the system of the interruption.
+	 */
 	public void stopNav(){
 
 		while(stop==true){
