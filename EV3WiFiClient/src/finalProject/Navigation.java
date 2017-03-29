@@ -28,7 +28,7 @@ import lejos.robotics.SampleProvider;
  *
  */
 
-public class Navigation{
+public class Navigation extends Thread{
 
 	double wheel_radius = WiFiExample.WHEEL_RADIUS;
 	double width =  WiFiExample.TRACK;
@@ -62,15 +62,29 @@ public class Navigation{
 
 	public boolean localizing=false;
 	public boolean stop = false;
+	public boolean drivetodest=false;
+
+	/**The Odometer of the robot */
+	public Odometer odometer = WiFiExample.odometer;
 
 	/** Correction to correct heading of robot when navigating, 
 	 * using two light sensors at the back of the robot. 
 	 * Instantiated in WiFiExample and passed on in Navigation.
 	 */
-	private Correction correcting ;
 
-	/**The Odometer of the robot */
-	public Odometer odometer = WiFiExample.odometer;
+	public void run(){
+		while(true){
+			if(drivetodest){
+				travelTo(x_dest,y_dest);
+				drivetodest=false;
+			}
+			try {
+				Thread.sleep(1500);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
 	/**
 	 * Constructor for Navigation
@@ -83,7 +97,7 @@ public class Navigation{
 
 	/**
 	 * The method moves the robot to the position that is inputed into the 
-	 * method by first travelling to (x,0) and then to (x,y), breaking it up into two steps.
+	 * method by first traveling to (x,0) and then to (x,y), breaking it up into two steps.
 	 * Therefore, this method travels in straight lines rather than diagonally to final coordinates.
 	 * 
 	 * @param x the X coordinate that should be moved to
@@ -91,20 +105,24 @@ public class Navigation{
 	 */
 	public void travelTo(double x, double y){
 		//this method causes robot to travel to the absolute field location (x,y)
-		if(stop){
-			return;
-		}
-		odo_x = odometer.getX();
-		odo_y = odometer.getY();
-		odo_theta = odometer.getAng();
-		x_dest = x;
-		y_dest = y;
+		//		while(stop){
+		//			return;
+		//		}
+//		synchronized(leftMotor){
+//			synchronized(rightMotor){
+				odo_x = odometer.getX();
+				odo_y = odometer.getY();
+				odo_theta = odometer.getAng();
+				x_dest = x;
+				y_dest = y;
 
-		//calculate the distance we want the robot to travel in x and y 
-		double delta_y = y_dest-odo_y;
-		double delta_x = x_dest-odo_x;
+				//calculate the distance we want the robot to travel in x and y 
+				double delta_y = y_dest-odo_y;
+				double delta_x = x_dest-odo_x;
 
-		drive(delta_x,delta_y);
+				drive(delta_x,delta_y);
+//			}
+//		}
 	}
 	/**
 	 * This method will travel to the coordinates x and y diagonally rather than split into x and y.
@@ -177,26 +195,46 @@ public class Navigation{
 				rightMotor.setSpeed(FORWARD_SPEED);
 
 				//X-travel
-				if(delta_x>0){
-					turnToSmart(90);
+				if(Math.abs(delta_x)<1){
+					delta_x=0;
+				}	
+				if(Math.abs(delta_x)>1){
+					if(delta_x>1)
+						turnToSmart(90);
+					else{
+						turnToSmart(270);
+					}
 				}
-				else{
-					turnTo(270);
-				}
+				leftMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_x)), true);
+				rightMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_x)), true);
 
-				leftMotor.rotate(convertDistance(wheel_radius, delta_x), true);
-				rightMotor.rotate(convertDistance(wheel_radius, delta_x), false);
+				while(leftMotor.isMoving()){
+					if(stop){
+						turning = false;
+						return;
+					}
+				}
 
 				//Y-travel
-				if(delta_y>0){
-					turnToSmart(0);
+				if(Math.abs(delta_y)<1){
+					delta_y=0;
+				}	
+				if(Math.abs(delta_y)>1){
+					if(delta_y>1)
+						turnToSmart(0);
+					else{
+						turnToSmart(180);
+					}
 				}
-				else{
-					turnToSmart(180);
-				}
+				leftMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_y)), true);
+				rightMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_y)), true);
 
-				leftMotor.rotate(convertDistance(wheel_radius, delta_y), true);
-				rightMotor.rotate(convertDistance(wheel_radius, delta_y), false);
+				while(leftMotor.isMoving()){
+					if(stop){
+						turning = false;
+						return;
+					}
+				}
 			}
 		}
 	}
@@ -218,7 +256,15 @@ public class Navigation{
 				rightMotor.setSpeed(FORWARD_SPEED);
 
 				leftMotor.rotate(convertDistance(wheel_radius, travelDist), true);
-				rightMotor.rotate(convertDistance(wheel_radius, travelDist), false);
+				rightMotor.rotate(convertDistance(wheel_radius, travelDist), true);
+
+				while(leftMotor.isMoving()){
+					if(stop){
+						turning = false;
+						return;
+					}
+				}
+
 			}
 		}
 	}
@@ -249,14 +295,22 @@ public class Navigation{
 				rightMotor.setAcceleration(2000);
 
 				leftMotor.rotate(convertAngle(wheel_radius, width, theta), true);
-				rightMotor.rotate(-convertAngle(wheel_radius, width, theta), false);
+				rightMotor.rotate(-convertAngle(wheel_radius, width, theta), true);
+
+				while(leftMotor.isMoving()){
+					if(stop){
+						turning = false;
+						return;
+					}
+				}
+
 				//returns default acceleration values after turn
 				leftMotor.setAcceleration(6000);
 				rightMotor.setAcceleration(6000);
-				turning = false;
 			}
 		}
 
+		turning = false;
 	}
 
 	/**

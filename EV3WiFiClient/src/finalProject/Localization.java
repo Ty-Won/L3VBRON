@@ -185,13 +185,15 @@ public class Localization {
 		boolean[] updates = {false,false,true}; //booleans indicating if x,y,theta are being updated
 		//only theta is being updated so index 2 is true but x and y remain 0
 		odo.setPosition(pos, updates);
+
 		nav.turnToSmart(55);
-//		Sound.buzz();
+		Sound.buzz();
 		
 		odo.setAng(45);
 
 		
-		//LIGHT:		
+		//LIGHT:
+
 		while(moving){
 			leftMotor.rotate(convertDistance(WHEEL_RADIUS, 600), true);
 			rightMotor.rotate(convertDistance(WHEEL_RADIUS, 600), true);

@@ -91,7 +91,7 @@ public class WiFiExample {
 	 * 
 	 * 2. TEAM_NUMBER: your project team number
 	 */
-	private static final String SERVER_IP = "192.168.2.21";
+	private static final String SERVER_IP = "192.168.2.33";
 	private static final int TEAM_NUMBER = 3;
 
 	// Enable/disable printing of debug info from the WiFi class
@@ -184,9 +184,9 @@ public class WiFiExample {
 //			}
 
 			
-
+			navigation = new Navigation(odometer);
 			Localization lsl = new Localization(odometer,navigation, colorValueF, colorData, 
-					colorData2, leftMotor,rightMotor, usValue, usSensor, usData);
+					colorData2, leftMotor, rightMotor, usValue, usSensor, usData);
 			final TextLCD t = LocalEV3.get().getTextLCD(); 
 			t.clear();
 			OdometryDisplay odometryDisplay = new OdometryDisplay(odometer,t);
@@ -204,16 +204,22 @@ public class WiFiExample {
 				odometer.start();
 				odometryDisplay.start();
 				
-				lsl.doLocalization();
-				Sound.beep();
-				Launcher.Enter_Launch_Position(); //PULLS ARM DOWN
+//				lsl.doLocalization();
+//				Launcher.Enter_Launch_Position(); //PULLS ARM DOWN
 
 //				Button.waitForAnyPress();
 //				navigation = new Navigation(odometer);
-//				correction = new Correction(odometer, navigation, colorValueR, colorValueL, colorValueF, leftMotor, rightMotor);
-//				correction.start();
-//								
-//				navigation.travelTo(4*30.48, 0);
+				correction = new Correction(odometer, navigation, colorValueR, colorValueL, colorValueF, leftMotor, rightMotor);
+				correction.start();
+				navigation.start();
+//					
+				for(int i=0;i<=4;i++){
+				navigation.travelTo(0, 60.96);
+				navigation.travelTo(60.96,60.96);
+				navigation.travelTo(60.96, 0);
+				navigation.travelTo(0, 0);
+			
+				}
 				
 //				t.drawString(Double.toString(finalProject.Localization.deltaTheta), 0, 2);
 //				t.drawString(Double.toString(odometer.theta), 0, 3);
