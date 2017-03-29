@@ -28,7 +28,7 @@ import lejos.robotics.SampleProvider;
  *
  */
 
-public class Navigation extends Thread{
+public class Navigation{
 
 	double wheel_radius = WiFiExample.WHEEL_RADIUS;
 	double width =  WiFiExample.TRACK;
@@ -62,7 +62,6 @@ public class Navigation extends Thread{
 
 	public boolean localizing=false;
 	public boolean stop = false;
-	public boolean drivetodest=false;
 
 	/**The Odometer of the robot */
 	public Odometer odometer = WiFiExample.odometer;
@@ -71,20 +70,7 @@ public class Navigation extends Thread{
 	 * using two light sensors at the back of the robot. 
 	 * Instantiated in WiFiExample and passed on in Navigation.
 	 */
-
-	public void run(){
-		while(true){
-			if(drivetodest){
-				travelTo(x_dest,y_dest);
-				drivetodest=false;
-			}
-			try {
-				Thread.sleep(1500);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+	//	public Correction correction;
 
 	/**
 	 * Constructor for Navigation
@@ -105,25 +91,23 @@ public class Navigation extends Thread{
 	 */
 	public void travelTo(double x, double y){
 		//this method causes robot to travel to the absolute field location (x,y)
-		//		while(stop){
-		//			return;
-		//		}
-//		synchronized(leftMotor){
-//			synchronized(rightMotor){
-				odo_x = odometer.getX();
-				odo_y = odometer.getY();
-				odo_theta = odometer.getAng();
-				x_dest = x;
-				y_dest = y;
 
-				//calculate the distance we want the robot to travel in x and y 
-				double delta_y = y_dest-odo_y;
-				double delta_x = x_dest-odo_x;
+		if(stop){
+			return;
+		}
+		odo_x = odometer.getX();
+		odo_y = odometer.getY();
+		odo_theta = odometer.getAng();
+		x_dest = x;
+		y_dest = y;
 
-				drive(delta_x,delta_y);
-//			}
-//		}
+		//calculate the distance we want the robot to travel in x and y 
+		double delta_y = y_dest-odo_y;
+		double delta_x = x_dest-odo_x;
+
+		drive(delta_x,delta_y);
 	}
+
 	/**
 	 * This method will travel to the coordinates x and y diagonally rather than split into x and y.
 	 * This should call the turnTo method to turn to the correct heading 
@@ -208,12 +192,15 @@ public class Navigation extends Thread{
 				leftMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_x)), true);
 				rightMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_x)), true);
 
-				while(leftMotor.isMoving()){
-					if(stop){
-						turning = false;
-						return;
+				//might need to add a travel to after while loop to make sure it's in the right location
+				while(leftMotor.isMoving()||rightMotor.isMoving()){
+					WiFiExample.correction.LightCorrection();
+					if(WiFiExample.correction.gridcount==4){
+						localize();
 					}
 				}
+				
+				motorstop();
 
 				//Y-travel
 				if(Math.abs(delta_y)<1){
@@ -226,15 +213,19 @@ public class Navigation extends Thread{
 						turnToSmart(180);
 					}
 				}
+				
 				leftMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_y)), true);
 				rightMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_y)), true);
 
-				while(leftMotor.isMoving()){
-					if(stop){
-						turning = false;
-						return;
+				//might need to add a travel to after while loop to make sure it's in the right location
+				while(leftMotor.isMoving()||rightMotor.isMoving()){
+					WiFiExample.correction.LightCorrection();
+					if(WiFiExample.correction.gridcount==4){
+						localize();
 					}
 				}
+				
+			motorstop();
 			}
 		}
 	}
@@ -307,11 +298,22 @@ public class Navigation extends Thread{
 				//returns default acceleration values after turn
 				leftMotor.setAcceleration(6000);
 				rightMotor.setAcceleration(6000);
+				leftMotor.setSpeed(FORWARD_SPEED);
+				rightMotor.setSpeed(FORWARD_SPEED);
 			}
 		}
 
 		turning = false;
 	}
+
+	public void localize(){
+		//		leftMotor.setSpeed(0);
+		//		rightMotor.setSpeed(0);
+		motorstop();
+		WiFiExample.correction.localize();
+		travelTo(x_dest,y_dest);
+	}
+
 
 	/**
 	 * The method should convert the input distance into a form that is equal to
@@ -384,6 +386,15 @@ public class Navigation extends Thread{
 	 */
 	public boolean isTurning(){
 		return turning; 
+	}
+	
+	public void motorstop(){
+		leftMotor.setSpeed(0);
+		rightMotor.setSpeed(0);
+		leftMotor.stop();
+		rightMotor.stop();
+		leftMotor.setSpeed(ROTATE_SPEED);
+		rightMotor.setSpeed(ROTATE_SPEED);
 	}
 
 	/**

@@ -91,7 +91,7 @@ public class WiFiExample {
 	 * 
 	 * 2. TEAM_NUMBER: your project team number
 	 */
-	private static final String SERVER_IP = "192.168.2.33";
+	private static final String SERVER_IP = "192.168.2.15";
 	private static final int TEAM_NUMBER = 3;
 
 	// Enable/disable printing of debug info from the WiFi class
@@ -210,15 +210,12 @@ public class WiFiExample {
 //				Button.waitForAnyPress();
 //				navigation = new Navigation(odometer);
 				correction = new Correction(odometer, navigation, colorValueR, colorValueL, colorValueF, leftMotor, rightMotor);
-				correction.start();
-				navigation.start();
 //					
-				for(int i=0;i<=4;i++){
+				for(int i=0;i<1;i++){
 				navigation.travelTo(0, 60.96);
 				navigation.travelTo(60.96,60.96);
 				navigation.travelTo(60.96, 0);
 				navigation.travelTo(0, 0);
-			
 				}
 				
 //				t.drawString(Double.toString(finalProject.Localization.deltaTheta), 0, 2);
