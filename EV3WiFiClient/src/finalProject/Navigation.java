@@ -183,8 +183,8 @@ public class Navigation{
 	 */
 	public void drive(double delta_x,double delta_y){
 
-		synchronized(leftMotor){
-			synchronized(rightMotor){
+//		synchronized(leftMotor){
+//			synchronized(rightMotor){
 				//		stopNav();
 				if(stop){
 					return;
@@ -249,8 +249,8 @@ public class Navigation{
 //
 //				}
 				motorstop();
-			}
-		}
+//			}
+//		}
 	}
 	/**
 	 * This method travels to distance inputed diagonally.
