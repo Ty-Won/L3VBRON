@@ -210,15 +210,12 @@ public class WiFiExample {
 //				Button.waitForAnyPress();
 //				navigation = new Navigation(odometer);
 				correction = new Correction(odometer, navigation, colorValueR, colorValueL, colorValueF, leftMotor, rightMotor);
-				correction.start();
-				navigation.start();
 //					
 				for(int i=0;i<=4;i++){
 				navigation.travelTo(0, 60.96);
 				navigation.travelTo(60.96,60.96);
 				navigation.travelTo(60.96, 0);
 				navigation.travelTo(0, 0);
-			
 				}
 				
 //				t.drawString(Double.toString(finalProject.Localization.deltaTheta), 0, 2);

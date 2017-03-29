@@ -28,7 +28,7 @@ import lejos.robotics.SampleProvider;
  *
  */
 
-public class Navigation extends Thread{
+public class Navigation{
 
 	double wheel_radius = WiFiExample.WHEEL_RADIUS;
 	double width =  WiFiExample.TRACK;
@@ -62,7 +62,6 @@ public class Navigation extends Thread{
 
 	public boolean localizing=false;
 	public boolean stop = false;
-	public boolean drivetodest=false;
 
 	/**The Odometer of the robot */
 	public Odometer odometer = WiFiExample.odometer;
@@ -71,20 +70,7 @@ public class Navigation extends Thread{
 	 * using two light sensors at the back of the robot. 
 	 * Instantiated in WiFiExample and passed on in Navigation.
 	 */
-
-	public void run(){
-		while(true){
-			if(drivetodest){
-				travelTo(x_dest,y_dest);
-				drivetodest=false;
-			}
-			try {
-				Thread.sleep(1500);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+//	public Correction correction;
 
 	/**
 	 * Constructor for Navigation
@@ -105,11 +91,7 @@ public class Navigation extends Thread{
 	 */
 	public void travelTo(double x, double y){
 		//this method causes robot to travel to the absolute field location (x,y)
-		//		while(stop){
-		//			return;
-		//		}
-//		synchronized(leftMotor){
-//			synchronized(rightMotor){
+
 				odo_x = odometer.getX();
 				odo_y = odometer.getY();
 				odo_theta = odometer.getAng();
@@ -121,9 +103,8 @@ public class Navigation extends Thread{
 				double delta_x = x_dest-odo_x;
 
 				drive(delta_x,delta_y);
-//			}
-//		}
 	}
+	
 	/**
 	 * This method will travel to the coordinates x and y diagonally rather than split into x and y.
 	 * This should call the turnTo method to turn to the correct heading 
@@ -209,9 +190,9 @@ public class Navigation extends Thread{
 				rightMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_x)), true);
 
 				while(leftMotor.isMoving()){
-					if(stop){
-						turning = false;
-						return;
+					WiFiExample.correction.LightCorrection();
+					if(WiFiExample.correction.gridcount==4){
+						localize();
 					}
 				}
 
@@ -230,9 +211,9 @@ public class Navigation extends Thread{
 				rightMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_y)), true);
 
 				while(leftMotor.isMoving()){
-					if(stop){
-						turning = false;
-						return;
+					WiFiExample.correction.LightCorrection();
+					if(WiFiExample.correction.gridcount==4){
+						localize();
 					}
 				}
 			}
@@ -312,6 +293,16 @@ public class Navigation extends Thread{
 
 		turning = false;
 	}
+	
+	public void localize(){
+//		leftMotor.setSpeed(0);
+//		rightMotor.setSpeed(0);
+		leftMotor.stop();
+		rightMotor.stop();
+		WiFiExample.correction.localize();
+		travelTo(x_dest,y_dest);
+	}
+	
 
 	/**
 	 * The method should convert the input distance into a form that is equal to
