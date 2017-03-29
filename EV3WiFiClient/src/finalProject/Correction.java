@@ -64,6 +64,7 @@ public class Correction {
 	public boolean rightline= false; 
 	public boolean turning = false;
 	public static boolean localizing = false;
+	public boolean stop = false;
 
 	/**
 	 * 
@@ -123,6 +124,9 @@ public class Correction {
 		while(!leftline  && !rightline){
 			leftline = lineDetected(colorSensorL, colorDataL);
 			rightline = lineDetected(colorSensorR, colorDataR);
+			if(leftMotor.isMoving()==false){
+				return;
+			}
 			//if one of them starts seeing a line, this loop exits
 //			pauseWhileTurning();
 		}
