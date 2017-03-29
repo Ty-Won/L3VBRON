@@ -70,7 +70,7 @@ public class Navigation{
 	 * using two light sensors at the back of the robot. 
 	 * Instantiated in WiFiExample and passed on in Navigation.
 	 */
-//	public Correction correction;
+	//	public Correction correction;
 
 	/**
 	 * Constructor for Navigation
@@ -92,19 +92,22 @@ public class Navigation{
 	public void travelTo(double x, double y){
 		//this method causes robot to travel to the absolute field location (x,y)
 
-				odo_x = odometer.getX();
-				odo_y = odometer.getY();
-				odo_theta = odometer.getAng();
-				x_dest = x;
-				y_dest = y;
+		if(stop){
+			return;
+		}
+		odo_x = odometer.getX();
+		odo_y = odometer.getY();
+		odo_theta = odometer.getAng();
+		x_dest = x;
+		y_dest = y;
 
-				//calculate the distance we want the robot to travel in x and y 
-				double delta_y = y_dest-odo_y;
-				double delta_x = x_dest-odo_x;
+		//calculate the distance we want the robot to travel in x and y 
+		double delta_y = y_dest-odo_y;
+		double delta_x = x_dest-odo_x;
 
-				drive(delta_x,delta_y);
+		drive(delta_x,delta_y);
 	}
-	
+
 	/**
 	 * This method will travel to the coordinates x and y diagonally rather than split into x and y.
 	 * This should call the turnTo method to turn to the correct heading 
@@ -189,7 +192,8 @@ public class Navigation{
 				leftMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_x)), true);
 				rightMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_x)), true);
 
-				while(leftMotor.isMoving()){
+				//might need to add a travel to after while loop to make sure it's in the right location
+				while(leftMotor.isMoving()||rightMotor.isMoving()){
 					WiFiExample.correction.LightCorrection();
 					if(WiFiExample.correction.gridcount==4){
 						localize();
@@ -207,10 +211,12 @@ public class Navigation{
 						turnToSmart(180);
 					}
 				}
+				
 				leftMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_y)), true);
 				rightMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_y)), true);
 
-				while(leftMotor.isMoving()){
+				//might need to add a travel to after while loop to make sure it's in the right location
+				while(leftMotor.isMoving()||rightMotor.isMoving()){
 					WiFiExample.correction.LightCorrection();
 					if(WiFiExample.correction.gridcount==4){
 						localize();
@@ -288,21 +294,23 @@ public class Navigation{
 				//returns default acceleration values after turn
 				leftMotor.setAcceleration(6000);
 				rightMotor.setAcceleration(6000);
+				leftMotor.setSpeed(FORWARD_SPEED);
+				rightMotor.setSpeed(FORWARD_SPEED);
 			}
 		}
 
 		turning = false;
 	}
-	
+
 	public void localize(){
-//		leftMotor.setSpeed(0);
-//		rightMotor.setSpeed(0);
+		//		leftMotor.setSpeed(0);
+		//		rightMotor.setSpeed(0);
 		leftMotor.stop();
 		rightMotor.stop();
 		WiFiExample.correction.localize();
 		travelTo(x_dest,y_dest);
 	}
-	
+
 
 	/**
 	 * The method should convert the input distance into a form that is equal to
