@@ -62,6 +62,8 @@ public class Navigation{
 
 	public boolean localizing=false;
 	public boolean stop = false;
+	public boolean donemoving = true;
+
 
 	/**The Odometer of the robot */
 	public Odometer odometer = WiFiExample.odometer;
@@ -106,6 +108,19 @@ public class Navigation{
 		double delta_x = x_dest-odo_x;
 
 		drive(delta_x,delta_y);
+		
+		odo_x = odometer.getX();
+		odo_y = odometer.getY();
+		odo_theta = odometer.getAng();
+		x_dest = x;
+		y_dest = y;
+
+		//calculate the distance we want the robot to travel in x and y 
+		delta_y = y_dest-odo_y;
+		delta_x = x_dest-odo_x;
+		
+		drive(delta_x,delta_y);
+
 	}
 
 	/**
@@ -195,11 +210,11 @@ public class Navigation{
 				//might need to add a travel to after while loop to make sure it's in the right location
 				while(leftMotor.isMoving()||rightMotor.isMoving()){
 					WiFiExample.correction.LightCorrection();
-					if(WiFiExample.correction.gridcount==4){
+					if(WiFiExample.correction.gridcount==6){
 						localize();
 					}
 				}
-				
+
 				motorstop();
 
 				//Y-travel
@@ -213,19 +228,27 @@ public class Navigation{
 						turnToSmart(180);
 					}
 				}
-				
+
 				leftMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_y)), true);
 				rightMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_y)), true);
+
 
 				//might need to add a travel to after while loop to make sure it's in the right location
 				while(leftMotor.isMoving()||rightMotor.isMoving()){
 					WiFiExample.correction.LightCorrection();
-					if(WiFiExample.correction.gridcount==4){
+					if(WiFiExample.correction.gridcount==6){
+//						donemoving = false;
 						localize();
+//						donemoving = true;
 					}
 				}
-				
-			motorstop();
+
+//				if(donemoving){
+//					Sound.beepSequenceUp();
+//					travelToDiag(x_dest,y_dest);
+//
+//				}
+				motorstop();
 			}
 		}
 	}
@@ -387,7 +410,7 @@ public class Navigation{
 	public boolean isTurning(){
 		return turning; 
 	}
-	
+
 	public void motorstop(){
 		leftMotor.setSpeed(0);
 		rightMotor.setSpeed(0);
