@@ -211,7 +211,7 @@ public class WiFiExample {
 //				navigation = new Navigation(odometer);
 				correction = new Correction(odometer, navigation, colorValueR, colorValueL, colorValueF, leftMotor, rightMotor);
 //					
-				for(int i=0;i<=4;i++){
+				for(int i=0;i<1;i++){
 				navigation.travelTo(0, 60.96);
 				navigation.travelTo(60.96,60.96);
 				navigation.travelTo(60.96, 0);

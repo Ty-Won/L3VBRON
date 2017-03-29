@@ -201,17 +201,15 @@ public class Correction {
 		synchronized(leftMotor){
 			synchronized(rightMotor){
 
-				leftMotor.stop();
-				rightMotor.stop();
-				
+
+				motorstop();
 				boolean moving = true;
 				while(moving){ //keep going until line detected
 					leftMotor.rotate(-convertDistance(wheel_radius, 600), true);
 					rightMotor.rotate(-convertDistance(wheel_radius, 600), true);
 					if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){	//at this point, the light sensors at back detected a line so we want to localize
 						moving = false; //if line detected from back sensors, stop going backward
-						leftMotor.stop();
-						rightMotor.stop();
+						motorstop();
 						nav.driveDiag(-11.6); //go backward sensor dist for center of rotation to be at intersection
 						//						Sound.twoBeeps();
 						nav.turnTo(90);//turn right
@@ -224,8 +222,7 @@ public class Correction {
 					rightMotor.rotate(convertDistance(wheel_radius, 600), true);
 					if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){
 						moving2 = false; //go forward until line from back sensors is detected
-						leftMotor.stop();
-						rightMotor.stop();
+						motorstop();
 						nav.driveDiag(-11.6); //drive back sensor dist
 						//						Sound.twoBeeps();
 						nav.turnTo(-90); //turn back to original heading
@@ -323,6 +320,15 @@ public class Correction {
 		}
 		else
 			return false;
+	}
+
+	public void motorstop(){
+		leftMotor.setSpeed(0);
+		rightMotor.setSpeed(0);
+		leftMotor.stop();
+		rightMotor.stop();
+		leftMotor.setSpeed(ROTATE_SPEED);
+		rightMotor.setSpeed(ROTATE_SPEED);
 	}
 
 	/**

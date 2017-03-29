@@ -200,8 +200,7 @@ public class Navigation{
 					}
 				}
 				
-				leftMotor.stop();
-				rightMotor.stop();
+				motorstop();
 
 				//Y-travel
 				if(Math.abs(delta_y)<1){
@@ -226,8 +225,7 @@ public class Navigation{
 					}
 				}
 				
-				leftMotor.stop();
-				rightMotor.stop();
+			motorstop();
 			}
 		}
 	}
@@ -311,8 +309,7 @@ public class Navigation{
 	public void localize(){
 		//		leftMotor.setSpeed(0);
 		//		rightMotor.setSpeed(0);
-		leftMotor.stop();
-		rightMotor.stop();
+		motorstop();
 		WiFiExample.correction.localize();
 		travelTo(x_dest,y_dest);
 	}
@@ -389,6 +386,15 @@ public class Navigation{
 	 */
 	public boolean isTurning(){
 		return turning; 
+	}
+	
+	public void motorstop(){
+		leftMotor.setSpeed(0);
+		rightMotor.setSpeed(0);
+		leftMotor.stop();
+		rightMotor.stop();
+		leftMotor.setSpeed(ROTATE_SPEED);
+		rightMotor.setSpeed(ROTATE_SPEED);
 	}
 
 	/**
