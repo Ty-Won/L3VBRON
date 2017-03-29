@@ -204,17 +204,16 @@ public class WiFiExample {
 				odometer.start();
 				odometryDisplay.start();
 				
-//				lsl.doLocalization();
-//				Launcher.Enter_Launch_Position(); //PULLS ARM DOWN
+				lsl.doLocalization();
+				Launcher.Enter_Launch_Position(); //PULLS ARM DOWN
 
 //				Button.waitForAnyPress();
-//				navigation = new Navigation(odometer);
 				correction = new Correction(odometer, navigation, colorValueR, colorValueL, colorValueF, leftMotor, rightMotor);
 //					
 				for(int i=0;i<1;i++){
-				navigation.travelTo(0, 6*30.48);
-				navigation.travelTo(2*30.48,6*30.48);
-				navigation.travelTo(2*30.48, 0);
+				navigation.travelTo(0, 2*30.48);
+				navigation.travelTo(6*30.48,2*30.48);
+				navigation.travelTo(6*30.48, 0);
 				navigation.travelTo(0, 0);
 				}
 				

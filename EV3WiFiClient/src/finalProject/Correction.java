@@ -198,10 +198,11 @@ public class Correction {
 		localizing = true;
 
 		//synchronize both motors so they can only be accessed by one thread (the Correction thread in this case)
-//		synchronized(leftMotor){
-//			synchronized(rightMotor){
-
+		synchronized(leftMotor){
+			synchronized(rightMotor){
+				
 				motorstop();
+				Sound.twoBeeps();
 				boolean moving = true;
 				while(moving){ //keep going until line detected
 					leftMotor.rotate(-convertDistance(wheel_radius, 600), true);
@@ -231,8 +232,8 @@ public class Correction {
 				gridcount = 0; //dont remove this
 				localizing = false;
 				//				nav.stop=false;
-//			}
-//		}
+			}
+		}
 	}
 
 	/**
