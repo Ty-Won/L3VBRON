@@ -93,10 +93,10 @@ public class Correction {
 	 * the robot has crossed over four, should call for the robot to localize to correct its
 	 * position and heading.
 	 */
-//	public void run(){ 
-//		pauseWhileTurning();
-//		LightCorrection();
-//	}
+	//	public void run(){ 
+	//		pauseWhileTurning();
+	//		LightCorrection();
+	//	}
 
 	/**
 	 * Orientation correction: this method should use the two light sensors affixed to the rear
@@ -108,13 +108,13 @@ public class Correction {
 	 */
 	public void LightCorrection (){
 
-//		if(localizing){
-//			return;
-//		}
+		//		if(localizing){
+		//			return;
+		//		}
 
 		correcting = true; 
-//		leftMotor.setSpeed(FORWARD_SPEED);
-//		rightMotor.setSpeed(FORWARD_SPEED);
+		//		leftMotor.setSpeed(FORWARD_SPEED);
+		//		rightMotor.setSpeed(FORWARD_SPEED);
 
 		//left and right sensors have not yet seen a black line
 		leftline = false; 
@@ -127,15 +127,16 @@ public class Correction {
 			if(leftMotor.isMoving()==false){
 				return;
 			}
+
 			//if one of them starts seeing a line, this loop exits
-//			pauseWhileTurning();
+			//			pauseWhileTurning();
 		}
 
 		if(leftline && rightline){
 			updateOdo();
-//			pauseWhileTurning();
+			//			pauseWhileTurning();
 			correcting = false;	
-//			run();
+			//			run();
 		}
 
 		if(leftline){
@@ -147,10 +148,10 @@ public class Correction {
 			leftMotor.setSpeed(FORWARD_SPEED);
 			updateOdo();
 
-//			pauseWhileTurning();
+			//			pauseWhileTurning();
 			gridcount++;
 			correcting = false;
-//			run();
+			//			run();
 		}
 
 		else if(rightline){
@@ -162,10 +163,10 @@ public class Correction {
 			rightMotor.setSpeed(FORWARD_SPEED);
 			updateOdo();
 
-//			pauseWhileTurning();
+			//			pauseWhileTurning();
 			gridcount++;
 			correcting = false;
-//			run();
+			//			run();
 
 		}
 
@@ -174,15 +175,15 @@ public class Correction {
 	/**
 	 * This method is used to stop the robot from performing correction while the robot is turning.
 	 */
-//	public void pauseWhileTurning(){
-//		turning = nav.isTurning();
-//		while(turning){ //puts correction thread to sleep while turning
-//			try { Sound.buzz();
-//			turning=nav.isTurning();
-//			Thread.sleep(timeout); //every 500ms, it will run this while loop again
-//			} catch (InterruptedException e) {}
-//		}
-//	}
+	//	public void pauseWhileTurning(){
+	//		turning = nav.isTurning();
+	//		while(turning){ //puts correction thread to sleep while turning
+	//			try { Sound.buzz();
+	//			turning=nav.isTurning();
+	//			Thread.sleep(timeout); //every 500ms, it will run this while loop again
+	//			} catch (InterruptedException e) {}
+	//		}
+	//	}
 
 	/**
 	 * The localization program that is to be used during the navigation of the robot. This should be called
@@ -193,21 +194,26 @@ public class Correction {
 	 */
 	public void localize(){
 
-//		nav.stop=true;
+		//		nav.stop=true;
 		localizing = true;
 
 		//synchronize both motors so they can only be accessed by one thread (the Correction thread in this case)
 		synchronized(leftMotor){
 			synchronized(rightMotor){
 
+				leftMotor.stop();
+				rightMotor.stop();
+				
 				boolean moving = true;
 				while(moving){ //keep going until line detected
 					leftMotor.rotate(-convertDistance(wheel_radius, 600), true);
 					rightMotor.rotate(-convertDistance(wheel_radius, 600), true);
 					if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){	//at this point, the light sensors at back detected a line so we want to localize
 						moving = false; //if line detected from back sensors, stop going backward
+						leftMotor.stop();
+						rightMotor.stop();
 						nav.driveDiag(-11.6); //go backward sensor dist for center of rotation to be at intersection
-						Sound.twoBeeps();
+						//						Sound.twoBeeps();
 						nav.turnTo(90);//turn right
 					}
 				}
@@ -218,15 +224,17 @@ public class Correction {
 					rightMotor.rotate(convertDistance(wheel_radius, 600), true);
 					if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){
 						moving2 = false; //go forward until line from back sensors is detected
+						leftMotor.stop();
+						rightMotor.stop();
 						nav.driveDiag(-11.6); //drive back sensor dist
-						Sound.twoBeeps();
+						//						Sound.twoBeeps();
 						nav.turnTo(-90); //turn back to original heading
 					}		
 				}
-				
+
 				gridcount = 0; //dont remove this
 				localizing = false;
-//				nav.stop=false;
+				//				nav.stop=false;
 			}
 		}
 	}
@@ -323,17 +331,17 @@ public class Correction {
 	 * @param y the current position in the y direction
 	 * @return the location of the intersection closest to the current postion
 	 */
-//	public double[] getIntersection(double x, double y){
-//		double[] intersection={0.0,0.0,0.0};
-//		double lineX = (int)(x)/tilelength;
-//		double lineY = (int)(y)/tilelength;
-//
-//		intersection[0]=lineX*tilelength;
-//		intersection[1]=lineY*tilelength;
-//		intersection[2]=0.0;
-//
-//		return intersection;
-//	}
+	//	public double[] getIntersection(double x, double y){
+	//		double[] intersection={0.0,0.0,0.0};
+	//		double lineX = (int)(x)/tilelength;
+	//		double lineY = (int)(y)/tilelength;
+	//
+	//		intersection[0]=lineX*tilelength;
+	//		intersection[1]=lineY*tilelength;
+	//		intersection[2]=0.0;
+	//
+	//		return intersection;
+	//	}
 
 	/**
 	 * This method should turn the robot to the given heading. Very similar to the method of the same name in 
@@ -341,35 +349,35 @@ public class Correction {
 	 * 
 	 * @param theta the angle to which the robot should turn.
 	 */
-//	public void turnTo(double theta){
-//		turning = true;
-//		Sound.twoBeeps(); //DONT REMOVE THIS
-//
-//		//make robot turn to angle theta:
-//		leftMotor.setSpeed(ROTATE_SPEED);
-//		leftMotor.setAcceleration(2000);
-//		rightMotor.setSpeed(ROTATE_SPEED);
-//		rightMotor.setAcceleration(2000);
-//
-//		leftMotor.rotate(convertAngle(wheel_radius, width, theta), true);
-//		rightMotor.rotate(-convertAngle(wheel_radius, width, theta), false);
-//		//returns default acceleration values after turn
-//		leftMotor.setAcceleration(6000);
-//		rightMotor.setAcceleration(6000);
-//		turning = false;
-//		//		//this method causes the robot to turn (on point) to the absolute heading theta
-//		////		leftMotor.setAcceleration(4000);
-//		////		rightMotor.setAcceleration(4000);
-//		//		//make robot turn to angle theta:
-//		//		leftMotor.setSpeed(ROTATE_SPEED);
-//		//		rightMotor.setSpeed(ROTATE_SPEED);
-//		//
-//		//		leftMotor.rotate(convertAngle(wheel_radius, width, theta), true);
-//		//		rightMotor.rotate(-convertAngle(wheel_radius, width, theta), false);
-//		//		
-//		////		leftMotor.setAcceleration(6000);
-//		////		rightMotor.setAcceleration(6000);
-//	}
+	//	public void turnTo(double theta){
+	//		turning = true;
+	//		Sound.twoBeeps(); //DONT REMOVE THIS
+	//
+	//		//make robot turn to angle theta:
+	//		leftMotor.setSpeed(ROTATE_SPEED);
+	//		leftMotor.setAcceleration(2000);
+	//		rightMotor.setSpeed(ROTATE_SPEED);
+	//		rightMotor.setAcceleration(2000);
+	//
+	//		leftMotor.rotate(convertAngle(wheel_radius, width, theta), true);
+	//		rightMotor.rotate(-convertAngle(wheel_radius, width, theta), false);
+	//		//returns default acceleration values after turn
+	//		leftMotor.setAcceleration(6000);
+	//		rightMotor.setAcceleration(6000);
+	//		turning = false;
+	//		//		//this method causes the robot to turn (on point) to the absolute heading theta
+	//		////		leftMotor.setAcceleration(4000);
+	//		////		rightMotor.setAcceleration(4000);
+	//		//		//make robot turn to angle theta:
+	//		//		leftMotor.setSpeed(ROTATE_SPEED);
+	//		//		rightMotor.setSpeed(ROTATE_SPEED);
+	//		//
+	//		//		leftMotor.rotate(convertAngle(wheel_radius, width, theta), true);
+	//		//		rightMotor.rotate(-convertAngle(wheel_radius, width, theta), false);
+	//		//		
+	//		////		leftMotor.setAcceleration(6000);
+	//		////		rightMotor.setAcceleration(6000);
+	//	}
 
 	/**
 	 * This method should move the robot forward by the given amount. Very similar to the method of the 
@@ -377,20 +385,20 @@ public class Correction {
 	 * 
 	 * @param travelDist the distance by which the robot should travel straight
 	 */
-//	public void drive(double travelDist){
-//		//set both motors to forward speed desired
-//		//		leftMotor.setAcceleration(4000);
-//		//		rightMotor.setAcceleration(4000);
-//
-//		//		leftMotor.setSpeed(FORWARD_SPEED);
-//		//		rightMotor.setSpeed(FORWARD_SPEED);
-//
-//		leftMotor.rotate(convertDistance(wheel_radius, travelDist), true);
-//		rightMotor.rotate(convertDistance(wheel_radius, travelDist), false);
-//
-//		//		leftMotor.setAcceleration(6000);
-//		//		rightMotor.setAcceleration(6000);
-//	}
+	//	public void drive(double travelDist){
+	//		//set both motors to forward speed desired
+	//		//		leftMotor.setAcceleration(4000);
+	//		//		rightMotor.setAcceleration(4000);
+	//
+	//		//		leftMotor.setSpeed(FORWARD_SPEED);
+	//		//		rightMotor.setSpeed(FORWARD_SPEED);
+	//
+	//		leftMotor.rotate(convertDistance(wheel_radius, travelDist), true);
+	//		rightMotor.rotate(convertDistance(wheel_radius, travelDist), false);
+	//
+	//		//		leftMotor.setAcceleration(6000);
+	//		//		rightMotor.setAcceleration(6000);
+	//	} s
 
 	//convertDistance method: It takes the radius of the wheel and the distance required to travel and calculates the required wheel rotation
 	/**
@@ -416,9 +424,9 @@ public class Correction {
 	 * @param angle the angle to be converted
 	 * @return the angle now in the form of amount of rotation needed by the robot's wheel to perform that angle of turn
 	 */
-//	private static int convertAngle(double radius, double width, double angle) {
-//		return convertDistance(radius, Math.PI * width * angle / 360.0);
-//	}
+	//	private static int convertAngle(double radius, double width, double angle) {
+	//		return convertDistance(radius, Math.PI * width * angle / 360.0);
+	//	}
 
 
 }

@@ -199,6 +199,9 @@ public class Navigation{
 						localize();
 					}
 				}
+				
+				leftMotor.stop();
+				rightMotor.stop();
 
 				//Y-travel
 				if(Math.abs(delta_y)<1){
@@ -222,6 +225,9 @@ public class Navigation{
 						localize();
 					}
 				}
+				
+				leftMotor.stop();
+				rightMotor.stop();
 			}
 		}
 	}
