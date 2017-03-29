@@ -263,18 +263,24 @@ public class Correction {
 		// if the robot is going (decreasing) along the x-direction, update the x-position and the heading
 		else if (odo.getAng()>270-angleThreshold && odo.getAng()<270+angleThreshold){
 			// determine which line the robot has crossed by dividing the y-position returned by the odometer
-			line = (int)((x) / tilelength); 
+			line = (int)(((x)+(tilelength/2)) / tilelength); 
 			// multiply by the length of a tile to know the y-position
 			position = (line*tilelength)-11.6;
+//			if(position<0){
+//				return;
+//			}
 			odo.setPosition(new double [] {position, 0.0 , 270}, new boolean [] {true, false, true});	
 		}
 
 		// if the robot is going (decreasing) along the y-direction, update the y-position and the heading
 		else if (odo.getAng()>180-angleThreshold && odo.getAng()<180+angleThreshold) {
 			// determine which line the robot has crossed by dividing the y-position returned by the odometer
-			line = (int)((y) / tilelength); 
+			line = (int)(((y)+(tilelength/2)) / tilelength);		
 			// multiply by the length of a tile to know the y-position
 			position = (line*tilelength)-11.6;
+//			if(position<0){
+//				return;
+//			}
 			odo.setPosition(new double [] {0.0, position , 180}, new boolean [] {false, true, true});	
 		}
 
