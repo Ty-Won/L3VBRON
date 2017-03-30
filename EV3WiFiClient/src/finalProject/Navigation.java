@@ -2,6 +2,7 @@ package finalProject;
 import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.robotics.RegulatedMotor;
 import lejos.robotics.SampleProvider;
 
 /**
@@ -62,8 +63,6 @@ public class Navigation{
 
 	public boolean localizing=false;
 	public boolean stop = false;
-	public boolean donemoving = true;
-
 
 	/**The Odometer of the robot */
 	public Odometer odometer = WiFiExample.odometer;
@@ -81,6 +80,7 @@ public class Navigation{
 
 	public Navigation(Odometer odometer){ //constructor
 		this.odometer = odometer;
+		leftMotor.synchronizeWith(new RegulatedMotor[] {rightMotor});
 	}
 
 	/**
@@ -120,7 +120,6 @@ public class Navigation{
 		delta_x = x_dest-odo_x;
 		
 		drive(delta_x,delta_y);
-
 	}
 
 	/**
@@ -185,13 +184,15 @@ public class Navigation{
 
 		synchronized(leftMotor){
 			synchronized(rightMotor){
-				//		stopNav();
+			
 				if(stop){
 					return;
 				}
 				//set both motors to forward speed desired
 				leftMotor.setSpeed(FORWARD_SPEED);
 				rightMotor.setSpeed(FORWARD_SPEED);
+				leftMotor.setAcceleration(3000);
+				rightMotor.setAcceleration(3000);
 
 				//X-travel
 				if(Math.abs(delta_x)<1){
@@ -204,14 +205,18 @@ public class Navigation{
 						turnToSmart(270);
 					}
 				}
+								
+				leftMotor.startSynchronization();
 				leftMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_x)), true);
 				rightMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_x)), true);
-
+				leftMotor.endSynchronization();
+				
 				//might need to add a travel to after while loop to make sure it's in the right location
 				while(leftMotor.isMoving()||rightMotor.isMoving()){
 					WiFiExample.correction.LightCorrection();
 					if(WiFiExample.correction.gridcount==6){
 						localize();
+						
 					}
 				}
 
@@ -228,26 +233,20 @@ public class Navigation{
 						turnToSmart(180);
 					}
 				}
-
+				
+				leftMotor.startSynchronization();
 				leftMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_y)), true);
 				rightMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_y)), true);
-
+				leftMotor.endSynchronization();
 
 				//might need to add a travel to after while loop to make sure it's in the right location
 				while(leftMotor.isMoving()||rightMotor.isMoving()){
 					WiFiExample.correction.LightCorrection();
 					if(WiFiExample.correction.gridcount==6){
-//						donemoving = false;
 						localize();
-//						donemoving = true;
 					}
 				}
 
-//				if(donemoving){
-//					Sound.beepSequenceUp();
-//					travelToDiag(x_dest,y_dest);
-//
-//				}
 				motorstop();
 			}
 		}
@@ -268,11 +267,15 @@ public class Navigation{
 				//set both motors to forward speed desired
 				leftMotor.setSpeed(FORWARD_SPEED);
 				rightMotor.setSpeed(FORWARD_SPEED);
+				leftMotor.setAcceleration(3000);
+				rightMotor.setAcceleration(3000);
 
+				leftMotor.startSynchronization();
 				leftMotor.rotate(convertDistance(wheel_radius, travelDist), true);
 				rightMotor.rotate(convertDistance(wheel_radius, travelDist), true);
+				leftMotor.endSynchronization();
 
-				while(leftMotor.isMoving()){
+				while(leftMotor.isMoving()||rightMotor.isMoving()){
 					if(stop){
 						turning = false;
 						return;
@@ -294,7 +297,7 @@ public class Navigation{
 
 		synchronized(leftMotor){
 			synchronized(rightMotor){
-				//		stopNav();
+
 				if(stop){
 					return;
 				}
@@ -308,19 +311,21 @@ public class Navigation{
 				rightMotor.setSpeed(ROTATE_SPEED);
 				rightMotor.setAcceleration(2000);
 
+				leftMotor.startSynchronization();
 				leftMotor.rotate(convertAngle(wheel_radius, width, theta), true);
 				rightMotor.rotate(-convertAngle(wheel_radius, width, theta), true);
+				leftMotor.endSynchronization();
 
-				while(leftMotor.isMoving()){
+				while(leftMotor.isMoving()||rightMotor.isMoving()){
 					if(stop){
 						turning = false;
 						return;
 					}
 				}
-
+				
 				//returns default acceleration values after turn
-				leftMotor.setAcceleration(6000);
-				rightMotor.setAcceleration(6000);
+				leftMotor.setAcceleration(3000);
+				rightMotor.setAcceleration(3000);
 				leftMotor.setSpeed(FORWARD_SPEED);
 				rightMotor.setSpeed(FORWARD_SPEED);
 			}
@@ -412,12 +417,15 @@ public class Navigation{
 	}
 
 	public void motorstop(){
+		
 		leftMotor.setSpeed(0);
 		rightMotor.setSpeed(0);
 		leftMotor.stop();
 		rightMotor.stop();
 		leftMotor.setSpeed(ROTATE_SPEED);
 		rightMotor.setSpeed(ROTATE_SPEED);
+		leftMotor.setAcceleration(3000);
+		rightMotor.setAcceleration(3000);
 	}
 
 	/**

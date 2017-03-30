@@ -4,6 +4,7 @@ import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorModes;
+import lejos.robotics.RegulatedMotor;
 import lejos.robotics.SampleProvider;
 
 /**
@@ -200,33 +201,40 @@ public class Correction {
 		//synchronize both motors so they can only be accessed by one thread (the Correction thread in this case)
 		synchronized(leftMotor){
 			synchronized(rightMotor){
-				
+
 				motorstop();
 				Sound.twoBeeps();
+				leftMotor.synchronizeWith(new RegulatedMotor[] {rightMotor});
 				boolean moving = true;
-				while(moving){ //keep going until line detected
-					leftMotor.rotate(-convertDistance(wheel_radius, 600), true);
-					rightMotor.rotate(-convertDistance(wheel_radius, 600), true);
-					if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){	//at this point, the light sensors at back detected a line so we want to localize
-						moving = false; //if line detected from back sensors, stop going backward
-						motorstop();
-						nav.driveDiag(-11.6); //go backward sensor dist for center of rotation to be at intersection
-						//						Sound.twoBeeps();
-						nav.turnTo(90);//turn right
-					}
+				//				while(moving){ //keep going until line detected
+
+				leftMotor.startSynchronization();
+				leftMotor.rotate(-convertDistance(wheel_radius, 600), true);
+				rightMotor.rotate(-convertDistance(wheel_radius, 600), true);
+				rightMotor.endSynchronization();
+
+				if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){	//at this point, the light sensors at back detected a line so we want to localize
+					//						moving = false; //if line detected from back sensors, stop going backward
+					motorstop(); //kills all .rotate()
+					nav.driveDiag(-11.6); //go backward sensor dist for center of rotation to be at intersection
+					//						Sound.twoBeeps();
+					nav.turnTo(90);//turn right
+					//					}
 				}
 
 				boolean moving2 = true;
-				while(moving2){ //keep going until line detected
-					leftMotor.rotate(convertDistance(wheel_radius, 600), true);
-					rightMotor.rotate(convertDistance(wheel_radius, 600), true);
-					if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){
-						moving2 = false; //go forward until line from back sensors is detected
-						motorstop();
-						nav.driveDiag(-11.6); //drive back sensor dist
-						//						Sound.twoBeeps();
-						nav.turnTo(-90); //turn back to original heading
-					}		
+				//				while(moving2){ //keep going until line detected
+				leftMotor.startSynchronization();
+				leftMotor.rotate(convertDistance(wheel_radius, 600), true);
+				rightMotor.rotate(convertDistance(wheel_radius, 600), true);
+				leftMotor.endSynchronization();
+				if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){
+					//						moving2 = false; //go forward until line from back sensors is detected
+					motorstop(); //kills all .rotate()
+					nav.driveDiag(-11.6); //drive back sensor dist
+					//						Sound.twoBeeps();
+					nav.turnTo(-90); //turn back to original heading
+					//					}		
 				}
 
 				gridcount = 0; //dont remove this
@@ -266,9 +274,9 @@ public class Correction {
 			line = (int)(((x)+(tilelength/2)) / tilelength); 
 			// multiply by the length of a tile to know the y-position
 			position = (line*tilelength)-11.6;
-//			if(position<0){
-//				return;
-//			}
+			//			if(position<0){
+			//				return;
+			//			}
 			odo.setPosition(new double [] {position, 0.0 , 270}, new boolean [] {true, false, true});	
 		}
 
@@ -278,9 +286,9 @@ public class Correction {
 			line = (int)(((y)+(tilelength/2)) / tilelength);		
 			// multiply by the length of a tile to know the y-position
 			position = (line*tilelength)-11.6;
-//			if(position<0){
-//				return;
-//			}
+			//			if(position<0){
+			//				return;
+			//			}
 			odo.setPosition(new double [] {0.0, position , 180}, new boolean [] {false, true, true});	
 		}
 
