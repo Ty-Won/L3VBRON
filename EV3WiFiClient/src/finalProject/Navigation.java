@@ -108,7 +108,7 @@ public class Navigation{
 		double delta_x = x_dest-odo_x;
 
 		drive(delta_x,delta_y);
-		
+
 		odo_x = odometer.getX();
 		odo_y = odometer.getY();
 		odo_theta = odometer.getAng();
@@ -118,7 +118,7 @@ public class Navigation{
 		//calculate the distance we want the robot to travel in x and y 
 		delta_y = y_dest-odo_y;
 		delta_x = x_dest-odo_x;
-		
+
 		drive(delta_x,delta_y);
 	}
 
@@ -184,7 +184,7 @@ public class Navigation{
 
 		synchronized(leftMotor){
 			synchronized(rightMotor){
-			
+
 				if(stop){
 					return;
 				}
@@ -205,18 +205,18 @@ public class Navigation{
 						turnToSmart(270);
 					}
 				}
-								
+
 				leftMotor.startSynchronization();
 				leftMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_x)), true);
 				rightMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_x)), true);
 				leftMotor.endSynchronization();
-				
+
 				//might need to add a travel to after while loop to make sure it's in the right location
 				while(leftMotor.isMoving()||rightMotor.isMoving()){
 					WiFiExample.correction.LightCorrection();
 					if(WiFiExample.correction.gridcount==6){
 						localize();
-						
+
 					}
 				}
 
@@ -233,7 +233,7 @@ public class Navigation{
 						turnToSmart(180);
 					}
 				}
-				
+
 				leftMotor.startSynchronization();
 				leftMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_y)), true);
 				rightMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_y)), true);
@@ -280,6 +280,7 @@ public class Navigation{
 						turning = false;
 						return;
 					}
+					motorstop();
 				}
 
 			}
@@ -322,7 +323,8 @@ public class Navigation{
 						return;
 					}
 				}
-				
+				motorstop();
+
 				//returns default acceleration values after turn
 				leftMotor.setAcceleration(3000);
 				rightMotor.setAcceleration(3000);
@@ -339,6 +341,7 @@ public class Navigation{
 		//		rightMotor.setSpeed(0);
 		motorstop();
 		WiFiExample.correction.localize();
+		Sound.beepSequenceUp();;
 		travelTo(x_dest,y_dest);
 	}
 
@@ -417,7 +420,7 @@ public class Navigation{
 	}
 
 	public void motorstop(){
-		
+
 		leftMotor.setSpeed(0);
 		rightMotor.setSpeed(0);
 		leftMotor.stop();

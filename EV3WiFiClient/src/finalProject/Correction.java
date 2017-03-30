@@ -203,9 +203,9 @@ public class Correction {
 			synchronized(rightMotor){
 
 				motorstop();
-				Sound.twoBeeps();
+				//		Sound.twoBeeps();
 				leftMotor.synchronizeWith(new RegulatedMotor[] {rightMotor});
-				boolean moving = true;
+				//				boolean moving = true;
 				//				while(moving){ //keep going until line detected
 
 				leftMotor.startSynchronization();
@@ -213,28 +213,34 @@ public class Correction {
 				rightMotor.rotate(-convertDistance(wheel_radius, 600), true);
 				rightMotor.endSynchronization();
 
-				if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){	//at this point, the light sensors at back detected a line so we want to localize
-					//						moving = false; //if line detected from back sensors, stop going backward
-					motorstop(); //kills all .rotate()
-					nav.driveDiag(-11.6); //go backward sensor dist for center of rotation to be at intersection
-					//						Sound.twoBeeps();
-					nav.turnTo(90);//turn right
-					//					}
+				boolean moving = true;
+				while(moving){
+					if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){	//at this point, the light sensors at back detected a line so we want to localize
+						//						moving = false; //if line detected from back sensors, stop going backward
+						motorstop(); //kills all .rotate()
+						nav.driveDiag(-11.6); //go backward sensor dist for center of rotation to be at intersection
+						//											Sound.beepSequence();
+						nav.turnTo(90);//turn right
+						moving = false;
+					}
 				}
 
-				boolean moving2 = true;
 				//				while(moving2){ //keep going until line detected
 				leftMotor.startSynchronization();
 				leftMotor.rotate(convertDistance(wheel_radius, 600), true);
 				rightMotor.rotate(convertDistance(wheel_radius, 600), true);
 				leftMotor.endSynchronization();
-				if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){
-					//						moving2 = false; //go forward until line from back sensors is detected
-					motorstop(); //kills all .rotate()
-					nav.driveDiag(-11.6); //drive back sensor dist
-					//						Sound.twoBeeps();
-					nav.turnTo(-90); //turn back to original heading
-					//					}		
+
+				boolean moving2 = true;
+				while(moving2){
+					if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){
+						//						moving2 = false; //go forward until line from back sensors is detected
+						motorstop(); //kills all .rotate()
+						nav.driveDiag(-11.6); //drive back sensor dist
+						//					                        Sound.beepSequence();
+						nav.turnTo(-90); //turn back to original heading
+						moving2 = false;		
+					}
 				}
 
 				gridcount = 0; //dont remove this
@@ -329,7 +335,7 @@ public class Correction {
 		colorSensor.fetchSample(colorData, 0);
 		int light_val = (int)((colorData[0])*100);
 
-		if(light_val <= 34){
+		if(light_val <= 28){
 			return true;
 		}
 		else

@@ -91,7 +91,7 @@ public class WiFiExample {
 	 * 
 	 * 2. TEAM_NUMBER: your project team number
 	 */
-	private static final String SERVER_IP = "192.168.2.15";
+	private static final String SERVER_IP = "192.168.2.33";
 	private static final int TEAM_NUMBER = 3;
 
 	// Enable/disable printing of debug info from the WiFi class
@@ -204,8 +204,8 @@ public class WiFiExample {
 				odometer.start();
 				odometryDisplay.start();
 				
-				lsl.doLocalization();
-				Launcher.Enter_Launch_Position(); //PULLS ARM DOWN
+//				lsl.doLocalization();
+//				Launcher.Enter_Launch_Position(); //PULLS ARM DOWN
 
 //				Button.waitForAnyPress();
 				correction = new Correction(odometer, navigation, colorValueR, colorValueL, colorValueF, leftMotor, rightMotor);
