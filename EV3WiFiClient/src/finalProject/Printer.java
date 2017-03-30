@@ -11,10 +11,10 @@ public class Printer extends Thread {
 //  the loop, screen updating is limited to 5 Hz.
 //
 	
-	private UltrasonicController cont;
+	private PController cont;
 	private final int option;
 	
-	public Printer(int option, UltrasonicController cont) {
+	public Printer(int option, PController cont) {
 		this.cont = cont;
 		this.option = option;
 	}

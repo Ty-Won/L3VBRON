@@ -16,6 +16,7 @@ import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.motor.EV3MediumRegulatedMotor;
 import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
@@ -50,6 +51,7 @@ public class WiFiExample {
 	public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 	public static final EV3LargeRegulatedMotor launcherMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
+	public static final EV3MediumRegulatedMotor usMotor = new EV3MediumRegulatedMotor(LocalEV3.get().getPort("C"));
 	
 	//colorPorts front, left side and right side of the EV3
 	private static final Port colorPortF = LocalEV3.get().getPort("S2");	
@@ -67,10 +69,10 @@ public class WiFiExample {
 	public static Odometer odometer = new Odometer(leftMotor, rightMotor);
 	public static Navigation navigation;
 	public static Correction correction;
+	
 
 	//	public static ballLauncher launch = new ballLauncher(launcherMotor,odometer,navigation);
-	BangBangController bangbang = new BangBangController(leftMotor, rightMotor,
-			bandCenter, bandWidth, motorLow, motorHigh);
+	public static PController cont = new PController(leftMotor, rightMotor, usMotor);
 
 	/*
 	 * We use System.out.println() instead of LCD printing so that full debug

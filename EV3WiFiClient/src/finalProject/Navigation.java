@@ -48,6 +48,8 @@ public class Navigation{
 	public double y_dest;
 	/** The desired heading of the robot. */
 	public double theta_dest;
+	
+	public double return_theta;
 
 	/** The left wheel's motor. Initialized in main class WiFiExample and passed on in Navigation.*/
 	private EV3LargeRegulatedMotor leftMotor = WiFiExample.leftMotor;
@@ -213,6 +215,11 @@ public class Navigation{
 					if(WiFiExample.correction.gridcount==6){
 						localize();
 					}
+					if(WiFiExample.cont.avoidingOb = true)
+					{
+						return_theta = odometer.getAng();
+						avoidOb();
+					}
 				}
 
 				motorstop();
@@ -240,6 +247,11 @@ public class Navigation{
 //						donemoving = false;
 						localize();
 //						donemoving = true;
+					}
+					if(WiFiExample.cont.avoidingOb = true)
+					{
+						return_theta = odometer.getAng();
+						avoidOb();
 					}
 				}
 
@@ -334,6 +346,13 @@ public class Navigation{
 		//		rightMotor.setSpeed(0);
 		motorstop();
 		WiFiExample.correction.localize();
+		travelTo(x_dest,y_dest);
+	}
+	public void avoidOb()
+	{
+		motorstop();
+		WiFiExample.cont.avoidOB();
+		turnTo(return_theta);
 		travelTo(x_dest,y_dest);
 	}
 
