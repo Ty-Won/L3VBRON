@@ -65,7 +65,7 @@ public class WiFiExample {
 	public static EV3ColorSensor colorSensorL = new EV3ColorSensor(colorPortL);
 	public static EV3ColorSensor colorSensorR = new EV3ColorSensor(colorPortR);
 	public static Odometer odometer = new Odometer(leftMotor, rightMotor);
-	public static Navigation navigation = new Navigation(odometer,colorSensorL,colorSensorR);
+	public static Navigation navigation;
 	public static Correction correction;
 
 	//	public static ballLauncher launch = new ballLauncher(launcherMotor,odometer,navigation);
@@ -91,7 +91,7 @@ public class WiFiExample {
 	 * 
 	 * 2. TEAM_NUMBER: your project team number
 	 */
-	private static final String SERVER_IP = "192.168.2.13";
+	private static final String SERVER_IP = "192.168.2.15";
 	private static final int TEAM_NUMBER = 3;
 
 	// Enable/disable printing of debug info from the WiFi class
@@ -184,10 +184,10 @@ public class WiFiExample {
 //			}
 
 			
-
+			navigation = new Navigation(odometer);
 			Localization lsl = new Localization(odometer,navigation, colorValueF, colorData, 
-					colorData2, leftMotor,rightMotor, usValue, usSensor, usData);
-			final TextLCD t = LocalEV3.get().getTextLCD();
+					colorData2, leftMotor, rightMotor, usValue, usSensor, usData);
+			final TextLCD t = LocalEV3.get().getTextLCD(); 
 			t.clear();
 			OdometryDisplay odometryDisplay = new OdometryDisplay(odometer,t);
 			//pass all these values to start the game:
@@ -202,16 +202,20 @@ public class WiFiExample {
 				System.out.println();
 				
 				odometer.start();
-				navigation.start();
 				odometryDisplay.start();
-				lsl.doLocalization(fwdCorner);
-				Sound.beep();
-				Launcher.Enter_Launch_Position(); //PULLS ARM DOWN
-//				Button.waitForAnyPress();
 				
+				lsl.doLocalization();
+				Launcher.Enter_Launch_Position(); //PULLS ARM DOWN
+
+//				Button.waitForAnyPress();
 				correction = new Correction(odometer, navigation, colorValueR, colorValueL, colorValueF, leftMotor, rightMotor);
-				correction.start();
-				navigation.travelTo(304.8, 60.96);
+//					
+				for(int i=0;i<1;i++){
+				navigation.travelTo(0, 2*30.48);
+				navigation.travelTo(6*30.48,2*30.48);
+				navigation.travelTo(6*30.48, 0);
+				navigation.travelTo(0, 0);
+				}
 				
 //				t.drawString(Double.toString(finalProject.Localization.deltaTheta), 0, 2);
 //				t.drawString(Double.toString(odometer.theta), 0, 3);
@@ -224,7 +228,7 @@ public class WiFiExample {
 				
 			}
 			if(defTeam == 3){//play defense:
-				lsl.doLocalization(defCorner);
+				lsl.doLocalization();
 				Defense defense = new Defense(defCorner, w1, w2);
 				defense.startDEF();
 			}
