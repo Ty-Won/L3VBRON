@@ -429,9 +429,11 @@ public class Navigation{
 
 		leftMotor.setSpeed(0);
 		rightMotor.setSpeed(0);
+		leftMotor.forward();
+		rightMotor.forward();
 //		leftMotor.startSynchronization();
-		leftMotor.stop();
-		rightMotor.stop();
+		leftMotor.stop(true);
+		rightMotor.stop(false);
 //		leftMotor.endSynchronization();
 		leftMotor.setSpeed(ROTATE_SPEED);
 		rightMotor.setSpeed(ROTATE_SPEED);
