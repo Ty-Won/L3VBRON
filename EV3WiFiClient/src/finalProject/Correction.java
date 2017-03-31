@@ -66,6 +66,7 @@ public class Correction {
 	public boolean turning = false;
 	public static boolean localizing = false;
 	public boolean stop = false;
+	private Navigation nav1;
 
 	/**
 	 * 
@@ -85,6 +86,7 @@ public class Correction {
 		this.nav = nav;
 		this.leftMotor = leftMotor;
 		this.rightMotor = rightMotor; 
+		nav1 = new Navigation(odo);
 	}
 
 	/**
@@ -202,16 +204,17 @@ public class Correction {
 		synchronized(leftMotor){
 			synchronized(rightMotor){
 
-				motorstop();
+//				motorstop();
 				//		Sound.twoBeeps();
-				leftMotor.synchronizeWith(new RegulatedMotor[] {rightMotor});
+				//				leftMotor.synchronizeWith(new RegulatedMotor[] {rightMotor});
 				//				boolean moving = true;
 				//				while(moving){ //keep going until line detected
 
-				leftMotor.startSynchronization();
+				//				leftMotor.startSynchronization();
+				motorstop();
 				leftMotor.rotate(-convertDistance(wheel_radius, 600), true);
 				rightMotor.rotate(-convertDistance(wheel_radius, 600), true);
-				rightMotor.endSynchronization();
+				//				rightMotor.endSynchronization();
 
 				boolean moving = true;
 				while(moving){
@@ -219,17 +222,19 @@ public class Correction {
 						//						moving = false; //if line detected from back sensors, stop going backward
 						motorstop(); //kills all .rotate()
 						nav.driveDiag(-11.6); //go backward sensor dist for center of rotation to be at intersection
-						//											Sound.beepSequence();
+						motorstop();
 						nav.turnTo(90);//turn right
+						motorstop();
 						moving = false;
 					}
 				}
+				//				motorstop();
 
 				//				while(moving2){ //keep going until line detected
-				leftMotor.startSynchronization();
+				//				leftMotor.startSynchronization();
 				leftMotor.rotate(convertDistance(wheel_radius, 600), true);
 				rightMotor.rotate(convertDistance(wheel_radius, 600), true);
-				leftMotor.endSynchronization();
+				//				leftMotor.endSynchronization();
 
 				boolean moving2 = true;
 				while(moving2){
@@ -237,11 +242,14 @@ public class Correction {
 						//						moving2 = false; //go forward until line from back sensors is detected
 						motorstop(); //kills all .rotate()
 						nav.driveDiag(-11.6); //drive back sensor dist
-						//					                        Sound.beepSequence();
+						motorstop();
 						nav.turnTo(-90); //turn back to original heading
-						moving2 = false;		
+						motorstop();
+						moving2 = false;
 					}
 				}
+
+				//				motorstop();
 
 				gridcount = 0; //dont remove this
 				localizing = false;
@@ -277,7 +285,7 @@ public class Correction {
 		// if the robot is going (decreasing) along the x-direction, update the x-position and the heading
 		else if (odo.getAng()>270-angleThreshold && odo.getAng()<270+angleThreshold){
 			// determine which line the robot has crossed by dividing the y-position returned by the odometer
-			line = (int)(((x)+(tilelength/2)) / tilelength); 
+			line = (int)(((x)+19) / tilelength); //MAKE SURE 19 IS OKAY
 			// multiply by the length of a tile to know the y-position
 			position = (line*tilelength)-11.6;
 			//			if(position<0){
@@ -289,7 +297,7 @@ public class Correction {
 		// if the robot is going (decreasing) along the y-direction, update the y-position and the heading
 		else if (odo.getAng()>180-angleThreshold && odo.getAng()<180+angleThreshold) {
 			// determine which line the robot has crossed by dividing the y-position returned by the odometer
-			line = (int)(((y)+(tilelength/2)) / tilelength);		
+			line = (int)(((y)+(19)) / tilelength);	//MAKE SURE 19 IS OKAY	
 			// multiply by the length of a tile to know the y-position
 			position = (line*tilelength)-11.6;
 			//			if(position<0){
@@ -345,8 +353,10 @@ public class Correction {
 	public void motorstop(){
 		leftMotor.setSpeed(0);
 		rightMotor.setSpeed(0);
+		//		leftMotor.startSynchronization();
 		leftMotor.stop();
 		rightMotor.stop();
+		//		leftMotor.endSynchronization();
 		leftMotor.setSpeed(ROTATE_SPEED);
 		rightMotor.setSpeed(ROTATE_SPEED);
 	}

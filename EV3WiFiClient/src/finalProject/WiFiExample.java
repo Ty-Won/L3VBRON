@@ -210,7 +210,7 @@ public class WiFiExample {
 //				Button.waitForAnyPress();
 				correction = new Correction(odometer, navigation, colorValueR, colorValueL, colorValueF, leftMotor, rightMotor);
 //					
-				for(int i=0;i<1;i++){
+				for(int i=0;i<6;i++){
 				navigation.travelTo(0, 2*30.48);
 				navigation.travelTo(6*30.48,2*30.48);
 				navigation.travelTo(6*30.48, 0);

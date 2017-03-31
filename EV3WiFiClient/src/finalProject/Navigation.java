@@ -80,7 +80,7 @@ public class Navigation{
 
 	public Navigation(Odometer odometer){ //constructor
 		this.odometer = odometer;
-		leftMotor.synchronizeWith(new RegulatedMotor[] {rightMotor});
+//		leftMotor.synchronizeWith(new RegulatedMotor[] {rightMotor});
 	}
 
 	/**
@@ -185,14 +185,14 @@ public class Navigation{
 		synchronized(leftMotor){
 			synchronized(rightMotor){
 
-				if(stop){
-					return;
-				}
+//				if(stop){
+//					return;
+//				}
 				//set both motors to forward speed desired
 				leftMotor.setSpeed(FORWARD_SPEED);
 				rightMotor.setSpeed(FORWARD_SPEED);
-				leftMotor.setAcceleration(3000);
-				rightMotor.setAcceleration(3000);
+				leftMotor.setAcceleration(1000);
+				rightMotor.setAcceleration(1000);
 
 				//X-travel
 				if(Math.abs(delta_x)<1){
@@ -206,15 +206,16 @@ public class Navigation{
 					}
 				}
 
-				leftMotor.startSynchronization();
+//				leftMotor.startSynchronization();
 				leftMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_x)), true);
 				rightMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_x)), true);
-				leftMotor.endSynchronization();
+//				leftMotor.endSynchronization();
 
 				//might need to add a travel to after while loop to make sure it's in the right location
-				while(leftMotor.isMoving()||rightMotor.isMoving()){
+				while(leftMotor.isMoving()&&rightMotor.isMoving()){
 					WiFiExample.correction.LightCorrection();
-					if(WiFiExample.correction.gridcount==6){
+					if(WiFiExample.correction.gridcount==3){
+						motorstop();
 						localize();
 
 					}
@@ -234,15 +235,16 @@ public class Navigation{
 					}
 				}
 
-				leftMotor.startSynchronization();
+//				leftMotor.startSynchronization();
 				leftMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_y)), true);
 				rightMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_y)), true);
-				leftMotor.endSynchronization();
+//				leftMotor.endSynchronization();
 
 				//might need to add a travel to after while loop to make sure it's in the right location
-				while(leftMotor.isMoving()||rightMotor.isMoving()){
+				while(leftMotor.isMoving()&&rightMotor.isMoving()){
 					WiFiExample.correction.LightCorrection();
-					if(WiFiExample.correction.gridcount==6){
+					if(WiFiExample.correction.gridcount==3){
+						motorstop();
 						localize();
 					}
 				}
@@ -260,28 +262,26 @@ public class Navigation{
 		synchronized(leftMotor){
 			synchronized(rightMotor){
 				//		stopNav();
-				if(stop){
-					return;
-				}
-
+//				if(stop){
+//					return;
+//				}
+				motorstop();
+				
 				//set both motors to forward speed desired
 				leftMotor.setSpeed(FORWARD_SPEED);
 				rightMotor.setSpeed(FORWARD_SPEED);
-				leftMotor.setAcceleration(3000);
-				rightMotor.setAcceleration(3000);
+				leftMotor.setAcceleration(1000);
+				rightMotor.setAcceleration(1000);
 
-				leftMotor.startSynchronization();
+//				leftMotor.startSynchronization();
 				leftMotor.rotate(convertDistance(wheel_radius, travelDist), true);
 				rightMotor.rotate(convertDistance(wheel_radius, travelDist), true);
-				leftMotor.endSynchronization();
-
+//				leftMotor.endSynchronization();
+				
 				while(leftMotor.isMoving()||rightMotor.isMoving()){
-					if(stop){
-						turning = false;
-						return;
 					}
 					motorstop();
-				}
+//				}
 
 			}
 		}
@@ -305,17 +305,17 @@ public class Navigation{
 
 				turning = true;
 				Sound.twoBeeps(); //DONT REMOVE THIS
-
+				motorstop();
 				//make robot turn to angle theta:
 				leftMotor.setSpeed(ROTATE_SPEED);
-				leftMotor.setAcceleration(2000);
+				leftMotor.setAcceleration(1000);
 				rightMotor.setSpeed(ROTATE_SPEED);
-				rightMotor.setAcceleration(2000);
+				rightMotor.setAcceleration(1000);
 
-				leftMotor.startSynchronization();
+//				leftMotor.startSynchronization();
 				leftMotor.rotate(convertAngle(wheel_radius, width, theta), true);
 				rightMotor.rotate(-convertAngle(wheel_radius, width, theta), true);
-				leftMotor.endSynchronization();
+//				leftMotor.endSynchronization();
 
 				while(leftMotor.isMoving()||rightMotor.isMoving()){
 					if(stop){
@@ -326,10 +326,11 @@ public class Navigation{
 				motorstop();
 
 				//returns default acceleration values after turn
-				leftMotor.setAcceleration(3000);
-				rightMotor.setAcceleration(3000);
+				leftMotor.setAcceleration(1000);
+				rightMotor.setAcceleration(1000);
 				leftMotor.setSpeed(FORWARD_SPEED);
 				rightMotor.setSpeed(FORWARD_SPEED);
+				Sound.twoBeeps();
 			}
 		}
 
@@ -341,7 +342,6 @@ public class Navigation{
 		//		rightMotor.setSpeed(0);
 		motorstop();
 		WiFiExample.correction.localize();
-		Sound.beepSequenceUp();;
 		travelTo(x_dest,y_dest);
 	}
 
@@ -384,7 +384,7 @@ public class Navigation{
 			return;
 		}
 		odo_theta = odometer.getAng();
-
+		
 		//subtract odo_theta from theta_dest:
 		double theta_corr = angle - odo_theta;
 		//DIRECTING ROBOT TO CORRECT ANGLE: 
@@ -423,12 +423,14 @@ public class Navigation{
 
 		leftMotor.setSpeed(0);
 		rightMotor.setSpeed(0);
+//		leftMotor.startSynchronization();
 		leftMotor.stop();
 		rightMotor.stop();
+//		leftMotor.endSynchronization();
 		leftMotor.setSpeed(ROTATE_SPEED);
 		rightMotor.setSpeed(ROTATE_SPEED);
-		leftMotor.setAcceleration(3000);
-		rightMotor.setAcceleration(3000);
+		leftMotor.setAcceleration(1000);
+		rightMotor.setAcceleration(1000);
 	}
 
 	/**
