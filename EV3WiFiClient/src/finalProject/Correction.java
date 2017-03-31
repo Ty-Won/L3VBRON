@@ -197,7 +197,7 @@ public class Correction {
 
 		//		nav.stop=true;
 		localizing = true;
-
+		
 		//synchronize both motors so they can only be accessed by one thread (the Correction thread in this case)
 		synchronized(leftMotor){
 			synchronized(rightMotor){
@@ -255,8 +255,29 @@ public class Correction {
 //				motorstop();
 				nav.turnTo(-90); //turn back to original heading
 //				motorstop();
-
-				//				motorstop();
+				
+				
+				double X_ini = odo.getX();
+				double Y_ini = odo.getY();
+				
+				if(X_ini<-tilelength/2){
+					X_ini = X_ini-tilelength/2;
+				}
+				else{
+					X_ini = X_ini+tilelength/2;
+				}
+				
+				if(Y_ini<-tilelength/2){
+					Y_ini = Y_ini-tilelength/2;
+				}
+				else{
+					Y_ini = Y_ini+tilelength/2;
+				}
+				
+				//calculate the position of the gridline intersection the robot just crossed
+				double[] nearestIntersection={0,0,0};
+				nearestIntersection=getIntersection(X_ini, Y_ini);
+				odo.setPosition(nearestIntersection, new boolean[]{true, true, false});
 
 				gridcount = 0; //dont remove this
 				localizing = false;
@@ -374,17 +395,17 @@ public class Correction {
 	 * @param y the current position in the y direction
 	 * @return the location of the intersection closest to the current postion
 	 */
-	//	public double[] getIntersection(double x, double y){
-	//		double[] intersection={0.0,0.0,0.0};
-	//		double lineX = (int)(x)/tilelength;
-	//		double lineY = (int)(y)/tilelength;
-	//
-	//		intersection[0]=lineX*tilelength;
-	//		intersection[1]=lineY*tilelength;
-	//		intersection[2]=0.0;
-	//
-	//		return intersection;
-	//	}
+		public double[] getIntersection(double x, double y){
+			double[] intersection={0.0,0.0,0.0};
+			double lineX = (int)((x)/tilelength);
+			double lineY = (int)((y)/tilelength);
+	
+			intersection[0]=lineX*tilelength;
+			intersection[1]=lineY*tilelength;
+			intersection[2]=0.0;
+	
+			return intersection;
+		}
 
 	/**
 	 * This method should turn the robot to the given heading. Very similar to the method of the same name in 

@@ -214,7 +214,7 @@ public class Navigation{
 				//might need to add a travel to after while loop to make sure it's in the right location
 				while(leftMotor.isMoving()&&rightMotor.isMoving()){
 					WiFiExample.correction.LightCorrection();
-					if(WiFiExample.correction.gridcount==3){
+					if(WiFiExample.correction.gridcount==7){
 //						motorstop();
 						localize();
 
@@ -243,7 +243,7 @@ public class Navigation{
 				//might need to add a travel to after while loop to make sure it's in the right location
 				while(leftMotor.isMoving()&&rightMotor.isMoving()){
 					WiFiExample.correction.LightCorrection();
-					if(WiFiExample.correction.gridcount==3){
+					if(WiFiExample.correction.gridcount==7){
 //						motorstop();
 						localize();
 					}
