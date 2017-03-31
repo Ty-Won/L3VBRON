@@ -109,17 +109,17 @@ public class Navigation{
 
 		drive(delta_x,delta_y);
 
-		odo_x = odometer.getX();
-		odo_y = odometer.getY();
-		odo_theta = odometer.getAng();
-		x_dest = x;
-		y_dest = y;
-
-		//calculate the distance we want the robot to travel in x and y 
-		delta_y = y_dest-odo_y;
-		delta_x = x_dest-odo_x;
-
-		drive(delta_x,delta_y);
+//		odo_x = odometer.getX();
+//		odo_y = odometer.getY();
+//		odo_theta = odometer.getAng();
+//		x_dest = x;
+//		y_dest = y;
+//
+//		//calculate the distance we want the robot to travel in x and y 
+//		delta_y = y_dest-odo_y;
+//		delta_x = x_dest-odo_x;
+//
+//		drive(delta_x,delta_y);
 	}
 
 	/**
@@ -215,13 +215,13 @@ public class Navigation{
 				while(leftMotor.isMoving()&&rightMotor.isMoving()){
 					WiFiExample.correction.LightCorrection();
 					if(WiFiExample.correction.gridcount==3){
-						motorstop();
+//						motorstop();
 						localize();
 
 					}
 				}
 
-				motorstop();
+//				motorstop();
 
 				//Y-travel
 				if(Math.abs(delta_y)<1){
@@ -244,12 +244,12 @@ public class Navigation{
 				while(leftMotor.isMoving()&&rightMotor.isMoving()){
 					WiFiExample.correction.LightCorrection();
 					if(WiFiExample.correction.gridcount==3){
-						motorstop();
+//						motorstop();
 						localize();
 					}
 				}
 
-				motorstop();
+//				motorstop();
 			}
 		}
 	}
@@ -265,7 +265,7 @@ public class Navigation{
 //				if(stop){
 //					return;
 //				}
-				motorstop();
+//				motorstop();
 				
 				//set both motors to forward speed desired
 				leftMotor.setSpeed(FORWARD_SPEED);
@@ -278,9 +278,10 @@ public class Navigation{
 				rightMotor.rotate(convertDistance(wheel_radius, travelDist), true);
 //				leftMotor.endSynchronization();
 				
-				while(leftMotor.isMoving()||rightMotor.isMoving()){
-					}
-					motorstop();
+				leftMotor.waitComplete();
+				rightMotor.waitComplete();
+				
+//					motorstop();
 //				}
 
 			}
@@ -305,7 +306,7 @@ public class Navigation{
 
 				turning = true;
 				Sound.twoBeeps(); //DONT REMOVE THIS
-				motorstop();
+//				motorstop();
 				//make robot turn to angle theta:
 				leftMotor.setSpeed(ROTATE_SPEED);
 				leftMotor.setAcceleration(1000);
@@ -317,13 +318,16 @@ public class Navigation{
 				rightMotor.rotate(-convertAngle(wheel_radius, width, theta), true);
 //				leftMotor.endSynchronization();
 
-				while(leftMotor.isMoving()||rightMotor.isMoving()){
-					if(stop){
-						turning = false;
-						return;
-					}
-				}
-				motorstop();
+//				while(leftMotor.isMoving()||rightMotor.isMoving()){
+//					if(stop){
+//						turning = false;
+//						return;
+//					}
+//				}
+				leftMotor.waitComplete();
+				rightMotor.waitComplete();
+				
+//				motorstop();
 
 				//returns default acceleration values after turn
 				leftMotor.setAcceleration(1000);
@@ -340,7 +344,7 @@ public class Navigation{
 	public void localize(){
 		//		leftMotor.setSpeed(0);
 		//		rightMotor.setSpeed(0);
-		motorstop();
+//		motorstop();
 		WiFiExample.correction.localize();
 		travelTo(x_dest,y_dest);
 	}
@@ -356,7 +360,7 @@ public class Navigation{
 	 * @return the converted distance
 	 */
 	private static int convertDistance(double radius, double distance) {
-		return ((int) (100*(180.0 * distance) / (Math.PI * radius)))/100;
+		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 
 	/**

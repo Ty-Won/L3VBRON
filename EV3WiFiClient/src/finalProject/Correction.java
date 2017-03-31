@@ -66,7 +66,6 @@ public class Correction {
 	public boolean turning = false;
 	public static boolean localizing = false;
 	public boolean stop = false;
-	private Navigation nav1;
 
 	/**
 	 * 
@@ -86,7 +85,6 @@ public class Correction {
 		this.nav = nav;
 		this.leftMotor = leftMotor;
 		this.rightMotor = rightMotor; 
-		nav1 = new Navigation(odo);
 	}
 
 	/**
@@ -127,7 +125,7 @@ public class Correction {
 		while(!leftline  && !rightline){
 			leftline = lineDetected(colorSensorL, colorDataL);
 			rightline = lineDetected(colorSensorR, colorDataR);
-			if(leftMotor.isMoving()==false){
+			if(leftMotor.isMoving()==false||rightMotor.isMoving()==false){
 				return;
 			}
 
@@ -204,50 +202,59 @@ public class Correction {
 		synchronized(leftMotor){
 			synchronized(rightMotor){
 
-//				motorstop();
+				//				motorstop();
 				//		Sound.twoBeeps();
 				//				leftMotor.synchronizeWith(new RegulatedMotor[] {rightMotor});
 				//				boolean moving = true;
 				//				while(moving){ //keep going until line detected
 
 				//				leftMotor.startSynchronization();
-				motorstop();
-				leftMotor.rotate(-convertDistance(wheel_radius, 600), true);
-				rightMotor.rotate(-convertDistance(wheel_radius, 600), true);
+//				motorstop();
+//				Sound.beepSequenceUp();
+				leftMotor.rotate(-convertDistance(wheel_radius, 100), true);
+				rightMotor.rotate(-convertDistance(wheel_radius, 100), true);
 				//				rightMotor.endSynchronization();
-
-				boolean moving = true;
-				while(moving){
-					if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){	//at this point, the light sensors at back detected a line so we want to localize
-						//						moving = false; //if line detected from back sensors, stop going backward
-						motorstop(); //kills all .rotate()
-						nav.driveDiag(-11.6); //go backward sensor dist for center of rotation to be at intersection
-						motorstop();
-						nav.turnTo(90);//turn right
-						motorstop();
-						moving = false;
-					}
+				
+				boolean left = false; 
+				boolean right= false; 
+				while(!left&&!right){
+					left = lineDetected(colorSensorL, colorDataL);
+					right = lineDetected(colorSensorR, colorDataR);	//at this point, the light sensors at back detected a line so we want to localize
 				}
-				//				motorstop();
+//				Sound.beepSequenceUp();
+				motorstop(); //kills all .rotate()
+				nav.driveDiag(-11.6); //go backward sensor dist for center of rotation to be at intersection
+//				motorstop();
+				nav.turnTo(90);//turn right
+//				motorstop();
+
+
 
 				//				while(moving2){ //keep going until line detected
 				//				leftMotor.startSynchronization();
-				leftMotor.rotate(convertDistance(wheel_radius, 600), true);
-				rightMotor.rotate(convertDistance(wheel_radius, 600), true);
+				leftMotor.rotate(convertDistance(wheel_radius, 100), true);
+				rightMotor.rotate(convertDistance(wheel_radius, 100), true);
 				//				leftMotor.endSynchronization();
 
-				boolean moving2 = true;
-				while(moving2){
-					if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){
-						//						moving2 = false; //go forward until line from back sensors is detected
-						motorstop(); //kills all .rotate()
-						nav.driveDiag(-11.6); //drive back sensor dist
-						motorstop();
-						nav.turnTo(-90); //turn back to original heading
-						motorstop();
-						moving2 = false;
-					}
+				//				boolean moving2 = true;
+				//				while(moving2){
+				//					if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){
+				//						moving2 = false; //go forward until line from back sensors is detected
+				//					}
+				//				}
+
+				boolean left2 = false; 
+				boolean right2= false; 
+				while(!left2&&!right2){
+					left2 = lineDetected(colorSensorL, colorDataL);
+					right2 = lineDetected(colorSensorR, colorDataR);	//at this point, the light sensors at back detected a line so we want to localize
 				}
+
+				motorstop(); //kills all .rotate()
+				nav.driveDiag(-11.6); //drive back sensor dist
+//				motorstop();
+				nav.turnTo(-90); //turn back to original heading
+//				motorstop();
 
 				//				motorstop();
 
