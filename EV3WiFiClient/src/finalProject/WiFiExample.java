@@ -34,7 +34,7 @@ import lejos.robotics.SampleProvider;
  */
 public class WiFiExample {
 	public static final double WHEEL_RADIUS = 2.0768;
-	public static final double TRACK = 10.60; //changed it
+	public static final double TRACK = 10.11; //changed it
 	public static final int FORWARD_SPEED = 250;
 	public static final int ROTATE_SPEED = 150;
 	private static final int bandCenter = 35;			// Offset from the wall (cm)
@@ -210,11 +210,30 @@ public class WiFiExample {
 //				Button.waitForAnyPress();
 				correction = new Correction(odometer, navigation, colorValueR, colorValueL, colorValueF, leftMotor, rightMotor);
 //					
-				for(int i=0;i<6;i++){
-				navigation.travelTo(0, 2*30.48);
-				navigation.travelTo(6*30.48,2*30.48);
-				navigation.travelTo(6*30.48, 0);
+				for(int i=0;i<2;i++){
+//				navigation.travelTo(0, 1*30.48);
+//				correction.localize();
+//				navigation.travelTo(0, 2*30.48);
+//				correction.localize();
+//				
+//				navigation.travelTo(6*30.48,2*30.48);
+//				correction.localize();
+//				navigation.travelTo(6*30.48, 0);
+//				correction.localize();
+//				navigation.travelTo(0, 0);
+					
+				navigation.travelTo(6*30.48, 2*30.48);
+				correction.localize();
+				navigation.travelTo(6*30.48, 2*30.48);
+//				navigation.travelTo(6*30.48, 2*30.48);
 				navigation.travelTo(0, 0);
+				correction.localize();
+				navigation.travelTo(0, 0);
+//				navigation.travelTo(0, 0);
+					
+					
+					
+					
 				}
 				
 //				t.drawString(Double.toString(finalProject.Localization.deltaTheta), 0, 2);

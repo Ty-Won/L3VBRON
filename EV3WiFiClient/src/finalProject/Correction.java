@@ -223,7 +223,7 @@ public class Correction {
 				}
 //				Sound.beepSequenceUp();
 				motorstop(); //kills all .rotate()
-				nav.driveDiag(-11.6); //go backward sensor dist for center of rotation to be at intersection
+				nav.driveDiag(-11); //go backward sensor dist for center of rotation to be at intersection
 //				motorstop();
 				nav.turnTo(90);//turn right
 //				motorstop();
@@ -251,7 +251,7 @@ public class Correction {
 				}
 
 				motorstop(); //kills all .rotate()
-				nav.driveDiag(-11.6); //drive back sensor dist
+				nav.driveDiag(-11); //drive back sensor dist
 //				motorstop();
 				nav.turnTo(-90); //turn back to original heading
 //				motorstop();

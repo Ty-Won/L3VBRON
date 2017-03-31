@@ -214,14 +214,14 @@ public class Navigation{
 				//might need to add a travel to after while loop to make sure it's in the right location
 				while(leftMotor.isMoving()&&rightMotor.isMoving()){
 					WiFiExample.correction.LightCorrection();
-					if(WiFiExample.correction.gridcount==7){
+					if(WiFiExample.correction.gridcount==12){
 //						motorstop();
 						localize();
 
 					}
 				}
 
-//				motorstop();
+				motorstop();
 
 				//Y-travel
 				if(Math.abs(delta_y)<1){
@@ -243,13 +243,15 @@ public class Navigation{
 				//might need to add a travel to after while loop to make sure it's in the right location
 				while(leftMotor.isMoving()&&rightMotor.isMoving()){
 					WiFiExample.correction.LightCorrection();
-					if(WiFiExample.correction.gridcount==7){
+					if(WiFiExample.correction.gridcount==12){
 //						motorstop();
 						localize();
+						return;
 					}
 				}
-
-//				motorstop();
+//				localize();
+//				travelTo(x_dest, y_dest);
+				motorstop();
 			}
 		}
 	}
