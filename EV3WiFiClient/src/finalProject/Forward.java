@@ -40,10 +40,12 @@ public class Forward {
 	public static final EV3LargeRegulatedMotor leftMotor = WiFiExample.leftMotor;
 	/**The right motor, which is connected to output D */
 	public static final EV3LargeRegulatedMotor rightMotor = WiFiExample.rightMotor;
+	public static final EV3LargeRegulatedMotor launcherMotor = WiFiExample.launcherMotor;
 	/**The navigation program for the robot */
 	public static Navigation nav;
 	/** The Ultrasonic Sensor */
 	private static final Port usPort = LocalEV3.get().getPort("S1");
+	Launcher LNCHR = new Launcher(launcherMotor);
 //	/** The motor for the ball launcher */
 //	public static Launcher launch =  WiFiExample.launch;
 	/** 
@@ -75,7 +77,7 @@ public class Forward {
 		nav.travelTo(CENTER_X_COORD*TILE_LENGTH, 0);
 		nav.travelTo(CENTER_X_COORD*TILE_LENGTH, ((FIELD_DIST-OUTER_TILES-fwdLinePosition)*TILE_LENGTH)-ROBOT_FRONT_TOCENTER_DIST);
 		nav.turnToSmart(0); //faceTarget
-		Launcher.Fire(4);
+		LNCHR.Fire(4);
 		
 		
 		

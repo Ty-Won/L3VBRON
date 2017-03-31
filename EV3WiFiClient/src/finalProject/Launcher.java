@@ -1,6 +1,5 @@
 package finalProject;
 
-import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 /**
@@ -16,14 +15,19 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
  * @version 1.0
  */
 public class Launcher {
-	public static final EV3LargeRegulatedMotor launcherMotor = WiFiExample.launcherMotor;
-
+	
+	public EV3LargeRegulatedMotor launcherMotor;
+	
+	public Launcher(EV3LargeRegulatedMotor LauncherMotor){
+		this.launcherMotor = LauncherMotor;
+	}
+	
 	/**
 	 * This should move the launch into a position where it can launch the
 	 * ball. The arm should be pulled back, stretching the rubber bands and 
 	 * increasing the available energy to fire the ball.
 	 */
-	public static void Enter_Launch_Position(){
+	public void Enter_Launch_Position(){
 		launcherMotor.setAcceleration(1000);
 		launcherMotor.setSpeed(1000);
 		launcherMotor.rotate(120,false);
@@ -36,7 +40,7 @@ public class Launcher {
 	 * 
 	 * @param dist the distance to the goal in number of tiles
 	 */
-	public static void Fire(int dist){
+	public void Fire(int dist){
 		// Fire Ball at speed calculated by Calculate_Speed method.
 		int speed = Calculate_Speed(dist);
 		// Release Ball at angle calculated by Calculate_Angle method.
