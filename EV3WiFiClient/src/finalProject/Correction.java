@@ -128,7 +128,9 @@ public class Correction {
 			if(leftMotor.isMoving()==false||rightMotor.isMoving()==false){
 				return;
 			}
-
+			if(WiFiExample.cont.avoidingOb){
+				return;
+			}
 			//if one of them starts seeing a line, this loop exits
 			//			pauseWhileTurning();
 		}
@@ -491,6 +493,88 @@ public class Correction {
 	//	private static int convertAngle(double radius, double width, double angle) {
 	//		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	//	}
+	
+	
+	public void localizeFWD(){
+
+		//		nav.stop=true;
+		localizing = true;
+		
+		//synchronize both motors so they can only be accessed by one thread (the Correction thread in this case)
+		synchronized(leftMotor){
+			synchronized(rightMotor){
+				leftMotor.rotate(convertDistance(wheel_radius, 100), true);
+				rightMotor.rotate(convertDistance(wheel_radius, 100), true);
+				boolean left = false; 
+				boolean right= false; 
+				while(!left&&!right){
+					left = lineDetected(colorSensorL, colorDataL);
+					right = lineDetected(colorSensorR, colorDataR);	//at this point, the light sensors at back detected a line so we want to localize
+				}
+//				Sound.beepSequenceUp();
+				motorstop(); //kills all .rotate()
+				nav.driveDiag(-11.6); //go backward sensor dist for center of rotation to be at intersection
+//				motorstop();
+				nav.turnTo(90);//turn right
+//				motorstop();
+
+
+
+				//				while(moving2){ //keep going until line detected
+				//				leftMotor.startSynchronization();
+				leftMotor.rotate(convertDistance(wheel_radius, 100), true);
+				rightMotor.rotate(convertDistance(wheel_radius, 100), true);
+				//				leftMotor.endSynchronization();
+
+				//				boolean moving2 = true;
+				//				while(moving2){
+				//					if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){
+				//						moving2 = false; //go forward until line from back sensors is detected
+				//					}
+				//				}
+
+				boolean left2 = false; 
+				boolean right2= false; 
+				while(!left2&&!right2){
+					left2 = lineDetected(colorSensorL, colorDataL);
+					right2 = lineDetected(colorSensorR, colorDataR);	//at this point, the light sensors at back detected a line so we want to localize
+				}
+
+				motorstop(); //kills all .rotate()
+				nav.driveDiag(-11.6); //drive back sensor dist
+//				motorstop();
+				nav.turnTo(-90); //turn back to original heading
+//				motorstop();
+				
+				
+				double X_ini = odo.getX();
+				double Y_ini = odo.getY();
+				
+				if(X_ini<-tilelength/2){
+					X_ini = X_ini-tilelength/2;
+				}
+				else{
+					X_ini = X_ini+tilelength/2;
+				}
+				
+				if(Y_ini<-tilelength/2){
+					Y_ini = Y_ini-tilelength/2;
+				}
+				else{
+					Y_ini = Y_ini+tilelength/2;
+				}
+				
+				//calculate the position of the gridline intersection the robot just crossed
+				double[] nearestIntersection={0,0,0};
+				nearestIntersection=getIntersection(X_ini, Y_ini);
+				odo.setPosition(nearestIntersection, new boolean[]{true, true, false});
+
+				gridcount = 0; //dont remove this
+				localizing = false;
+				//				nav.stop=false;
+			}
+		}
+	}
 
 
 }

@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import lejos.hardware.motor.*;
 
-public class BangBangController implements UltrasonicController{
+public class BangBangController{
 	private final int bandCenter, bandwidth;
 	private final int motorLow, motorHigh;
 	private EV3LargeRegulatedMotor leftMotor, rightMotor;
@@ -27,7 +27,7 @@ public class BangBangController implements UltrasonicController{
 		rightMotor.forward();
 	}
 	
-	@Override
+	
 	public void processUSData(int distance) {
 		
 		//Basic filter implemented in order to reduce the amount of false positives/negatives
@@ -111,7 +111,6 @@ public class BangBangController implements UltrasonicController{
 		}
 	}
 
-	@Override
 	public int readUSDistance() {
 		return FilteredDistance;
 	}

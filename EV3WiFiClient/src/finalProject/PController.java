@@ -1,93 +1,245 @@
 package finalProject;
 
+import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.motor.EV3MediumRegulatedMotor;
+import lejos.hardware.sensor.SensorModes;
+import lejos.robotics.SampleProvider;
 
-public class PController implements UltrasonicController {
-	
-	private final int bandCenter, bandwidth;
+public class PController extends Thread{
 	private final int motorStraight = 300, FILTER_OUT = 20;
 	private EV3LargeRegulatedMotor leftMotor, rightMotor;
-	private int filterControl;
+	private EV3MediumRegulatedMotor usMotor;
+	private int filterControl, motorShift;
 	int FilteredDistance;
-	
-	public PController(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
-					   int bandCenter, int bandwidth) {
+	private UltrasonicPoller usPoller ;
+	private int distance;
+	public boolean avoidingOb;
+	private static final int FORWARD_SPEED = WiFiExample.FORWARD_SPEED;
+	private SampleProvider usValue;
+	private SensorModes usSensor;
+	private float[] usData;
+	double wheel_radius = WiFiExample.WHEEL_RADIUS;
+	private static final int ROTATE_SPEED = WiFiExample.ROTATE_SPEED;
+
+	public PController(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, EV3MediumRegulatedMotor usMotor,
+			UltrasonicPoller usPoller, SampleProvider usValue, SensorModes usSensor, float[] usData) {
 		//Default Constructor
-		this.bandCenter = bandCenter;
-		this.bandwidth = bandwidth;
 		this.leftMotor = leftMotor;
 		this.rightMotor = rightMotor;
-		leftMotor.setSpeed(motorStraight);					// Initalize motor rolling forward
-		rightMotor.setSpeed(motorStraight);
-		leftMotor.forward();
-		rightMotor.forward();
+		this.usMotor = usMotor;
+		this.usPoller = usPoller;
+		//leftMotor.setSpeed(motorStraight);					// Initalize motor rolling forward
+		//rightMotor.setSpeed(motorStraight);
+		//leftMotor.forward();
+		//rightMotor.forward();
 		filterControl = 0;
+		motorShift = 0;
+		this.usValue=usValue;
+		this.usSensor = usSensor;
+		this.usData = usData;
 	}
-	
-	@Override
-	public void processUSData(int distance) {
+	public void run(){
+//		usMotor.rotate(-30);
+		int x = 255;
+		while(true){
+			x = readUSDistance();
+			System.out.println(distance);
+			avoidingOb = processUSData(x);
+			try { Thread.sleep(50); } catch(Exception e){}	
+		}
+	}
 
-		if(distance == 21474)
-			// sensor "error" value was passed, replace this value by the set bandCenter 
-			// so the robot keeps moving in a straight line
-			FilteredDistance=bandCenter;
-		else if (distance >= bandCenter+40 && filterControl < FILTER_OUT) {
-			// abnormal value (in theory, the robot shoudln't deviate that much from the wall)
-			//do not set the distance var, however do increment the filter value
+	public boolean processUSData(int distance) {
+
+		if (distance >= 255 && filterControl < FILTER_OUT) {
+			// bad value, do not set the distance var, however do increment the
+			// filter value
 			filterControl++;
-		} else if (distance >= bandCenter+40 && filterControl > FILTER_OUT) {
+		} else if (distance >= 255) {
 			// We have repeated large values, so there must actually be nothing
 			// there: leave the distance alone
-			FilteredDistance = distance;
-		}	
-		 else {
+			this.distance = distance;
+		} else {
 			// distance went below 255: reset filter and leave
 			// distance alone.
 			filterControl = 0;
-			FilteredDistance = distance;
+			this.distance = distance;
 		}
 
-		
-		int distError=FilteredDistance-bandCenter;
-		
-		// Function used to calculate by how much the speed of the robot should be increased or decreased, 
-		// depending on how far the robot is from the target distance from the wall
-		int deltaspeed=Math.abs(distError*15);
-		
-		// Sets a maximum increase or decrease in speed of 200
-		if (deltaspeed>200)
-			deltaspeed=200;
-		
-		// If the distance separating the robot and the wall is between a center margin of error (bandwidth), 
-		// then the robot keeps moving in a straight line
-		if(Math.abs(distError)<=bandwidth){
-			leftMotor.setSpeed(motorStraight);
-			rightMotor.setSpeed(motorStraight);
-			leftMotor.forward();
-			rightMotor.forward();
+		if(motorShift > 9 && this.distance > 25)
+		{
+			if(usMotor.getTachoCount() < 0)
+			{
+		//		usMotor.rotate(80);
+				motorShift = 0;
+				return false;
+			}
+			else
+			{
+		//		usMotor.rotate(-80);
+				motorShift = 0;
+				return false;
+			}
 		}
-		
-		//If the disterror is positive (meaning the robot is too far from the wall), then the robot must turn left
-		else if(distError>0){
-			leftMotor.setSpeed(motorStraight-deltaspeed);
-			rightMotor.setSpeed(motorStraight+deltaspeed);
-			leftMotor.forward();
-			rightMotor.forward();
+		else if(this.distance > 25)
+		{
+			motorShift++;
+			return false;
 		}
-		
-		//If the disterror is negative (meaning the robot is too close to the wall), then the robot must turn right
-		else if(distError<0){
-			leftMotor.setSpeed(motorStraight+deltaspeed);
-			rightMotor.setSpeed(motorStraight-deltaspeed);
-			leftMotor.forward();
-			rightMotor.forward();
+		else
+		{
+			return true;
 		}
+
+
+
+		//		if(distance == 21474)
+		//			// sensor "error" value was passed, replace this value by the set bandCenter 
+		//			// so the robot keeps moving in a straight line
+		//			FilteredDistance=bandCenter;
+		//		else if (distance >= bandCenter+40 && filterControl < FILTER_OUT) {
+		//			// abnormal value (in theory, the robot shoudln't deviate that much from the wall)
+		//			//do not set the distance var, however do increment the filter value
+		//			filterControl++;
+		//		} else if (distance >= bandCenter+40 && filterControl > FILTER_OUT) {
+		//			// We have repeated large values, so there must actually be nothing
+		//			// there: leave the distance alone
+		//			FilteredDistance = distance;
+		//		}	
+		//		 else {
+		//			// distance went below 255: reset filter and leave
+		//			// distance alone.
+		//			filterControl = 0;
+		//			FilteredDistance = distance;
+		//		}
+		//
+		//		
+		//		int distError=FilteredDistance-bandCenter;
+		//		
+		//		// Function used to calculate by how much the speed of the robot should be increased or decreased, 
+		//		// depending on how far the robot is from the target distance from the wall
+		//		int deltaspeed=Math.abs(distError*15);
+		//		
+		//		// Sets a maximum increase or decrease in speed of 200
+		//		if (deltaspeed>200)
+		//			deltaspeed=200;
+		//		
+		//		// If the distance separating the robot and the wall is between a center margin of error (bandwidth), 
+		//		// then the robot keeps moving in a straight line
+		//		if(Math.abs(distError)<=bandwidth){
+		//			leftMotor.setSpeed(motorStraight);
+		//			rightMotor.setSpeed(motorStraight);
+		//			leftMotor.forward();
+		//			rightMotor.forward();
+		//		}
+		//		
+		//		//If the disterror is positive (meaning the robot is too far from the wall), then the robot must turn left
+		//		else if(distError>0){
+		//			leftMotor.setSpeed(motorStraight-deltaspeed);
+		//			rightMotor.setSpeed(motorStraight+deltaspeed);
+		//			leftMotor.forward();
+		//			rightMotor.forward();
+		//		}
+		//		
+		//		//If the disterror is negative (meaning the robot is too close to the wall), then the robot must turn right
+		//		else if(distError<0){
+		//			leftMotor.setSpeed(motorStraight+deltaspeed);
+		//			rightMotor.setSpeed(motorStraight-deltaspeed);
+		//			leftMotor.forward();
+		//			rightMotor.forward();
+		//		}
 	}
 
-	
-	@Override
+	public void avoidOB()
+	{
+		int distance = 255;
+		Sound.buzz();
+		double x = 0;
+		while(avoidingOb){
+			distance = readUSDistance();
+			
+//			if(distance>0 && distance < 25 && usMotor.getTachoCount() < 0){
+//			if(distance>0 && distance < 25 ){
+//				
+//				System.out.println("Obstacle found left!");
+////				rightMotor.stop();
+////				leftMotor.stop();
+////				x = WiFiExample.odometer.getAng();
+////				WiFiExample.navigation.turnTo(x + 90);
+////				avoidingOb = false;
+//				
+//				
+//				avoidingOb = true;
+//			//	motorstop();
+//				leftMotor.setSpeed(200);
+//				rightMotor.setSpeed(distance*8);
+//				leftMotor.rotate(convertDistance(wheel_radius, 20), true);
+//				rightMotor.rotate(convertDistance(wheel_radius, 20), true);
+//				motorShift = 0;
+//			}
+//			else if(distance>0 && distance < 25 && usMotor.getTachoCount() > 0){
+			if(distance>0 && distance < 25){	
+				System.out.println("Obstacle found right!");
+//				rightMotor.stop();
+//				leftMotor.stop();
+//				x = WiFiExample.odometer.getAng();
+//				WiFiExample.navigation.turnTo(x - 90);
+//				avoidingOb = false;
+				avoidingOb = true;
+		//		motorstop();
+				motorstop();
+				WiFiExample.navigation.turnToSmart(90); //turn right
+				if(distance<25){ //there is another obstacle to the right, so turn back
+					WiFiExample.navigation.turnToSmart(-180); //turn left
+				}
+				WiFiExample.navigation.turnToSmart(-90);
+				WiFiExample.navigation.driveDiag(30);
+				WiFiExample.navigation.turnToSmart(90);
+//				rightMotor.setSpeed(200);
+//				leftMotor.setSpeed(distance*8);
+//				rightMotor.forward();
+//				leftMotor.forward();
+//				leftMotor.rotate(convertDistance(wheel_radius, 20), true);
+//				rightMotor.rotate(convertDistance(wheel_radius, 20), true);
+				motorShift = 0;
+			}
+			else{
+				Sound.twoBeeps();
+				avoidingOb = false;
+			}
+		}
+
+	}
 	public int readUSDistance() {
-		return FilteredDistance;
+		usSensor.fetchSample(usData, 0);
+		float distance = usData[0];
+		distance = (int)(usData[0]*100.0);
+		// Rudimentary filter
+		if (distance > 50){
+			distance = 255;
+		}
+		return (int)distance;
+
+	}
+	public void motorstop(){
+
+		leftMotor.setSpeed(0);
+		rightMotor.setSpeed(0);
+		leftMotor.forward();
+		rightMotor.forward();
+//		leftMotor.startSynchronization();
+		leftMotor.stop(true);
+		rightMotor.stop(false);
+//		leftMotor.endSynchronization();
+//		leftMotor.setSpeed(ROTATE_SPEED);
+//		rightMotor.setSpeed(ROTATE_SPEED);
+		leftMotor.setAcceleration(1000);
+		rightMotor.setAcceleration(1000);
+	}
+	
+	private static int convertDistance(double radius, double distance) {
+		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 
 }

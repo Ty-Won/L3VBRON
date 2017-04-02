@@ -35,7 +35,7 @@ public class Navigation{
 	double width =  WiFiExample.TRACK;
 	private static final int FORWARD_SPEED = WiFiExample.FORWARD_SPEED;
 	private static final int ROTATE_SPEED = WiFiExample.ROTATE_SPEED;
-
+	public double return_theta;
 	/**The odometer value of the X position */
 	public double odo_x;
 	/** The odometer value of the Y position of the robot. */
@@ -219,6 +219,10 @@ public class Navigation{
 						localize();
 
 					}
+					if(WiFiExample.cont.avoidingOb = true){
+						return_theta = odometer.getAng();
+						avoidOb();
+					}
 				}
 
 				motorstop();
@@ -248,6 +252,11 @@ public class Navigation{
 						localize();
 						return;
 					}
+					if(WiFiExample.cont.avoidingOb = true)
+					{
+						return_theta = odometer.getAng();
+						avoidOb();
+					}
 				}
 //				localize();
 //				travelTo(x_dest, y_dest);
@@ -259,6 +268,12 @@ public class Navigation{
 	 * This method travels to distance inputed diagonally.
 	 * @param travelDist
 	 */
+	public void avoidOb(){
+//		motorstop();
+		WiFiExample.cont.avoidOB();
+		turnToSmart(return_theta);
+		travelTo(x_dest,y_dest);
+	}
 	public void driveDiag(double travelDist){
 
 		synchronized(leftMotor){
@@ -289,7 +304,37 @@ public class Navigation{
 			}
 		}
 	}
+	public void driveWCorrection(double travelDist){
 
+		synchronized(leftMotor){
+			synchronized(rightMotor){
+				//		stopNav();
+//				if(stop){
+//					return;
+//				}
+//				motorstop();
+				
+				//set both motors to forward speed desired
+				leftMotor.setSpeed(FORWARD_SPEED);
+				rightMotor.setSpeed(FORWARD_SPEED);
+				leftMotor.setAcceleration(1000);
+				rightMotor.setAcceleration(1000);
+
+//				leftMotor.startSynchronization();
+				leftMotor.rotate(convertDistance(wheel_radius, travelDist), true);
+				rightMotor.rotate(convertDistance(wheel_radius, travelDist), true);
+//				leftMotor.endSynchronization();
+				
+				while(leftMotor.isMoving()&&rightMotor.isMoving()){
+					WiFiExample.correction.LightCorrection();
+				}
+				
+//					motorstop();
+//				}
+
+			}
+		}
+	}
 	/**
 	 * The method should intake an angle and then turn the robot to that angle.
 	 * 
