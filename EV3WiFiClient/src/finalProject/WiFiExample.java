@@ -35,7 +35,7 @@ import lejos.robotics.SampleProvider;
  */
 public class WiFiExample {
 	public static final double WHEEL_RADIUS = 2.0768;
-	public static final double TRACK = 10.8; //changed it
+	public static final double TRACK = 10.97; //changed it
 	public static final int FORWARD_SPEED = 250;
 	public static final int ROTATE_SPEED = 150;
 	private static final int bandCenter = 35;			// Offset from the wall (cm)
@@ -79,7 +79,7 @@ public class WiFiExample {
 	public static float[] usData = new float[usValue.sampleSize()];				// colorData is the buffer in which data are returned
 
 	public static UltrasonicPoller usPoller = new UltrasonicPoller(usValue, usData);
-	public static PController cont = new PController(leftMotor, rightMotor, usMotor, usPoller, usValue, usSensor, usData);
+	public static PController cont;
 	//	public static ballLauncher launch = new ballLauncher(launcherMotor,odometer,navigation);
 	
 
@@ -187,6 +187,7 @@ public class WiFiExample {
 
 
 			navigation = new Navigation(odometer);
+			cont = new PController(leftMotor, rightMotor, usMotor, usPoller, usValue, usSensor, usData);
 			Localization lsl = new Localization(odometer,navigation, colorValueF, colorData, 
 					colorData2, leftMotor, rightMotor, usValue, usSensor, usData);
 			final TextLCD t = LocalEV3.get().getTextLCD(); 

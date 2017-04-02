@@ -15,12 +15,16 @@ public class PController extends Thread{
 	private UltrasonicPoller usPoller ;
 	private int distance;
 	public boolean avoidingOb;
+	boolean avoidedBlock=false;
 	private static final int FORWARD_SPEED = WiFiExample.FORWARD_SPEED;
 	private SampleProvider usValue;
-	private SensorModes usSensor;
-	private float[] usData;
+	private static SensorModes usSensor;
+	private static float[] usData;
 	double wheel_radius = WiFiExample.WHEEL_RADIUS;
 	private static final int ROTATE_SPEED = WiFiExample.ROTATE_SPEED;
+	public boolean avoiding = false;
+	Navigation nav = WiFiExample.navigation;
+	Odometer odo = WiFiExample.odometer;
 
 	public PController(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, EV3MediumRegulatedMotor usMotor,
 			UltrasonicPoller usPoller, SampleProvider usValue, SensorModes usSensor, float[] usData) {
@@ -43,56 +47,67 @@ public class PController extends Thread{
 //		usMotor.rotate(-30);
 		int x = 255;
 		while(true){
+			if(avoiding){
+				break;
+			}
 			x = readUSDistance();
-			System.out.println(distance);
-			avoidingOb = processUSData(x);
+			avoidingOb =processUSData(x);
 			try { Thread.sleep(50); } catch(Exception e){}	
 		}
 	}
 
 	public boolean processUSData(int distance) {
-
-		if (distance >= 255 && filterControl < FILTER_OUT) {
-			// bad value, do not set the distance var, however do increment the
-			// filter value
-			filterControl++;
-		} else if (distance >= 255) {
-			// We have repeated large values, so there must actually be nothing
-			// there: leave the distance alone
-			this.distance = distance;
-		} else {
-			// distance went below 255: reset filter and leave
-			// distance alone.
-			filterControl = 0;
-			this.distance = distance;
-		}
-
-		if(motorShift > 9 && this.distance > 25)
-		{
-			if(usMotor.getTachoCount() < 0)
-			{
-		//		usMotor.rotate(80);
-				motorShift = 0;
-				return false;
-			}
-			else
-			{
-		//		usMotor.rotate(-80);
-				motorShift = 0;
-				return false;
-			}
-		}
-		else if(this.distance > 25)
-		{
-			motorShift++;
+		if(distance>=25){
 			return false;
 		}
-		else
-		{
+		else{
 			return true;
 		}
+		
+// I COMMENTED THIS OUT starts from here***************************
 
+		
+//		if (distance >= 255 && filterControl < FILTER_OUT) {
+//			// bad value, do not set the distance var, however do increment the
+//			// filter value
+//			filterControl++;
+//		} else if (distance >= 255) {
+//			// We have repeated large values, so there must actually be nothing
+//			// there: leave the distance alone
+//			this.distance = distance;
+//		} else {
+//			// distance went below 255: reset filter and leave
+//			// distance alone.
+//			filterControl = 0;
+//			this.distance = distance;
+//		}
+//
+//		if(motorShift > 9 && this.distance > 25)
+//		{
+//			if(usMotor.getTachoCount() < 0)
+//			{
+//		//		usMotor.rotate(80);
+//				motorShift = 0;
+//				return false;
+//			}
+//			else
+//			{
+//		//		usMotor.rotate(-80);
+//				motorShift = 0;
+//				return false;
+//			}
+//		}
+//		else if(this.distance > 25)
+//		{
+//			motorShift++;
+//			return false;
+//		}
+//		else
+//		{
+//			return true;
+//		}
 
+//ends here *********************************************************
 
 		//		if(distance == 21474)
 		//			// sensor "error" value was passed, replace this value by the set bandCenter 
@@ -152,11 +167,12 @@ public class PController extends Thread{
 	}
 
 	public void avoidOB()
-	{
+	{	avoidedBlock=false;
 		int distance = 255;
 		Sound.buzz();
 		double x = 0;
 		while(avoidingOb){
+			
 			distance = readUSDistance();
 			
 //			if(distance>0 && distance < 25 && usMotor.getTachoCount() < 0){
@@ -179,23 +195,49 @@ public class PController extends Thread{
 //				motorShift = 0;
 //			}
 //			else if(distance>0 && distance < 25 && usMotor.getTachoCount() > 0){
-			if(distance>0 && distance < 25){	
-				System.out.println("Obstacle found right!");
+			if(distance<10 && distance < 20){	
+				//System.out.println("Obstacle found right!");
 //				rightMotor.stop();
 //				leftMotor.stop();
 //				x = WiFiExample.odometer.getAng();
 //				WiFiExample.navigation.turnTo(x - 90);
-//				avoidingOb = false;
-				avoidingOb = true;
-		//		motorstop();
-				motorstop();
-				WiFiExample.navigation.turnToSmart(90); //turn right
-				if(distance<25){ //there is another obstacle to the right, so turn back
-					WiFiExample.navigation.turnToSmart(-180); //turn left
+
+
+//				motorstop();
+				nav.turnToSmart(odo.getAng()+90); //turn right
+				distance = readUSDistance();
+				if(distance<30){//there is another obstacle to the right, so turn back
+				//	WiFiExample.navigation.turnToSmart(WiFiExample.odometer.getAng()-180); //turn left
+					nav.turnToSmart(odo.getAng()-90); //turn left
+					avoiding = true;
+					WiFiExample.correction.localizeForAvoidance(); //goes to intersection
+					System.out.println("in the if block");
+					nav.turnToSmart(odo.getAng()-90); //turn left
+					nav.driveWCorrection(30.48);
+					nav.turnToSmart(odo.getAng()+90);
+					nav.driveWCorrection(2*30.48);
+					nav.turnToSmart(odo.getAng()+90); //turn right
+					nav.driveWCorrection(30.48);
+					nav.turnToSmart(odo.getAng()-90); //turn left
+					avoidedBlock=true;
 				}
-				WiFiExample.navigation.turnToSmart(-90);
-				WiFiExample.navigation.driveDiag(30);
-				WiFiExample.navigation.turnToSmart(90);
+				else{
+					nav.turnToSmart(odo.getAng()-90); //turn left
+					WiFiExample.correction.localizeForAvoidance(); //goes to intersection
+					System.out.println("in the else block");
+					nav.turnToSmart(odo.getAng()+90); //turn right
+					
+					nav.driveWCorrection(30.48);
+					nav.turnToSmart(odo.getAng()-90); //turn left
+					nav.driveWCorrection(2*30.48);
+					nav.turnToSmart(odo.getAng()-90); //turn left
+					nav.driveWCorrection(30.48);
+					nav.turnToSmart(odo.getAng()+90); //turn right
+					avoidedBlock=true;
+					
+//					WiFiExample.navigation.turnToSmart(-90);
+//					WiFiExample.navigation.driveDiag(30);
+//					WiFiExample.navigation.turnToSmart(0);
 //				rightMotor.setSpeed(200);
 //				leftMotor.setSpeed(distance*8);
 //				rightMotor.forward();
@@ -203,15 +245,21 @@ public class PController extends Thread{
 //				leftMotor.rotate(convertDistance(wheel_radius, 20), true);
 //				rightMotor.rotate(convertDistance(wheel_radius, 20), true);
 				motorShift = 0;
+				}
 			}
+			
 			else{
 				Sound.twoBeeps();
 				avoidingOb = false;
 			}
 		}
-
+		avoiding = false;
 	}
-	public int readUSDistance() {
+	
+	
+	
+	
+	public static int readUSDistance() {
 		usSensor.fetchSample(usData, 0);
 		float distance = usData[0];
 		distance = (int)(usData[0]*100.0);

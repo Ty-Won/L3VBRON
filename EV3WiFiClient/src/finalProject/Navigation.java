@@ -91,7 +91,7 @@ public class Navigation{
 	 * @param x the X coordinate that should be moved to
 	 * @param y the X coordinate that should be moved to
 	 */
-	public void travelTo(double x, double y){
+	public void travelTo(double x_dest, double y_dest){
 		//this method causes robot to travel to the absolute field location (x,y)
 
 		if(stop){
@@ -100,14 +100,12 @@ public class Navigation{
 		odo_x = odometer.getX();
 		odo_y = odometer.getY();
 		odo_theta = odometer.getAng();
-		x_dest = x;
-		y_dest = y;
 
 		//calculate the distance we want the robot to travel in x and y 
 		double delta_y = y_dest-odo_y;
 		double delta_x = x_dest-odo_x;
 
-		drive(delta_x,delta_y);
+		drive(delta_x,delta_y,x_dest,y_dest);
 
 //		odo_x = odometer.getX();
 //		odo_y = odometer.getY();
@@ -180,12 +178,11 @@ public class Navigation{
 	 * Insert x and y coordinates and the EV3 travels on the x,y planes to reach the destination
 	 * @param distance the distance to be converted in terms of cm
 	 */
-	public void drive(double delta_x,double delta_y){
+	public void drive(double delta_x,double delta_y,double x_dest,double y_dest){
 
 		synchronized(leftMotor){
 			synchronized(rightMotor){
 
-//				if(stop){
 //					return;
 //				}
 				//set both motors to forward speed desired
@@ -221,12 +218,13 @@ public class Navigation{
 					}
 					if(WiFiExample.cont.avoidingOb = true){
 						return_theta = odometer.getAng();
-						avoidOb();
+						avoidOb(x_dest,y_dest);
 					}
 				}
 
-				motorstop();
-
+				//motorstop();
+				
+				
 				//Y-travel
 				if(Math.abs(delta_y)<1){
 					delta_y=0;
@@ -255,25 +253,35 @@ public class Navigation{
 					if(WiFiExample.cont.avoidingOb = true)
 					{
 						return_theta = odometer.getAng();
-						avoidOb();
+						
+						avoidOb(x_dest,y_dest);
+						
 					}
 				}
 //				localize();
 //				travelTo(x_dest, y_dest);
-				motorstop();
+				//motorstop();
 			}
 		}
 	}
+	
+	
+	//this method activates obstacle avoidance and continues travel after the avoidance is done
+	public void avoidOb(double x_dest,double y_dest){
+//		motorstop();
+		WiFiExample.cont.avoidOB();
+//		turnToSmart(return_theta);
+		if(WiFiExample.cont.avoidedBlock){
+			WiFiExample.correction.localizeFWD();
+			travelTo(x_dest,y_dest);
+			motorstop();
+		}
+	}
+	
 	/**
 	 * This method travels to distance inputed diagonally.
 	 * @param travelDist
 	 */
-	public void avoidOb(){
-//		motorstop();
-		WiFiExample.cont.avoidOB();
-		turnToSmart(return_theta);
-		travelTo(x_dest,y_dest);
-	}
 	public void driveDiag(double travelDist){
 
 		synchronized(leftMotor){

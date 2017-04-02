@@ -78,55 +78,63 @@ public class Forward {
 	 * localization and move the robot to the position of the ball dispenser.
 	 */
 	public void startFWD() {
-		nav.travelTo(0, 7*30.48);
-//		int[] field_coord = new int[2]; 	//array that stores field coordinates of the robot's position
-//		if(corner==1){
-//			field_coord[0] =0;
-//			field_coord[1] =0;
-//		}
-//		if(corner==2){
-//			field_coord[0] =10;
-//			field_coord[1] =0;
-//		}
-//		if(corner==3){
-//			field_coord[0] =10;
-//			field_coord[1] =10;
-//		}
-//		if(corner==4){
-//			field_coord[0] =0;
-//			field_coord[1] =10;
-//		}
-//		//update odometer to correct position on field using the field_coord array
-//		double[] position = {TILE_LENGTH*field_coord[0], TILE_LENGTH*field_coord[1], 0};
-//		odo.setPosition(position, new boolean[]{true,true,false});//only update x and y
+//		nav.travelTo(5*30.48, 5*30.48);
 //		
-//		//convert bx,by to cm:
-//		double bx_cm, by_cm;
-//		bx_cm = bx*TILE_LENGTH;
-//		by_cm = by*TILE_LENGTH;
-//		
-//		//travel to ball dispenser cm coordinates:
-//		nav.travelTo(bx_cm, by_cm-(2*30.48));
-//		correction.localize();
-//		nav.travelTo(bx_cm, by_cm); 
-//		
-//		//face AWAY from disp:
-//		if(bx==0){ //disp is on west wall
-//			nav.turnToSmart(90); //facing away from disp
-//		}
-//		if(bx==10){ //disp on east wall:
-//			nav.turnToSmart(270);
-//		}
-//		
-//		//localize forward
-//		correction.localizeFWD();
-//		//drive forward a little to correct angle:
-//		nav.driveWCorrection(14);
-//		nav.driveWCorrection(-15.5); //drive back to intersection
-//		launcher.Enter_Launch_Position();//pulls the arm down
-//		
-//		//beep to indicate robot is ready to receive ball:
-//		Sound.beep();
+//		//the 360 track test
+//		//nav.turnTo(360);
+		
+		
+		int[] field_coord = new int[2]; 	//array that stores field coordinates of the robot's position
+		if(corner==1){
+			field_coord[0] =0;
+			field_coord[1] =0;
+		}
+		if(corner==2){
+			field_coord[0] =10;
+			field_coord[1] =0;
+		}
+		if(corner==3){
+			field_coord[0] =10;
+			field_coord[1] =10;
+		}
+		if(corner==4){
+			field_coord[0] =0;
+			field_coord[1] =10;
+		}
+		//update odometer to correct position on field using the field_coord array
+		double[] position = {TILE_LENGTH*field_coord[0], TILE_LENGTH*field_coord[1], 0};
+		odo.setPosition(position, new boolean[]{true,true,false});//only update x and y
+		
+		//convert bx,by to cm:
+		double bx_cm, by_cm;
+		bx_cm = bx*TILE_LENGTH;
+		by_cm = by*TILE_LENGTH;
+		
+		//travel to ball dispenser cm coordinates:
+		if(bx-field_coord[0]>4 || by_cm-field_coord[1]>4 ){
+			
+		}
+		nav.travelTo(bx_cm, by_cm-(2*30.48));
+		correction.localize();
+		nav.travelTo(bx_cm, by_cm); 
+		
+		//face AWAY from disp:
+		if(bx==0){ //disp is on west wall
+			nav.turnToSmart(90); //facing away from disp
+		}
+		if(bx==10){ //disp on east wall:
+			nav.turnToSmart(270);
+		}
+		
+		//localize forward
+		correction.localizeFWD();
+		//drive forward a little to correct angle:
+		nav.driveWCorrection(14);
+		nav.driveWCorrection(-15.5); //drive back to intersection
+		launcher.Enter_Launch_Position();//pulls the arm down
+		
+		//beep to indicate robot is ready to receive ball:
+		Sound.beep();
 
 		
 //		nav.travelTo(CENTER_X_COORD*TILE_LENGTH, 0);

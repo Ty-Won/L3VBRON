@@ -144,6 +144,9 @@ public class Odometer extends Thread {
 				position[1] = y;
 			if (update[2])
 				position[2] = theta;
+			if (update[3]){
+				position[3]=PController.readUSDistance();
+			}
 		}
 	}
 

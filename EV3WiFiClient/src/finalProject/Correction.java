@@ -575,6 +575,39 @@ public class Correction {
 			}
 		}
 	}
+	
+	public void localizeForAvoidance(){
+		// goes back until line detected, goes back 11.6
+		//		nav.stop=true;
+		localizing = true;
+		
+		//synchronize both motors so they can only be accessed by one thread (the Correction thread in this case)
+		synchronized(leftMotor){
+			synchronized(rightMotor){
+				leftMotor.rotate(-convertDistance(wheel_radius, 100), true);
+				rightMotor.rotate(-convertDistance(wheel_radius, 100), true);
+				boolean left = false; 
+				boolean right= false; 
+				while(!left&&!right){
+					left = lineDetected(colorSensorL, colorDataL);
+					right = lineDetected(colorSensorR, colorDataR);	//at this point, the light sensors at back detected a line so we want to localize
+				}
+//				Sound.beepSequenceUp();
+				motorstop(); //kills all .rotate()
+				nav.driveDiag(-11.6); //go backward sensor dist for center of rotation to be at intersection
+//				motorstop();
+//				nav.turnTo(-90);//turn left
+//				motorstop();
+
+	
+				gridcount = 0; //dont remove this
+				localizing = false;
+				System.out.println("poop");
+				//				nav.stop=false;
+			}
+		}
+		
+	}
 
 
 }
