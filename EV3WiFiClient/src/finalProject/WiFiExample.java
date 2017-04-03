@@ -51,7 +51,9 @@ public class WiFiExample {
 	public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 	public static final EV3LargeRegulatedMotor launcherMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
-	public static final EV3MediumRegulatedMotor usMotor = new EV3MediumRegulatedMotor(LocalEV3.get().getPort("C"));
+	public static final EV3MediumRegulatedMotor barMotor = new EV3MediumRegulatedMotor(LocalEV3.get().getPort("C"));
+	
+	public static Launcher launcher = new Launcher(launcherMotor, barMotor);
 	//colorPorts front, left side and right side of the EV3
 	private static final Port colorPortF = LocalEV3.get().getPort("S2");	
 	private static final Port colorPortL = LocalEV3.get().getPort("S3");	
@@ -187,7 +189,7 @@ public class WiFiExample {
 
 
 			navigation = new Navigation(odometer);
-			cont = new PController(leftMotor, rightMotor, usMotor, usPoller, usValue, usSensor, usData);
+			cont = new PController(leftMotor, rightMotor, usPoller, usValue, usSensor, usData);
 			Localization lsl = new Localization(odometer,navigation, colorValueF, colorData, 
 					colorData2, leftMotor, rightMotor, usValue, usSensor, usData);
 			final TextLCD t = LocalEV3.get().getTextLCD(); 

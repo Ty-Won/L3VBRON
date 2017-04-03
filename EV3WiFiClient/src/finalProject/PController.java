@@ -26,7 +26,7 @@ public class PController extends Thread{
 	Navigation nav = WiFiExample.navigation;
 	Odometer odo = WiFiExample.odometer;
 
-	public PController(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, EV3MediumRegulatedMotor usMotor,
+	public PController(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
 			UltrasonicPoller usPoller, SampleProvider usValue, SensorModes usSensor, float[] usData) {
 		//Default Constructor
 		this.leftMotor = leftMotor;

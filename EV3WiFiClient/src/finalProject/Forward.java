@@ -47,7 +47,7 @@ public class Forward {
 	public static Odometer odo = WiFiExample.odometer;
 	/** The Ultrasonic Sensor */
 	private static final Port usPort = LocalEV3.get().getPort("S1");
-	Launcher launcher = new Launcher(launcherMotor);
+	Launcher launcher = WiFiExample.launcher;
 	
 	public static Correction correction = WiFiExample.correction;
 //	/** The motor for the ball launcher */
@@ -111,7 +111,7 @@ public class Forward {
 			
 		//travel to ball dispenser cm coordinates:
 		nav.travelTo(bx_cm, by_cm); 
-		System.out.println("GOT THE BALL BITCH");
+
 		nav.finishTravel = false;
 		if(bx==10){
 			nav.turnToSmart(270);
@@ -129,13 +129,13 @@ public class Forward {
 		//drive forward a little to correct angle:
 		nav.driveWCorrection(14);
 		nav.driveWCorrection(-15.5); //drive back to intersection
-//		launcher.Enter_Launch_Position();//pulls the arm down
-		
+
+		launcher.Enter_Launch_Position();//pulls the arm down
 		//beep to indicate robot is ready to receive ball:
 		Sound.beep();
-		
-		//wait a few seconds at the dispenser
-		Sound.pause(5000);
+		Sound.pause(5000); 
+		nav.driveWCorrection(3);
+		launcher.lockArm(); //brings it to middle and locks it
 		
 //		try { Thread.sleep(10000); } catch (InterruptedException e) {}
 		
@@ -144,12 +144,15 @@ public class Forward {
 		
 		//travel one tile behind forward line IN Y FIRST, localize
 		int fwdLine_coord = 10 - fwdLinePosition;
-		nav.travelTo(5*TILE_LENGTH, ((fwdLine_coord-1)*TILE_LENGTH) - ROBOT_FRONT_TOCENTER_DIST);
+		nav.travelToYFIRST(5*TILE_LENGTH, (fwdLine_coord-1)*TILE_LENGTH);
 		nav.finishTravel = false;
 		nav.turnToSmart(0); //face target 
 		correction.localize(); 
-		nav.travelTo(5*TILE_LENGTH, (fwdLine_coord*TILE_LENGTH) - ROBOT_FRONT_TOCENTER_DIST); //go to forward line
+		nav.travelToYFIRST(5*TILE_LENGTH, (fwdLine_coord*TILE_LENGTH) - ROBOT_FRONT_TOCENTER_DIST); //go to forward line
 		nav.finishTravel = false;
+		
+		launcher.prepareToFire();
+		Sound.pause(1000);
 		launcher.Fire(fwdLinePosition);
 		
 		

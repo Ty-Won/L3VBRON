@@ -1,6 +1,7 @@
 package finalProject;
-
+import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.motor.EV3MediumRegulatedMotor;
 
 /**
  * This class is used to perform the launching of the ball toward the goal
@@ -17,9 +18,11 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 public class Launcher {
 	
 	public EV3LargeRegulatedMotor launcherMotor;
+	public EV3MediumRegulatedMotor barMotor;
 	
-	public Launcher(EV3LargeRegulatedMotor LauncherMotor){
+	public Launcher(EV3LargeRegulatedMotor LauncherMotor, EV3MediumRegulatedMotor BarMotor){
 		this.launcherMotor = LauncherMotor;
+		this.barMotor = BarMotor;
 	}
 	
 	/**
@@ -33,6 +36,24 @@ public class Launcher {
 		launcherMotor.rotate(120,false);
 	}
 	
+	public void lockArm(){
+		barMotor.resetTachoCount();
+		launcherMotor.setAcceleration(100);
+		launcherMotor.setSpeed(20);
+		barMotor.rotate(-100);
+		launcherMotor.rotate(-40);
+		barMotor.resetTachoCount();
+		launcherMotor.flt();
+		barMotor.flt();
+	}
+	
+	public void prepareToFire(){
+		launcherMotor.setAcceleration(1000);
+		launcherMotor.setSpeed(1000);
+		launcherMotor.rotate(40,false);
+		barMotor.rotate(100);
+		barMotor.flt();
+	}
 	/**
 	 * The overarching fire method, should call the other methods to get the speed
 	 * and angle to fire from and then perform the actual action of rotating the
@@ -52,7 +73,9 @@ public class Launcher {
 		// Return to firing position:
 		launcherMotor.setSpeed(1000);
 		launcherMotor.rotate(angle, false);
-		
+		launcherMotor.setSpeed(100);
+		launcherMotor.rotate(-120,false);
+		launcherMotor.flt();
 		
 	}
 	//This method calculates the correct angle of release depending on the distance given to the 
