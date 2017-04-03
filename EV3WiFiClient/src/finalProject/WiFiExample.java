@@ -35,7 +35,7 @@ import lejos.robotics.SampleProvider;
  */
 public class WiFiExample {
 	public static final double WHEEL_RADIUS = 2.0768;
-	public static final double TRACK = 10.97; //changed it
+	public static final double TRACK = 10.9; //changed it, 10.97 before 
 	public static final int FORWARD_SPEED = 250;
 	public static final int ROTATE_SPEED = 150;
 	private static final int bandCenter = 35;			// Offset from the wall (cm)
@@ -102,7 +102,7 @@ public class WiFiExample {
 	 * 
 	 * 2. TEAM_NUMBER: your project team number
 	 */
-	private static final String SERVER_IP = "192.168.2.5";
+	private static final String SERVER_IP = "192.168.2.14";
 	private static final int TEAM_NUMBER = 3;
 
 	// Enable/disable printing of debug info from the WiFi class
@@ -207,7 +207,7 @@ public class WiFiExample {
 				odometer.start();
 				odometryDisplay.start();
 
-//				lsl.doLocalization();
+			//	lsl.doLocalization();
 				//				Launcher.Enter_Launch_Position(); //PULLS ARM DOWN
 
 				//				Button.waitForAnyPress();

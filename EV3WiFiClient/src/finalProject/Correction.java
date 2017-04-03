@@ -602,7 +602,7 @@ public class Correction {
 	
 				gridcount = 0; //dont remove this
 				localizing = false;
-				System.out.println("poop");
+	//			System.out.println("poop");
 				//				nav.stop=false;
 			}
 		}

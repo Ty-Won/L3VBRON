@@ -88,7 +88,7 @@ public class Forward {
 		if(corner==2){
 			field_coord[0] =10;
 			field_coord[1] =0;
-			field_coord[2] = 0;
+			field_coord[2] = 270;
 		}
 		if(corner==3){
 			field_coord[0] =10;
@@ -98,7 +98,7 @@ public class Forward {
 		if(corner==4){
 			field_coord[0] =0;
 			field_coord[1] =10;
-			field_coord[2] = 180;
+			field_coord[2] = 90;
 		}
 		//update odometer to correct position on field using the field_coord array
 		double[] position = {TILE_LENGTH*field_coord[0], TILE_LENGTH*field_coord[1], field_coord[2]};
@@ -108,60 +108,47 @@ public class Forward {
 		double bx_cm, by_cm;
 		bx_cm = bx*TILE_LENGTH;
 		by_cm = by*TILE_LENGTH;
-		
-
-		
-		int dispToCorner_x = Math.abs(bx-field_coord[0]); //tiles left to travel to dispenser (if disp is on south wall)
-		int dispToCorner_y = Math.abs(by-field_coord[1]); //tiles left to travel to dispenser (if disp is on east/west wall)
-//		if((dispToCorner_x>4 || dispToCorner_y>4) && (dispToCorner_x<=8|| dispToCorner_y<=8)){ 
-//			//if distance from starting corner to ball dispenser is more than 4 tiles but less than 8, localize after 4
-//			//if it is 8 away, we only need to localize at 4 because we localize once dispenser is reached
-//			//so, localize after traveling 4 tiles, and then travel what's left:
-//			if(bx == 0){ //west wall:
-//				nav.travelTo(0, 4*TILE_LENGTH); 
-//				correction.localize();
-//				nav.travelTo(0, (by-4)*TILE_LENGTH);
-//				
-//			}
-//			
-//		}
-//		else if(dispToCorner_x>8 || dispToCorner_y>8){ //if distance is 9 or 10 however, we need to localize at 4, and 8. 
-//			
-//		}
-//		else if(dispToCorner_x<=4 || dispToCorner_y<=4){ //just travel to ball dispenser without localizing
-//			
-//		}
-//		nav.travelTo(bx_cm, by_cm-(2*30.48));
-//		correction.localize();
-		
+			
 		//travel to ball dispenser cm coordinates:
 		nav.travelTo(bx_cm, by_cm); 
+		System.out.println("GOT THE BALL BITCH");
 		nav.finishTravel = false;
-		nav.turnToSmart(90); //facing away from disp
+		if(bx==10){
+			nav.turnToSmart(270);
+		}
+		if(bx == 0){
+			nav.turnToSmart(90); //facing away from disp
+		}
+		if(by==0){
+			nav.turnToSmart(0);
+		}
+		
 
 		//localize forward
 		correction.localizeFWD();
 		//drive forward a little to correct angle:
 		nav.driveWCorrection(14);
 		nav.driveWCorrection(-15.5); //drive back to intersection
-		launcher.Enter_Launch_Position();//pulls the arm down
+//		launcher.Enter_Launch_Position();//pulls the arm down
 		
 		//beep to indicate robot is ready to receive ball:
 		Sound.beep();
 		
 		//wait a few seconds at the dispenser
-		try { Thread.sleep(10000); } catch (InterruptedException e) {}
+		Sound.pause(5000);
+		
+//		try { Thread.sleep(10000); } catch (InterruptedException e) {}
 		
 		//BALL RECEIVED: turn off US sensor
 		
 		
 		//travel one tile behind forward line IN Y FIRST, localize
 		int fwdLine_coord = 10 - fwdLinePosition;
-		nav.travelToYFIRST(5*TILE_LENGTH, ((fwdLine_coord-1)*TILE_LENGTH) - ROBOT_FRONT_TOCENTER_DIST);
+		nav.travelTo(5*TILE_LENGTH, ((fwdLine_coord-1)*TILE_LENGTH) - ROBOT_FRONT_TOCENTER_DIST);
 		nav.finishTravel = false;
 		nav.turnToSmart(0); //face target 
 		correction.localize(); 
-		nav.travelToYFIRST(5*TILE_LENGTH, (fwdLine_coord*TILE_LENGTH) - ROBOT_FRONT_TOCENTER_DIST); //go to forward line
+		nav.travelTo(5*TILE_LENGTH, (fwdLine_coord*TILE_LENGTH) - ROBOT_FRONT_TOCENTER_DIST); //go to forward line
 		nav.finishTravel = false;
 		launcher.Fire(fwdLinePosition);
 		

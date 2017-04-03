@@ -185,7 +185,7 @@ public class PController extends Thread{
 					nav.turnToSmart(odo.getAng()-90); //turn left
 					nav.driveWCorrection(30.48);
 					nav.turnToSmart(odo.getAng()+90);
-					nav.driveWCorrection(2*30.48);
+					nav.driveWCorrection(3*30.48);
 					nav.turnToSmart(odo.getAng()+90); //turn right
 					nav.driveWCorrection(30.48);
 					nav.turnToSmart(odo.getAng()-90); //turn left
@@ -198,7 +198,7 @@ public class PController extends Thread{
 					nav.turnToSmart(odo.getAng()+90); //turn right
 					nav.driveWCorrection(30.48);
 					nav.turnToSmart(odo.getAng()-90); //turn left
-					nav.driveWCorrection(2*30.48);
+					nav.driveWCorrection(3*30.48);
 					nav.turnToSmart(odo.getAng()-90); //turn left
 					nav.driveWCorrection(30.48);
 					nav.turnToSmart(odo.getAng()+90); //turn right

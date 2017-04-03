@@ -98,6 +98,8 @@ public class Navigation{
 		if(stop){
 			return;
 		}
+		this.x_dest = x_dest;
+		this.y_dest = y_dest;
 		odo_x = odometer.getX();
 		odo_y = odometer.getY();
 		odo_theta = odometer.getAng();
@@ -135,7 +137,10 @@ public class Navigation{
 		if(stop){
 			return;
 		}
-
+		
+		x_dest = x;
+		y_dest = y;
+		
 		odo_x = odometer.getX();
 		odo_y = odometer.getY();
 		odo_theta = odometer.getAng();
@@ -368,7 +373,7 @@ public class Navigation{
 
 //				leftMotor.startSynchronization();
 				leftMotor.rotate(convertAngle(wheel_radius, width, theta), true);
-				rightMotor.rotate(-convertAngle(wheel_radius, width, theta), true);
+				rightMotor.rotate(-convertAngle(wheel_radius, width, theta), false);
 //				leftMotor.endSynchronization();
 
 //				while(leftMotor.isMoving()||rightMotor.isMoving()){
@@ -377,9 +382,9 @@ public class Navigation{
 //						return;
 //					}
 //				}
-				leftMotor.waitComplete();
-				rightMotor.waitComplete();
-				
+//				leftMotor.waitComplete();
+//				rightMotor.waitComplete();
+//				
 //				motorstop();
 
 				//returns default acceleration values after turn
@@ -399,6 +404,7 @@ public class Navigation{
 		//		rightMotor.setSpeed(0);
 //		motorstop();
 		WiFiExample.correction.localize();
+		System.out.println("x dest: "+ x_dest + ", y_dest: "+ y_dest);
 		travelTo(x_dest,y_dest);
 		finishTravel = true;
 	}
@@ -513,6 +519,8 @@ public class Navigation{
 		if(stop){
 			return;
 		}
+		this.x_dest = x_dest;
+		this.y_dest = y_dest;
 		odo_x = odometer.getX();
 		odo_y = odometer.getY();
 		odo_theta = odometer.getAng();
@@ -542,6 +550,7 @@ public class Navigation{
 						turnToSmart(0);
 					else{
 						turnToSmart(180);
+						System.out.println("got here");
 					}
 				}
 
@@ -553,18 +562,18 @@ public class Navigation{
 				//might need to add a travel to after while loop to make sure it's in the right location
 				while(leftMotor.isMoving()&&rightMotor.isMoving()){
 					WiFiExample.correction.LightCorrection();
-					if(WiFiExample.correction.gridcount==12){
-//						motorstop();
+					 
+					if(WiFiExample.cont.avoidingOb = true){
+						return_theta = odometer.getAng();
+						avoidOb(x_dest,y_dest);		
+					}
+					if(WiFiExample.correction.gridcount==4){
 						localize();
 						return;
 					}
-					if(WiFiExample.cont.avoidingOb = true)
-					{
-						return_theta = odometer.getAng();
-						
-						avoidOb(x_dest,y_dest);
-						
-					}
+				}
+				if(finishTravel){
+					return;
 				}
 				//X-travel
 				if(Math.abs(delta_x)<1){
@@ -575,6 +584,7 @@ public class Navigation{
 						turnToSmart(90);
 					else{
 						turnToSmart(270);
+						System.out.println("got here 2");
 					}
 				}
 
@@ -586,24 +596,14 @@ public class Navigation{
 				//might need to add a travel to after while loop to make sure it's in the right location
 				while(leftMotor.isMoving()&&rightMotor.isMoving()){
 					WiFiExample.correction.LightCorrection();
-					if(WiFiExample.correction.gridcount==12){
-//						motorstop();
-						localize();
-
-					}
 					if(WiFiExample.cont.avoidingOb = true){
 						return_theta = odometer.getAng();
 						avoidOb(x_dest,y_dest);
 					}
+					if(WiFiExample.correction.gridcount==4){
+						localize();
+					}
 				}
-
-				//motorstop();
-				
-				
-
-//				localize();
-//				travelTo(x_dest, y_dest);
-				//motorstop();
 			}
 		}
 	}
