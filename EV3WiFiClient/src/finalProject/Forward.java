@@ -79,26 +79,30 @@ public class Forward {
 	 */
 	public void startFWD() {
 		
-		int[] field_coord = new int[2]; 	//array that stores field coordinates of the robot's position
+		int[] field_coord = new int[3]; 	//array that stores field coordinates of the robot's position
 		if(corner==1){
 			field_coord[0] =0;
 			field_coord[1] =0;
+			field_coord[2] = 0;
 		}
 		if(corner==2){
 			field_coord[0] =10;
 			field_coord[1] =0;
+			field_coord[2] = 0;
 		}
 		if(corner==3){
 			field_coord[0] =10;
 			field_coord[1] =10;
+			field_coord[2] = 180;
 		}
 		if(corner==4){
 			field_coord[0] =0;
 			field_coord[1] =10;
+			field_coord[2] = 180;
 		}
 		//update odometer to correct position on field using the field_coord array
-		double[] position = {TILE_LENGTH*field_coord[0], TILE_LENGTH*field_coord[1], 0};
-		odo.setPosition(position, new boolean[]{true,true,false});//only update x and y
+		double[] position = {TILE_LENGTH*field_coord[0], TILE_LENGTH*field_coord[1], field_coord[2]};
+		odo.setPosition(position, new boolean[]{true,true,true});
 		
 		//convert bx,by to cm:
 		double bx_cm, by_cm;
@@ -106,39 +110,35 @@ public class Forward {
 		by_cm = by*TILE_LENGTH;
 		
 
-		//travel to ball dispenser cm coordinates:
+		
 		int dispToCorner_x = Math.abs(bx-field_coord[0]); //tiles left to travel to dispenser (if disp is on south wall)
 		int dispToCorner_y = Math.abs(by-field_coord[1]); //tiles left to travel to dispenser (if disp is on east/west wall)
-		if((dispToCorner_x>4 || dispToCorner_y>4) && (dispToCorner_x<=8|| dispToCorner_y<=8)){ 
-			//if distance from starting corner to ball dispenser is more than 4 tiles but less than 8, localize after 4
-			//if it is 8 away, we only need to localize at 4 because we localize once dispenser is reached
-			//so, localize after traveling 4 tiles, and then travel what's left:
-			if(bx == 0){ //west wall:
-				nav.travelTo(0, 4*TILE_LENGTH); 
-				correction.localize();
-				nav.travelTo(0, (by-4)*TILE_LENGTH);
-				
-			}
-			
-		}
-		else if(dispToCorner_x>8 || dispToCorner_y>8){ //if distance is 9 or 10 however, we need to localize at 4, and 8. 
-			
-		}
-		else if(dispToCorner_x<=4 || dispToCorner_y<=4){ //just travel to ball dispenser without localizing
-			
-		}
-		nav.travelTo(bx_cm, by_cm-(2*30.48));
-		correction.localize();
+//		if((dispToCorner_x>4 || dispToCorner_y>4) && (dispToCorner_x<=8|| dispToCorner_y<=8)){ 
+//			//if distance from starting corner to ball dispenser is more than 4 tiles but less than 8, localize after 4
+//			//if it is 8 away, we only need to localize at 4 because we localize once dispenser is reached
+//			//so, localize after traveling 4 tiles, and then travel what's left:
+//			if(bx == 0){ //west wall:
+//				nav.travelTo(0, 4*TILE_LENGTH); 
+//				correction.localize();
+//				nav.travelTo(0, (by-4)*TILE_LENGTH);
+//				
+//			}
+//			
+//		}
+//		else if(dispToCorner_x>8 || dispToCorner_y>8){ //if distance is 9 or 10 however, we need to localize at 4, and 8. 
+//			
+//		}
+//		else if(dispToCorner_x<=4 || dispToCorner_y<=4){ //just travel to ball dispenser without localizing
+//			
+//		}
+//		nav.travelTo(bx_cm, by_cm-(2*30.48));
+//		correction.localize();
+		
+		//travel to ball dispenser cm coordinates:
 		nav.travelTo(bx_cm, by_cm); 
-		
-		//face AWAY from disp:
-		if(bx==0){ //disp is on west wall
-			nav.turnToSmart(90); //facing away from disp
-		}
-		if(bx==10){ //disp on east wall:
-			nav.turnToSmart(270);
-		}
-		
+		nav.finishTravel = false;
+		nav.turnToSmart(90); //facing away from disp
+
 		//localize forward
 		correction.localizeFWD();
 		//drive forward a little to correct angle:
@@ -150,14 +150,23 @@ public class Forward {
 		Sound.beep();
 		
 		//wait a few seconds at the dispenser
+		try { Thread.sleep(10000); } catch (InterruptedException e) {}
+		
+		//BALL RECEIVED: turn off US sensor
+		
 		
 		//travel one tile behind forward line IN Y FIRST, localize
 		int fwdLine_coord = 10 - fwdLinePosition;
 		nav.travelToYFIRST(5*TILE_LENGTH, ((fwdLine_coord-1)*TILE_LENGTH) - ROBOT_FRONT_TOCENTER_DIST);
+		nav.finishTravel = false;
 		nav.turnToSmart(0); //face target 
 		correction.localize(); 
 		nav.travelToYFIRST(5*TILE_LENGTH, (fwdLine_coord*TILE_LENGTH) - ROBOT_FRONT_TOCENTER_DIST); //go to forward line
+		nav.finishTravel = false;
 		launcher.Fire(fwdLinePosition);
+		
+		
+		
 	
 		
 	}

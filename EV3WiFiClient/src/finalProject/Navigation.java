@@ -63,6 +63,7 @@ public class Navigation{
 
 	public boolean localizing=false;
 	public boolean stop = false;
+	public static boolean finishTravel = false;
 
 	/**The Odometer of the robot */
 	public Odometer odometer = WiFiExample.odometer;
@@ -182,9 +183,6 @@ public class Navigation{
 
 		synchronized(leftMotor){
 			synchronized(rightMotor){
-
-//					return;
-//				}
 				//set both motors to forward speed desired
 				leftMotor.setSpeed(FORWARD_SPEED);
 				rightMotor.setSpeed(FORWARD_SPEED);
@@ -211,17 +209,19 @@ public class Navigation{
 				//might need to add a travel to after while loop to make sure it's in the right location
 				while(leftMotor.isMoving()&&rightMotor.isMoving()){
 					WiFiExample.correction.LightCorrection();
-					if(WiFiExample.correction.gridcount==12){
-//						motorstop();
-						localize();
-
-					}
 					if(WiFiExample.cont.avoidingOb = true){
 						return_theta = odometer.getAng();
 						avoidOb(x_dest,y_dest);
 					}
+					if(WiFiExample.correction.gridcount==4){
+						localize();
+					}
+					
 				}
-
+				if(finishTravel){
+					return;
+				}
+				
 				//motorstop();
 				
 				
@@ -237,26 +237,22 @@ public class Navigation{
 					}
 				}
 
-//				leftMotor.startSynchronization();
 				leftMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_y)), true);
 				rightMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_y)), true);
-//				leftMotor.endSynchronization();
 
 				//might need to add a travel to after while loop to make sure it's in the right location
 				while(leftMotor.isMoving()&&rightMotor.isMoving()){
 					WiFiExample.correction.LightCorrection();
-					if(WiFiExample.correction.gridcount==12){
+					if(WiFiExample.cont.avoidingOb = true){
+						return_theta = odometer.getAng();
+						avoidOb(x_dest,y_dest);
+					}
+					if(WiFiExample.correction.gridcount==4){
 //						motorstop();
 						localize();
 						return;
 					}
-					if(WiFiExample.cont.avoidingOb = true)
-					{
-						return_theta = odometer.getAng();
-						
-						avoidOb(x_dest,y_dest);
-						
-					}
+					
 				}
 //				localize();
 //				travelTo(x_dest, y_dest);
@@ -275,6 +271,7 @@ public class Navigation{
 			WiFiExample.correction.localizeFWD();
 			travelTo(x_dest,y_dest);
 			motorstop();
+			finishTravel = true;
 		}
 	}
 	
@@ -335,6 +332,7 @@ public class Navigation{
 				
 				while(leftMotor.isMoving()&&rightMotor.isMoving()){
 					WiFiExample.correction.LightCorrection();
+					WiFiExample.correction.gridcount = 0;
 				}
 				
 //					motorstop();
@@ -402,6 +400,7 @@ public class Navigation{
 //		motorstop();
 		WiFiExample.correction.localize();
 		travelTo(x_dest,y_dest);
+		finishTravel = true;
 	}
 
 
