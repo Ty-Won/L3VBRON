@@ -166,48 +166,18 @@ public class PController extends Thread{
 		//		}
 	}
 
-	public void avoidOB()
-	{	avoidedBlock=false;
+	public void avoidOB(){
+		avoidedBlock=false;
 		int distance = 255;
 		Sound.buzz();
 		double x = 0;
 		while(avoidingOb){
-			
 			distance = readUSDistance();
-			
-//			if(distance>0 && distance < 25 && usMotor.getTachoCount() < 0){
-//			if(distance>0 && distance < 25 ){
-//				
-//				System.out.println("Obstacle found left!");
-////				rightMotor.stop();
-////				leftMotor.stop();
-////				x = WiFiExample.odometer.getAng();
-////				WiFiExample.navigation.turnTo(x + 90);
-////				avoidingOb = false;
-//				
-//				
-//				avoidingOb = true;
-//			//	motorstop();
-//				leftMotor.setSpeed(200);
-//				rightMotor.setSpeed(distance*8);
-//				leftMotor.rotate(convertDistance(wheel_radius, 20), true);
-//				rightMotor.rotate(convertDistance(wheel_radius, 20), true);
-//				motorShift = 0;
-//			}
-//			else if(distance>0 && distance < 25 && usMotor.getTachoCount() > 0){
-			if(distance<10 && distance < 20){	
-				//System.out.println("Obstacle found right!");
-//				rightMotor.stop();
-//				leftMotor.stop();
-//				x = WiFiExample.odometer.getAng();
-//				WiFiExample.navigation.turnTo(x - 90);
-
-
-//				motorstop();
+			if(distance<10 && distance < 25){	
 				nav.turnToSmart(odo.getAng()+90); //turn right
 				distance = readUSDistance();
 				if(distance<30){//there is another obstacle to the right, so turn back
-				//	WiFiExample.navigation.turnToSmart(WiFiExample.odometer.getAng()-180); //turn left
+					//	WiFiExample.navigation.turnToSmart(WiFiExample.odometer.getAng()-180); //turn left
 					nav.turnToSmart(odo.getAng()-90); //turn left
 					avoiding = true;
 					WiFiExample.correction.localizeForAvoidance(); //goes to intersection
@@ -226,7 +196,6 @@ public class PController extends Thread{
 					WiFiExample.correction.localizeForAvoidance(); //goes to intersection
 					System.out.println("in the else block");
 					nav.turnToSmart(odo.getAng()+90); //turn right
-					
 					nav.driveWCorrection(30.48);
 					nav.turnToSmart(odo.getAng()-90); //turn left
 					nav.driveWCorrection(2*30.48);
@@ -234,20 +203,10 @@ public class PController extends Thread{
 					nav.driveWCorrection(30.48);
 					nav.turnToSmart(odo.getAng()+90); //turn right
 					avoidedBlock=true;
-					
-//					WiFiExample.navigation.turnToSmart(-90);
-//					WiFiExample.navigation.driveDiag(30);
-//					WiFiExample.navigation.turnToSmart(0);
-//				rightMotor.setSpeed(200);
-//				leftMotor.setSpeed(distance*8);
-//				rightMotor.forward();
-//				leftMotor.forward();
-//				leftMotor.rotate(convertDistance(wheel_radius, 20), true);
-//				rightMotor.rotate(convertDistance(wheel_radius, 20), true);
-				motorShift = 0;
+
+					motorShift = 0;
 				}
 			}
-			
 			else{
 				Sound.twoBeeps();
 				avoidingOb = false;

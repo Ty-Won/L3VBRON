@@ -507,6 +507,107 @@ public class Navigation{
 			} catch (InterruptedException e) {}
 		}
 	}
+	
+	public void travelToYFIRST(double x_dest, double y_dest){
+		//this method causes robot to travel to the absolute field location (x,y)
+
+		if(stop){
+			return;
+		}
+		odo_x = odometer.getX();
+		odo_y = odometer.getY();
+		odo_theta = odometer.getAng();
+
+		//calculate the distance we want the robot to travel in x and y 
+		double delta_y = y_dest-odo_y;
+		double delta_x = x_dest-odo_x;
+
+		driveYFIRST(delta_x,delta_y,x_dest,y_dest);
+	}
+	public void driveYFIRST(double delta_x,double delta_y,double x_dest,double y_dest){
+
+		synchronized(leftMotor){
+			synchronized(rightMotor){
+				//set both motors to forward speed desired
+				leftMotor.setSpeed(FORWARD_SPEED);
+				rightMotor.setSpeed(FORWARD_SPEED);
+				leftMotor.setAcceleration(1000);
+				rightMotor.setAcceleration(1000);
+				
+				//Y-travel
+				if(Math.abs(delta_y)<1){
+					delta_y=0;
+				}	
+				if(Math.abs(delta_y)>1){
+					if(delta_y>1)
+						turnToSmart(0);
+					else{
+						turnToSmart(180);
+					}
+				}
+
+//				leftMotor.startSynchronization();
+				leftMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_y)), true);
+				rightMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_y)), true);
+//				leftMotor.endSynchronization();
+
+				//might need to add a travel to after while loop to make sure it's in the right location
+				while(leftMotor.isMoving()&&rightMotor.isMoving()){
+					WiFiExample.correction.LightCorrection();
+					if(WiFiExample.correction.gridcount==12){
+//						motorstop();
+						localize();
+						return;
+					}
+					if(WiFiExample.cont.avoidingOb = true)
+					{
+						return_theta = odometer.getAng();
+						
+						avoidOb(x_dest,y_dest);
+						
+					}
+				}
+				//X-travel
+				if(Math.abs(delta_x)<1){
+					delta_x=0;
+				}	
+				if(Math.abs(delta_x)>1){
+					if(delta_x>1)
+						turnToSmart(90);
+					else{
+						turnToSmart(270);
+					}
+				}
+
+//				leftMotor.startSynchronization();
+				leftMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_x)), true);
+				rightMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_x)), true);
+//				leftMotor.endSynchronization();
+
+				//might need to add a travel to after while loop to make sure it's in the right location
+				while(leftMotor.isMoving()&&rightMotor.isMoving()){
+					WiFiExample.correction.LightCorrection();
+					if(WiFiExample.correction.gridcount==12){
+//						motorstop();
+						localize();
+
+					}
+					if(WiFiExample.cont.avoidingOb = true){
+						return_theta = odometer.getAng();
+						avoidOb(x_dest,y_dest);
+					}
+				}
+
+				//motorstop();
+				
+				
+
+//				localize();
+//				travelTo(x_dest, y_dest);
+				//motorstop();
+			}
+		}
+	}
 
 }
 

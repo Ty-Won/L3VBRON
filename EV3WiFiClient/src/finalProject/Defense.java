@@ -19,6 +19,7 @@ public class Defense {
 	private int corner;	//starting corner
 	private int w1; //defender zone dimension w1
 	private int w2; //defender zone dimension w2
+	private final double TILE_LENGTH = 30.48;
 	
 	// Left motor connected to output A
 	// Right motor connected to output D
@@ -26,8 +27,10 @@ public class Defense {
 	public static final EV3LargeRegulatedMotor rightMotor = WiFiExample.rightMotor;
 	private static final Port usPort = LocalEV3.get().getPort("S1");
 	
-	public static Odometer odometer = WiFiExample.odometer;
-	public static Navigation navigation = WiFiExample.navigation;
+	/**The navigation program for the robot */
+	public static Navigation nav = WiFiExample.navigation;
+	/** Instantiating odometer of robopt*/
+	public static Odometer odo = WiFiExample.odometer;
 
 	
 	//Setup ultrasonic sensor
@@ -52,6 +55,16 @@ public class Defense {
 		//step 1 = travel to middle of w1,w2 zone (while avoiding obstacles)!!
 		//step 2 = block balls from entering target
 		
+		if(w2 == 2){ //go to coordinates (5, 7.5) 
+			//travel in y first
+			nav.travelToYFIRST(5*TILE_LENGTH, 7.5*TILE_LENGTH);
+		}
+		if(w2 == 3){ //go to coordinates (5, 6.5) 
+			nav.travelToYFIRST(5*TILE_LENGTH, 6.5*TILE_LENGTH);
+		}
+		if(w2 == 4){ //go to coordinates (5, 5.5) 
+			nav.travelToYFIRST(5*TILE_LENGTH, 5.5*TILE_LENGTH);
+		}
 	
 		
 	}

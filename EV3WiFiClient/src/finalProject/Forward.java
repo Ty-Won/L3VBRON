@@ -32,7 +32,7 @@ public class Forward {
 	private String omega; //ball dispenser orientation 
 	private final double TILE_LENGTH = 30.48;
 	private final int CENTER_X_COORD = 10; //x coordinate of center of field we will shoot from
-	private final double ROBOT_FRONT_TOCENTER_DIST = 11; //distance from front of robot to center of rotation
+	private final double ROBOT_FRONT_TOCENTER_DIST = 8; //distance from front of robot to center of rotation
 	private final int FIELD_DIST = 8; //12
 	private final int OUTER_TILES = 2;
 
@@ -42,9 +42,9 @@ public class Forward {
 	public static final EV3LargeRegulatedMotor rightMotor = WiFiExample.rightMotor;
 	public static final EV3LargeRegulatedMotor launcherMotor = WiFiExample.launcherMotor;
 	/**The navigation program for the robot */
-	public static Navigation nav;
+	public static Navigation nav = WiFiExample.navigation;
 	/** Instantiating odometer of robopt*/
-	public static Odometer odo;
+	public static Odometer odo = WiFiExample.odometer;
 	/** The Ultrasonic Sensor */
 	private static final Port usPort = LocalEV3.get().getPort("S1");
 	Launcher launcher = new Launcher(launcherMotor);
@@ -78,11 +78,6 @@ public class Forward {
 	 * localization and move the robot to the position of the ball dispenser.
 	 */
 	public void startFWD() {
-//		nav.travelTo(5*30.48, 5*30.48);
-//		
-//		//the 360 track test
-//		//nav.turnTo(360);
-		
 		
 		int[] field_coord = new int[2]; 	//array that stores field coordinates of the robot's position
 		if(corner==1){
@@ -110,8 +105,26 @@ public class Forward {
 		bx_cm = bx*TILE_LENGTH;
 		by_cm = by*TILE_LENGTH;
 		
+
 		//travel to ball dispenser cm coordinates:
-		if(bx-field_coord[0]>4 || by_cm-field_coord[1]>4 ){
+		int dispToCorner_x = Math.abs(bx-field_coord[0]); //tiles left to travel to dispenser (if disp is on south wall)
+		int dispToCorner_y = Math.abs(by-field_coord[1]); //tiles left to travel to dispenser (if disp is on east/west wall)
+		if((dispToCorner_x>4 || dispToCorner_y>4) && (dispToCorner_x<=8|| dispToCorner_y<=8)){ 
+			//if distance from starting corner to ball dispenser is more than 4 tiles but less than 8, localize after 4
+			//if it is 8 away, we only need to localize at 4 because we localize once dispenser is reached
+			//so, localize after traveling 4 tiles, and then travel what's left:
+			if(bx == 0){ //west wall:
+				nav.travelTo(0, 4*TILE_LENGTH); 
+				correction.localize();
+				nav.travelTo(0, (by-4)*TILE_LENGTH);
+				
+			}
+			
+		}
+		else if(dispToCorner_x>8 || dispToCorner_y>8){ //if distance is 9 or 10 however, we need to localize at 4, and 8. 
+			
+		}
+		else if(dispToCorner_x<=4 || dispToCorner_y<=4){ //just travel to ball dispenser without localizing
 			
 		}
 		nav.travelTo(bx_cm, by_cm-(2*30.48));
@@ -135,14 +148,17 @@ public class Forward {
 		
 		//beep to indicate robot is ready to receive ball:
 		Sound.beep();
-
 		
-//		nav.travelTo(CENTER_X_COORD*TILE_LENGTH, 0);
-//		nav.travelTo(CENTER_X_COORD*TILE_LENGTH, ((FIELD_DIST-OUTER_TILES-fwdLinePosition)*TILE_LENGTH)-ROBOT_FRONT_TOCENTER_DIST);
-//		nav.turnToSmart(0); //faceTarget
-//		LNCHR.Fire(4);
+		//wait a few seconds at the dispenser
 		
-		
+		//travel one tile behind forward line IN Y FIRST, localize
+		int fwdLine_coord = 10 - fwdLinePosition;
+		nav.travelToYFIRST(5*TILE_LENGTH, ((fwdLine_coord-1)*TILE_LENGTH) - ROBOT_FRONT_TOCENTER_DIST);
+		nav.turnToSmart(0); //face target 
+		correction.localize(); 
+		nav.travelToYFIRST(5*TILE_LENGTH, (fwdLine_coord*TILE_LENGTH) - ROBOT_FRONT_TOCENTER_DIST); //go to forward line
+		launcher.Fire(fwdLinePosition);
+	
 		
 	}
 	
