@@ -43,6 +43,8 @@ public class Launcher {
 		barMotor.rotate(-100);
 		launcherMotor.rotate(-40);
 		barMotor.resetTachoCount();
+//		launcherMotor.close();
+//		barMotor.close();
 		launcherMotor.flt();
 		barMotor.flt();
 	}

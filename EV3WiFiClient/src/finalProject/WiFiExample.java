@@ -35,7 +35,8 @@ import lejos.robotics.SampleProvider;
  */
 public class WiFiExample {
 	public static final double WHEEL_RADIUS = 2.0768;
-	public static final double TRACK = 10.9; //changed it, 10.97 before 
+//	public static final double TRACK = 11.4; 
+	public static double TRACK = 10.9; 
 	public static final int FORWARD_SPEED = 250;
 	public static final int ROTATE_SPEED = 150;
 	private static final int bandCenter = 35;			// Offset from the wall (cm)

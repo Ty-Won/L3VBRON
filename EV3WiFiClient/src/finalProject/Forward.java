@@ -35,7 +35,7 @@ public class Forward {
 	private final double ROBOT_FRONT_TOCENTER_DIST = 8; //distance from front of robot to center of rotation
 	private final int FIELD_DIST = 8; //12
 	private final int OUTER_TILES = 2;
-
+//	private double track =  WiFiExample.TRACK;
 	/** The left motor, which is connected to output A */
 	public static final EV3LargeRegulatedMotor leftMotor = WiFiExample.leftMotor;
 	/**The right motor, which is connected to output D */
@@ -78,6 +78,10 @@ public class Forward {
 	 * localization and move the robot to the position of the ball dispenser.
 	 */
 	public void startFWD() {
+//		launcher.Enter_Launch_Position();
+//		Sound.pause(2000); 
+//		launcher.lockArm();
+//		nav.turnTo(360);
 		
 		int[] field_coord = new int[3]; 	//array that stores field coordinates of the robot's position
 		if(corner==1){
@@ -128,14 +132,17 @@ public class Forward {
 		correction.localizeFWD();
 		//drive forward a little to correct angle:
 		nav.driveWCorrection(14);
+		launcher.Enter_Launch_Position();//pulls the arm down
 		nav.driveWCorrection(-15.5); //drive back to intersection
 
-		launcher.Enter_Launch_Position();//pulls the arm down
+//		launcher.Enter_Launch_Position();//pulls the arm down
 		//beep to indicate robot is ready to receive ball:
 		Sound.beep();
 		Sound.pause(5000); 
 		nav.driveWCorrection(3);
 		launcher.lockArm(); //brings it to middle and locks it
+		//change track:
+		WiFiExample.TRACK = 30;
 		
 //		try { Thread.sleep(10000); } catch (InterruptedException e) {}
 		
@@ -147,7 +154,7 @@ public class Forward {
 		nav.travelToYFIRST(5*TILE_LENGTH, (fwdLine_coord-1)*TILE_LENGTH);
 		nav.finishTravel = false;
 		nav.turnToSmart(0); //face target 
-		correction.localize(); 
+		correction.localizeFWD(); 
 		nav.travelToYFIRST(5*TILE_LENGTH, (fwdLine_coord*TILE_LENGTH) - ROBOT_FRONT_TOCENTER_DIST); //go to forward line
 		nav.finishTravel = false;
 		
@@ -155,10 +162,8 @@ public class Forward {
 		Sound.pause(1000);
 		launcher.Fire(fwdLinePosition);
 		
-		
-		
-	
-		
+		WiFiExample.TRACK = 10.9;
+			
 	}
 	
 }
