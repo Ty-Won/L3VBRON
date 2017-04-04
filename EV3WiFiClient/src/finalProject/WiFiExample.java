@@ -211,9 +211,8 @@ public class WiFiExample {
 				odometryDisplay.start();
 
 			//	lsl.doLocalization();
-				//				Launcher.Enter_Launch_Position(); //PULLS ARM DOWN
+				colorSensorF.close();
 
-				//				Button.waitForAnyPress();
 				correction = new Correction(odometer, navigation, colorValueR, colorValueL, colorValueF, leftMotor, rightMotor);
 
 

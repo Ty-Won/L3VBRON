@@ -381,14 +381,20 @@ public class Correction {
 	}
 
 	public void motorstop(){
+		leftMotor.setAcceleration(7000);
+		rightMotor.setAcceleration(7000);
 		leftMotor.setSpeed(0);
 		rightMotor.setSpeed(0);
-		//		leftMotor.startSynchronization();
-		leftMotor.stop();
-		rightMotor.stop();
-		//		leftMotor.endSynchronization();
+		leftMotor.forward();
+		rightMotor.forward();
+//		leftMotor.startSynchronization();
+		leftMotor.stop(true);
+		rightMotor.stop(false);
+//		leftMotor.endSynchronization();
 		leftMotor.setSpeed(ROTATE_SPEED);
 		rightMotor.setSpeed(ROTATE_SPEED);
+		leftMotor.setAcceleration(1000);
+		rightMotor.setAcceleration(1000);
 	}
 
 	/**

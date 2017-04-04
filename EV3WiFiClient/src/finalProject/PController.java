@@ -169,7 +169,7 @@ public class PController extends Thread{
 	public void avoidOB(){
 		avoidedBlock=false;
 		int distance = 255;
-		Sound.buzz();
+//		Sound.buzz();
 		double x = 0;
 		while(avoidingOb){
 			distance = readUSDistance();
@@ -208,7 +208,7 @@ public class PController extends Thread{
 				}
 			}
 			else{
-				Sound.twoBeeps();
+				//Sound.twoBeeps();
 				avoidingOb = false;
 			}
 		}
@@ -230,7 +230,6 @@ public class PController extends Thread{
 
 	}
 	public void motorstop(){
-
 		leftMotor.setSpeed(0);
 		rightMotor.setSpeed(0);
 		leftMotor.forward();

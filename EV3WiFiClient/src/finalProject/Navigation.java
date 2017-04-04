@@ -218,7 +218,7 @@ public class Navigation{
 						return_theta = odometer.getAng();
 						avoidOb(x_dest,y_dest);
 					}
-					if(WiFiExample.correction.gridcount==4){
+					if(WiFiExample.correction.gridcount==5){
 						localize();
 					}
 					
@@ -252,7 +252,7 @@ public class Navigation{
 						return_theta = odometer.getAng();
 						avoidOb(x_dest,y_dest);
 					}
-					if(WiFiExample.correction.gridcount==4){
+					if(WiFiExample.correction.gridcount==5){
 //						motorstop();
 						localize();
 						return;
@@ -315,7 +315,6 @@ public class Navigation{
 		}
 	}
 	public void driveWCorrection(double travelDist){
-
 		synchronized(leftMotor){
 			synchronized(rightMotor){
 				//		stopNav();
@@ -334,7 +333,7 @@ public class Navigation{
 				leftMotor.rotate(convertDistance(wheel_radius, travelDist), true);
 				rightMotor.rotate(convertDistance(wheel_radius, travelDist), true);
 //				leftMotor.endSynchronization();
-				
+				System.out.println("drive with correction");
 				while(leftMotor.isMoving()&&rightMotor.isMoving()){
 					WiFiExample.correction.LightCorrection();
 					WiFiExample.correction.gridcount = 0;
@@ -392,7 +391,7 @@ public class Navigation{
 				rightMotor.setAcceleration(1000);
 				leftMotor.setSpeed(FORWARD_SPEED);
 				rightMotor.setSpeed(FORWARD_SPEED);
-				Sound.twoBeeps();
+				
 			}
 		}
 
@@ -404,7 +403,7 @@ public class Navigation{
 		//		rightMotor.setSpeed(0);
 //		motorstop();
 		WiFiExample.correction.localize();
-		System.out.println("x dest: "+ x_dest + ", y_dest: "+ y_dest);
+//		System.out.println("x dest: "+ x_dest + ", y_dest: "+ y_dest);
 		travelTo(x_dest,y_dest);
 		finishTravel = true;
 	}
@@ -550,7 +549,6 @@ public class Navigation{
 						turnToSmart(0);
 					else{
 						turnToSmart(180);
-						System.out.println("got here");
 					}
 				}
 
@@ -567,7 +565,7 @@ public class Navigation{
 						return_theta = odometer.getAng();
 						avoidOb(x_dest,y_dest);		
 					}
-					if(WiFiExample.correction.gridcount==4){
+					if(WiFiExample.correction.gridcount==5){
 						localize();
 						return;
 					}
@@ -584,7 +582,6 @@ public class Navigation{
 						turnToSmart(90);
 					else{
 						turnToSmart(270);
-						System.out.println("got here 2");
 					}
 				}
 
@@ -600,7 +597,7 @@ public class Navigation{
 						return_theta = odometer.getAng();
 						avoidOb(x_dest,y_dest);
 					}
-					if(WiFiExample.correction.gridcount==4){
+					if(WiFiExample.correction.gridcount==5){
 						localize();
 					}
 				}

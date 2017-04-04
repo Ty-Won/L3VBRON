@@ -35,6 +35,7 @@ public class Forward {
 	private final double ROBOT_FRONT_TOCENTER_DIST = 8; //distance from front of robot to center of rotation
 	private final int FIELD_DIST = 8; //12
 	private final int OUTER_TILES = 2;
+	private static final int ROTATE_SPEED = WiFiExample.ROTATE_SPEED;
 //	private double track =  WiFiExample.TRACK;
 	/** The left motor, which is connected to output A */
 	public static final EV3LargeRegulatedMotor leftMotor = WiFiExample.leftMotor;
@@ -133,7 +134,7 @@ public class Forward {
 		//drive forward a little to correct angle:
 		nav.driveWCorrection(14);
 		launcher.Enter_Launch_Position();//pulls the arm down
-		nav.driveWCorrection(-15.5); //drive back to intersection
+		nav.driveWCorrection(-16.5); //drive back to intersection
 
 //		launcher.Enter_Launch_Position();//pulls the arm down
 		//beep to indicate robot is ready to receive ball:
@@ -142,7 +143,10 @@ public class Forward {
 		nav.driveWCorrection(3);
 		launcher.lockArm(); //brings it to middle and locks it
 		//change track:
-		WiFiExample.TRACK = 30;
+		correction.width = 12;
+		nav.width = 12;
+		odo.TRACK = 12;
+		System.out.println(WiFiExample.TRACK);
 		
 //		try { Thread.sleep(10000); } catch (InterruptedException e) {}
 		
@@ -152,18 +156,38 @@ public class Forward {
 		//travel one tile behind forward line IN Y FIRST, localize
 		int fwdLine_coord = 10 - fwdLinePosition;
 		nav.travelToYFIRST(5*TILE_LENGTH, (fwdLine_coord-1)*TILE_LENGTH);
+//		correction.width = 14;
+//		nav.width = 14;
+		nav.finishTravel = false;
+
+//		correction.localizeFWD(); 
+		nav.travelTo(5*TILE_LENGTH, (fwdLine_coord*TILE_LENGTH) - ROBOT_FRONT_TOCENTER_DIST); //go to forward line
 		nav.finishTravel = false;
 		nav.turnToSmart(0); //face target 
-		correction.localizeFWD(); 
-		nav.travelToYFIRST(5*TILE_LENGTH, (fwdLine_coord*TILE_LENGTH) - ROBOT_FRONT_TOCENTER_DIST); //go to forward line
-		nav.finishTravel = false;
-		
+		nav.driveWCorrection(-15);
+		nav.driveWCorrection(15);
+		motorstop();
 		launcher.prepareToFire();
 		Sound.pause(1000);
 		launcher.Fire(fwdLinePosition);
 		
-		WiFiExample.TRACK = 10.9;
+		correction.width = 10.9;
+		nav.width = 10.9;
 			
+	}
+	public void motorstop(){
+		leftMotor.setAcceleration(7000);
+		rightMotor.setAcceleration(7000);
+		leftMotor.setSpeed(0);
+		rightMotor.setSpeed(0);
+//		leftMotor.startSynchronization();
+		leftMotor.stop(true);
+		rightMotor.stop(false);
+//		leftMotor.endSynchronization();
+		leftMotor.setSpeed(ROTATE_SPEED);
+		rightMotor.setSpeed(ROTATE_SPEED);
+		leftMotor.setAcceleration(1000);
+		rightMotor.setAcceleration(1000);
 	}
 	
 }

@@ -30,7 +30,7 @@ public class Odometer extends Thread {
 	private EV3LargeRegulatedMotor rightMotor = WiFiExample.rightMotor;
 	private static final long ODOMETER_PERIOD = 25;// odometer update period, in ms
 	private static final double WHEEL_RADIUS = WiFiExample.WHEEL_RADIUS;
-	private static final double TRACK = WiFiExample.TRACK; //Tried: 8.8, 9.3 ,9.5, 9.8, 10.1, 10.3, 10.4, 10.5
+	public static double TRACK = WiFiExample.TRACK; //Tried: 8.8, 9.3 ,9.5, 9.8, 10.1, 10.3, 10.4, 10.5
 
 	// lock object for mutual exclusion
 	private Object lock;
