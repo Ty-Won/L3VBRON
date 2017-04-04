@@ -181,7 +181,7 @@ public class PController extends Thread{
 					nav.turnToSmart(odo.getAng()-90); //turn left
 					avoiding = true;
 					WiFiExample.correction.localizeForAvoidance(); //goes to intersection
-					System.out.println("in the if block");
+					//System.out.println("in the if block");
 					nav.turnToSmart(odo.getAng()-90); //turn left
 					nav.driveWCorrection(30.48);
 					nav.turnToSmart(odo.getAng()+90);
@@ -194,7 +194,7 @@ public class PController extends Thread{
 				else{
 					nav.turnToSmart(odo.getAng()-90); //turn left
 					WiFiExample.correction.localizeForAvoidance(); //goes to intersection
-					System.out.println("in the else block");
+					//System.out.println("in the else block");
 					nav.turnToSmart(odo.getAng()+90); //turn right
 					nav.driveWCorrection(30.48);
 					nav.turnToSmart(odo.getAng()-90); //turn left
@@ -244,8 +244,6 @@ public class PController extends Thread{
 		rightMotor.setAcceleration(1000);
 	}
 	
-	private static int convertDistance(double radius, double distance) {
-		return (int) ((180.0 * distance) / (Math.PI * radius));
-	}
+
 
 }

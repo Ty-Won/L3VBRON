@@ -259,9 +259,6 @@ public class Navigation{
 					}
 					
 				}
-//				localize();
-//				travelTo(x_dest, y_dest);
-				//motorstop();
 			}
 		}
 	}
@@ -275,7 +272,7 @@ public class Navigation{
 		if(WiFiExample.cont.avoidedBlock){
 			WiFiExample.correction.localizeFWD();
 			travelTo(x_dest,y_dest);
-			motorstop();
+//			motorstop();
 			finishTravel = true;
 		}
 	}
@@ -333,14 +330,14 @@ public class Navigation{
 				leftMotor.rotate(convertDistance(wheel_radius, travelDist), true);
 				rightMotor.rotate(convertDistance(wheel_radius, travelDist), true);
 //				leftMotor.endSynchronization();
-				System.out.println("drive with correction");
+					//System.out.println("drive with correction");
 				while(leftMotor.isMoving()&&rightMotor.isMoving()){
 					WiFiExample.correction.LightCorrection();
 					WiFiExample.correction.gridcount = 0;
 				}
-				
-//					motorstop();
-//				}
+
+				motorstop();
+				//				}
 
 			}
 		}
@@ -391,7 +388,7 @@ public class Navigation{
 				rightMotor.setAcceleration(1000);
 				leftMotor.setSpeed(FORWARD_SPEED);
 				rightMotor.setSpeed(FORWARD_SPEED);
-				
+				Sound.twoBeeps();
 			}
 		}
 

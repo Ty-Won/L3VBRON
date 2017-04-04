@@ -120,7 +120,7 @@ public class Correction {
 		//left and right sensors have not yet seen a black line
 		leftline = false; 
 		rightline= false; 
-
+		//System.out.println("LC");
 		Sound.twoBeeps();	//DO NOT REMOVE 
 		while(!leftline  && !rightline){
 			leftline = lineDetected(colorSensorL, colorDataL);
@@ -129,7 +129,8 @@ public class Correction {
 				return;
 			}
 			if(WiFiExample.cont.avoidingOb){
-				return;
+				gridcount = 0;
+				//return;
 			}
 			//if one of them starts seeing a line, this loop exits
 			//			pauseWhileTurning();
@@ -381,8 +382,8 @@ public class Correction {
 	}
 
 	public void motorstop(){
-		leftMotor.setAcceleration(7000);
-		rightMotor.setAcceleration(7000);
+	//	leftMotor.setAcceleration(7000);
+		//rightMotor.setAcceleration(7000);
 		leftMotor.setSpeed(0);
 		rightMotor.setSpeed(0);
 		leftMotor.forward();
@@ -598,18 +599,16 @@ public class Correction {
 					left = lineDetected(colorSensorL, colorDataL);
 					right = lineDetected(colorSensorR, colorDataR);	//at this point, the light sensors at back detected a line so we want to localize
 				}
-//				Sound.beepSequenceUp();
+
 				motorstop(); //kills all .rotate()
 				nav.driveDiag(-11.6); //go backward sensor dist for center of rotation to be at intersection
-//				motorstop();
-//				nav.turnTo(-90);//turn left
-//				motorstop();
+
+
 
 	
 				gridcount = 0; //dont remove this
 				localizing = false;
-	//			System.out.println("poop");
-				//				nav.stop=false;
+
 			}
 		}
 		
