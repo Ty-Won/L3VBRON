@@ -11,6 +11,11 @@ import lejos.hardware.motor.EV3MediumRegulatedMotor;
  * in order for the ball to be able to pass through the goal. The launcher
  * then finds the angle to rotate to before accelerating to that speed and
  * launching the ball.
+ * In addition, this class is used to receive the ball from the dispenser.
+ * The arm should be lowered to receive the ball and then after it has been
+ * received the bar should be placed to block the arm's upward motion and
+ * launcher arm should be released onto the bar to stop the strain on the 
+ * battery.
  * 
  * @author Tristan Bouchard
  * @version 1.0
@@ -20,6 +25,11 @@ public class Launcher {
 	public EV3LargeRegulatedMotor launcherMotor;
 	public EV3MediumRegulatedMotor barMotor;
 	
+	/**
+	 * 
+	 * @param LauncherMotor the motor used to move the launching arm
+	 * @param BarMotor the motor used to rotate the holding bar for the launching arm
+	 */
 	public Launcher(EV3LargeRegulatedMotor LauncherMotor, EV3MediumRegulatedMotor BarMotor){
 		this.launcherMotor = LauncherMotor;
 		this.barMotor = BarMotor;
@@ -36,6 +46,12 @@ public class Launcher {
 		launcherMotor.rotate(120,false);
 	}
 	
+	/**
+	 * Should be called once the ball has been placed into the arm. The bar motor
+	 * should be turned into position to hold the launch arm in place at which point
+	 * the launching arm should be moved to be against the holding bar and then
+	 * floated to reduce strain on the battery.
+	 */
 	public void lockArm(){
 		barMotor.resetTachoCount();
 		launcherMotor.setAcceleration(100);
@@ -49,6 +65,11 @@ public class Launcher {
 		barMotor.flt();
 	}
 	
+	/**
+	 * This method should be called when the robot is in position to fire.
+	 * The method should remove the bar arm and return the arm to its firing
+	 * position.
+	 */
 	public void prepareToFire(){
 		launcherMotor.setAcceleration(1000);
 		launcherMotor.setSpeed(1000);

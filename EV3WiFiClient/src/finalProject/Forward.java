@@ -11,12 +11,17 @@ import lejos.robotics.SampleProvider;
 
 
 /**
- * The forward class is a general class that is 
- * used to start up the necessary sensors and other 
- * classes (navigation and odometer). Forward should 
- * be called directly after localization if the robot is 
- * playing the forward role and it tells the robot to move 
- * to the position of the ball dispenser.
+ * The Forward class is the controlling class which will be called
+ * after the initial localization process of the robot has been completed.
+ * The robot will be told where the ball dispenser is and told to go to that position
+ * and move to an orientation and position from which it can receive a ball.
+ * The robot will then lower its arm and receive the ball before traveling
+ * to the edge of the forward line and shooting the ball at the target.
+ * Once this has been completed, the robot should repeat the process for the
+ * duration of the round.
+ * During all movements, the correction and obstacle avoidance algorithms
+ * should be called continuously to ensure the robot moves to exactly the right
+ * position without hitting any obstacles.
  * 
  * @author Ilana Haddad
  * @version 1.0
@@ -62,6 +67,8 @@ public class Forward {
 	 * @param bx the x coordinate of the ball dispenser
 	 * @param by the y coordinate of the ball dispenser
 	 * @param omega the orientation of the robot
+	 * @param navigation the navigation system of the robot
+	 * @param odometer the odometer of the robot
 	 */
 	public Forward(Navigation navigation, Odometer odometer, int corner, int d1, int w1, int w2, int bx, int by, String omega) {
 		this.corner = corner;
@@ -76,7 +83,13 @@ public class Forward {
 	}
 	/**
 	 * The start Forward method should begin directly after 
-	 * localization and move the robot to the position of the ball dispenser.
+	 * localization and call navigation to move the ball to the dispenser.
+	 * At this point, the class should turn the robot to a heading from which
+	 * it can receive a ball and lower the arm. Then, when the ball has been received,
+	 * the method should call the launcher class to float the launcher arm using the
+	 * holding bar to keep it in place. Then, the method should navigate the robot
+	 * to the edge of the forward line and call for the ball to be shot toward the 
+	 * goal before repeating the process for the remainder of the round.
 	 */
 	public void startFWD() {
 //		launcher.Enter_Launch_Position();
@@ -175,6 +188,11 @@ public class Forward {
 		nav.width = 10.9;
 			
 	}
+	
+	/**
+	 * This method is used to very quickly stop the robot from moving in whatever direction it is
+	 * moving in before setting it's speed to be 150 degrees/second shortly afterward.
+	 */
 	public void motorstop(){
 		leftMotor.setAcceleration(7000);
 		rightMotor.setAcceleration(7000);

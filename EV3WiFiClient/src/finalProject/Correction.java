@@ -18,6 +18,10 @@ import lejos.robotics.SampleProvider;
  * heading.
  * In addition, after the robot crosses over four grid lines, the system should perform
  * an additional localization in order to more exactly correct its position and heading.
+ * This will be done in a different way than the original localization. The robot
+ * will first back up to find a grid line with its back two sensors before turning ninety degrees
+ * and doing the same in the other dimension. It will then use these findings to recalibrate the robot's
+ * heading and position.
  * 
  * @author Ilana Haddad
  * @author Tristan Bouchard
@@ -87,13 +91,13 @@ public class Correction {
 		this.rightMotor = rightMotor; 
 	}
 
-	/**
-	 * This method should continuously check the amount of grid lines that the robot has passed
-	 * while going forward (the program should halt the check while the robot is turning
-	 * as it may pass many lines in this action but not change it's position at all) and after
-	 * the robot has crossed over four, should call for the robot to localize to correct its
-	 * position and heading.
-	 */
+//	/**
+//	 * This method should continuously check the amount of grid lines that the robot has passed
+//	 * while going forward (the program should halt the check while the robot is turning
+//	 * as it may pass many lines in this action but not change it's position at all) and after
+//	 * the robot has crossed over four, should call for the robot to localize to correct its
+//	 * position and heading.
+//	 */
 	//	public void run(){ 
 	//		pauseWhileTurning();
 	//		LightCorrection();
@@ -176,9 +180,9 @@ public class Correction {
 
 	}
 
-	/**
-	 * This method is used to stop the robot from performing correction while the robot is turning.
-	 */
+//	/**
+//	 * This method is used to stop the robot from performing correction while the robot is turning.
+//	 */
 	//	public void pauseWhileTurning(){
 	//		turning = nav.isTurning();
 	//		while(turning){ //puts correction thread to sleep while turning
@@ -381,6 +385,10 @@ public class Correction {
 			return false;
 	}
 
+	/**
+	 * This method is used to very quickly stop the robot from moving in whatever direction it is
+	 * moving in before setting it's speed to be 150 degrees/second shortly afterward.
+	 */
 	public void motorstop(){
 	//	leftMotor.setAcceleration(7000);
 		//rightMotor.setAcceleration(7000);
@@ -399,10 +407,12 @@ public class Correction {
 	}
 
 	/**
+	 * Method which returns the intersection closest to the current position of the
+	 * robot.
 	 * 
 	 * @param x the current position in the x direction
 	 * @param y the current position in the y direction
-	 * @return the location of the intersection closest to the current postion
+	 * @return the location of the intersection closest to the current position
 	 */
 		public double[] getIntersection(double x, double y){
 			double[] intersection={0.0,0.0,0.0};
@@ -416,12 +426,12 @@ public class Correction {
 			return intersection;
 		}
 
-	/**
-	 * This method should turn the robot to the given heading. Very similar to the method of the same name in 
-	 * navigation.
-	 * 
-	 * @param theta the angle to which the robot should turn.
-	 */
+//	/**
+//	 * This method should turn the robot to the given heading. Very similar to the method of the same name in 
+//	 * navigation.
+//	 * 
+//	 * @param theta the angle to which the robot should turn.
+//	 */
 	//	public void turnTo(double theta){
 	//		turning = true;
 	//		Sound.twoBeeps(); //DONT REMOVE THIS
@@ -452,12 +462,12 @@ public class Correction {
 	//		////		rightMotor.setAcceleration(6000);
 	//	}
 
-	/**
-	 * This method should move the robot forward by the given amount. Very similar to the method of the 
-	 * same name located in navigation.
-	 * 
-	 * @param travelDist the distance by which the robot should travel straight
-	 */
+//	/**
+//	 * This method should move the robot forward by the given amount. Very similar to the method of the 
+//	 * same name located in navigation.
+//	 * 
+//	 * @param travelDist the distance by which the robot should travel straight
+//	 */
 	//	public void drive(double travelDist){
 	//		//set both motors to forward speed desired
 	//		//		leftMotor.setAcceleration(4000);
@@ -487,21 +497,27 @@ public class Correction {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 	//convertAngle method: This method takes the radius of wheel, width of cart and the angle required to be turned and calculated the required wheel rotation
-	/**
-	 * The method should convert the input angle into a form that can be performed
-	 * by the robot with the given wheel radius and width.
-	 * 
-	 * 
-	 * @param radius the radius of the wheel
-	 * @param width the width of the robot
-	 * @param angle the angle to be converted
-	 * @return the angle now in the form of amount of rotation needed by the robot's wheel to perform that angle of turn
-	 */
+//	/**
+//	 * The method should convert the input angle into a form that can be performed
+//	 * by the robot with the given wheel radius and width.
+//	 * 
+//	 * 
+//	 * @param radius the radius of the wheel
+//	 * @param width the width of the robot
+//	 * @param angle the angle to be converted
+//	 * @return the angle now in the form of amount of rotation needed by the robot's wheel to perform that angle of turn
+//	 */
 	//	private static int convertAngle(double radius, double width, double angle) {
 	//		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	//	}
 	
-	
+	/**
+	 * This method is very similar to the normal localization method in this class but will
+	 * be executed only when the robot has reached the ball dispenser and is almost ready to 
+	 * receive the ball. The robot should perform a normal localization but it should ensure that
+	 * the robot not turn into the wall that will be present as the robot will be very close
+	 * to the wall the dispenser is connected to. 
+	 */
 	public void localizeFWD(){
 
 		//		nav.stop=true;
@@ -583,6 +599,13 @@ public class Correction {
 		}
 	}
 	
+	/**
+	 * This method is very similar to the normal localization method found within this class.
+	 * However, this method will only be called directly after the robot has finished with
+	 * avoiding an obstacle. In this method, the robot will only localize in one direction to reset the 
+	 * position of the angle in the direction which it will be driving following 
+	 * the avoidance of an obstacle.
+	 */
 	public void localizeForAvoidance(){
 		// goes back until line detected, goes back 11.6
 		//		nav.stop=true;

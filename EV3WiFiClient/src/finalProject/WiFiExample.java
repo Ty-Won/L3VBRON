@@ -112,6 +112,16 @@ public class WiFiExample {
 	private static final boolean ENABLE_DEBUG_WIFI_PRINT = true;
 
 	@SuppressWarnings("rawtypes")
+	/**
+	 * Main method that will be entered at the beginning of each round.
+	 * The method will begin the running of the odometer and the display
+	 * and then it will have the robot do its initial localization to find
+	 * the exact position and heading of the robot. Then, the robot should
+	 * start the running of the obstacle avoidance and navigation systems and, 
+	 * depending on whether the robot is playing forward or defense should begin
+	 * the robot's defense or forward system.
+	 *
+	 */
 	public static void main(String[] args) {
 
 		System.out.println("Running..");

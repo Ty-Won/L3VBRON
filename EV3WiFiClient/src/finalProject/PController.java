@@ -6,6 +6,16 @@ import lejos.hardware.motor.EV3MediumRegulatedMotor;
 import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
 
+/**
+ * The obstacle avoidance class for the robot.
+ * 
+ * @author Ian Gauthier
+ * @author Ilana Haddad
+ * @author Tristan Bouchard
+ * @author Tyrone Wong
+ * @author Alexandre Tessier
+ *
+ */
 public class PController extends Thread{
 	private final int motorStraight = 300, FILTER_OUT = 20;
 	private EV3LargeRegulatedMotor leftMotor, rightMotor;
@@ -26,6 +36,15 @@ public class PController extends Thread{
 	Navigation nav = WiFiExample.navigation;
 	Odometer odo = WiFiExample.odometer;
 
+	/**
+	 * 
+	 * @param leftMotor the motor connected to the left wheel
+	 * @param rightMotor the motor connected to the right wheel
+	 * @param usPoller the class which continually polls the ultrasonic sensor
+	 * @param usValue 
+	 * @param usSensor the ultrasonic sensor of the robot
+	 * @param usData the array in which the data from the us sensor is held
+	 */
 	public PController(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
 			UltrasonicPoller usPoller, SampleProvider usValue, SensorModes usSensor, float[] usData) {
 		//Default Constructor
@@ -43,6 +62,10 @@ public class PController extends Thread{
 		this.usSensor = usSensor;
 		this.usData = usData;
 	}
+	
+	/**
+	 * 
+	 */
 	public void run(){
 //		usMotor.rotate(-30);
 		int x = 255;

@@ -8,15 +8,10 @@ import lejos.robotics.SampleProvider;
 /**
  * The navigator is used to change either the robot's position 
  * or heading in a controlled manner. The navigator intakes values 
- * from the odometer continuously and takes a value for either 
- * angle or position from another class and computes the difference 
- * in heading before using the difference in wheel angle count of the 
- * robot to find the amount of change needed to have the correct 
- * heading. Once the robot has the correct heading, if the robot 
- * needs to move to another position the robot calculates the 
- * amount of distance it needs to travel to reach the correct 
- * position before going there and stopping.
- * 
+ * from the odometer continuously and should first move the robot towards its
+ * target position or target heading. During these movements the robot should
+ * consistently be the calling correction and obstacle avoidance methods
+ * to ensure the robot reaches the correct final position.
  * 
  * 
  * @author Ian Gauthier
@@ -178,11 +173,19 @@ public class Navigation{
 		driveDiag(travelDist);
 	}
 
+	
 	/**
-	 * The method should convert the distance into an angle in terms of
-	 * the radius of the wheel and then travel forward that amount.
-	 * Insert x and y coordinates and the EV3 travels on the x,y planes to reach the destination
-	 * @param distance the distance to be converted in terms of cm
+	 * This method should move the robot to by the given amount first in the x dimension
+	 * and then in the y dimension all while continually calling the obstacle avoidance 
+	 * and correction classes to ensure that the robot is moving to the correct point.
+	 * The grid line correction should be performed when the robot reaches each grid line
+	 * and the localization correction should be performed after the robot has crossed over 
+	 * six grid lines since its last localization.
+	 * 
+	 * @param delta_x the difference in x position from start to finish
+	 * @param delta_y the difference in y position from start to finish
+	 * @param x_dest the final x position
+	 * @param y_dest the final y position
 	 */
 	public void drive(double delta_x,double delta_y,double x_dest,double y_dest){
 
@@ -265,6 +268,14 @@ public class Navigation{
 	
 	
 	//this method activates obstacle avoidance and continues travel after the avoidance is done
+	/**
+	 * This method should call the obstacle avoidance system when there has been a block
+	 * detected, avoid the obstacle and then travel to the position that was initially
+	 * the goal.
+	 *	
+	 * @param x_dest the x coordinate of the final position
+	 * @param y_dest the y coordinate of the final position
+	 */
 	public void avoidOb(double x_dest,double y_dest){
 //		motorstop();
 		WiFiExample.cont.avoidOB();
@@ -311,6 +322,15 @@ public class Navigation{
 			}
 		}
 	}
+	
+	/**
+	 * This method is very similar to the drive method except
+	 * that it should continuously call the corrected method for grid line
+	 * correction to fix the heading of the robot as it moves to the final
+	 * position.
+	 * 
+	 * @param travelDist the distance to be traveled
+	 */
 	public void driveWCorrection(double travelDist){
 		synchronized(leftMotor){
 			synchronized(rightMotor){
@@ -395,6 +415,11 @@ public class Navigation{
 		turning = false;
 	}
 
+	/**
+	 * This method should call the correction class' localization method
+	 * and then when finished should call the robot to travel to the initial
+	 * destination of the robot.
+	 */
 	public void localize(){
 		//		leftMotor.setSpeed(0);
 		//		rightMotor.setSpeed(0);
@@ -462,6 +487,10 @@ public class Navigation{
 
 	}
 
+	/**
+	 * 
+	 * @return the coordinates of the destination of the robot
+	 */
 	public double[] getDest(){
 		double[] coordinates = {0.0,0.0,0.0};
 		coordinates[0]=x_dest;
@@ -479,6 +508,10 @@ public class Navigation{
 		return turning; 
 	}
 
+	/**
+	 * This method is used to very quickly stop the robot from moving in whatever direction it is
+	 * moving in before setting it's speed to be 150 degrees/second shortly afterward.
+	 */
 	public void motorstop(){
 
 		leftMotor.setSpeed(0);
@@ -509,6 +542,13 @@ public class Navigation{
 		}
 	}
 	
+	/**
+	 * This method is identical to the original travelTo method except that it
+	 * moves in the y dimension before it moves in the x dimension.
+	 * 
+	 * @param x_dest the x coordinate of the final position
+	 * @param y_dest the y coordinate of the final position
+	 */
 	public void travelToYFIRST(double x_dest, double y_dest){
 		//this method causes robot to travel to the absolute field location (x,y)
 
@@ -527,6 +567,16 @@ public class Navigation{
 
 		driveYFIRST(delta_x,delta_y,x_dest,y_dest);
 	}
+	
+	/**
+	 * This method is very similar to the original drive method except that it
+	 * drives in the y dimension before driving in the x dimension.
+	 * 
+	 * @param delta_x the difference in x position from start to finish
+	 * @param delta_y the difference in y position from start to finish
+	 * @param x_dest the final x position
+	 * @param y_dest the final y position
+	 */
 	public void driveYFIRST(double delta_x,double delta_y,double x_dest,double y_dest){
 
 		synchronized(leftMotor){
