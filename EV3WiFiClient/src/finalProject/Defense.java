@@ -34,7 +34,7 @@ public class Defense {
 	// Right motor connected to output D
 	public static final EV3LargeRegulatedMotor leftMotor = WiFiExample.leftMotor;
 	public static final EV3LargeRegulatedMotor rightMotor = WiFiExample.rightMotor;
-	private static final Port usPort = LocalEV3.get().getPort("S1");
+
 	
 	/**
 	 * The navigation program for the robot 
@@ -45,18 +45,6 @@ public class Defense {
 	 */
 	public static Odometer odo = WiFiExample.odometer;
 
-	
-	//Setup ultrasonic sensor
-	// 1. Create a port object attached to a physical port (done above)
-	// 2. Create a sensor instance and attach to port
-	// 3. Create a sample provider instance for the above and initialize operating mode
-	// 4. Create a buffer for the sensor data
-	@SuppressWarnings("resource")							    	// Because we don't bother to close this resource
-	SensorModes usSensor = new EV3UltrasonicSensor(usPort);
-	SampleProvider usValue = usSensor.getMode("Distance");			// colorValue provides samples from this instance
-	float[] usData = new float[usValue.sampleSize()];				// colorData is the buffer in which data are returned
-	
-		
 	/**
 	 * 
 	 * @param corner the starting corner of the robot
@@ -82,18 +70,44 @@ public class Defense {
 		//already localized
 		//step 1 = travel to middle of w1,w2 zone (while avoiding obstacles)!!
 		//step 2 = block balls from entering target
-		
-		if(w2 == 2){ //go to coordinates (5, 7.5) 
+		int[] field_coord = new int[3]; 	//array that stores field coordinates of the robot's position
+		if(corner==1){
+			field_coord[0] =0;
+			field_coord[1] =0;
+			field_coord[2] = 0;
+		}
+		if(corner==2){
+			field_coord[0] =10;
+			field_coord[1] =0;
+			field_coord[2] = 270;
+		}
+		if(corner==3){
+			field_coord[0] =10;
+			field_coord[1] =10;
+			field_coord[2] = 180;
+		}
+		if(corner==4){
+			field_coord[0] =0;
+			field_coord[1] =10;
+			field_coord[2] = 90;
+		}
+		//update odometer to correct position on field using the field_coord array
+		double[] position = {TILE_LENGTH*field_coord[0], TILE_LENGTH*field_coord[1], field_coord[2]};
+		odo.setPosition(position, new boolean[]{true,true,true});
+		System.out.println("in defense");
+		if(this.w2 == 2){ //go to coordinates (5, 7.5) 
 			//travel in y first
-			nav.travelToYFIRST(5*TILE_LENGTH, 7.5*TILE_LENGTH);
+			System.out.println("in w2 = 2");
+			nav.travelToYFIRST(5*TILE_LENGTH, 6*TILE_LENGTH);
+		//	nav.travelToYFIRST(5*TILE_LENGTH, 7*TILE_LENGTH);
 		}
-		if(w2 == 3){ //go to coordinates (5, 6.5) 
-			nav.travelToYFIRST(5*TILE_LENGTH, 6.5*TILE_LENGTH);
+		if(this.w2 == 3){ //go to coordinates (5, 6.5) 
+			nav.travelToYFIRST(5*TILE_LENGTH, 6*TILE_LENGTH);
 		}
-		if(w2 == 4){ //go to coordinates (5, 5.5) 
-			nav.travelToYFIRST(5*TILE_LENGTH, 5.5*TILE_LENGTH);
+		if(this.w2 == 4){ //go to coordinates (5, 5.5) 
+			nav.travelToYFIRST(5*TILE_LENGTH, 5*TILE_LENGTH);
 		}
-	
+		nav.turnToSmart(180);
 		
 	}
 

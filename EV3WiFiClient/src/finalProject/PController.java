@@ -35,6 +35,8 @@ public class PController extends Thread{
 	public boolean avoiding = false;
 	Navigation nav = WiFiExample.navigation;
 	Odometer odo = WiFiExample.odometer;
+	public boolean doit = true;
+	public boolean stopSensing = false;
 
 	/**
 	 * 
@@ -69,7 +71,7 @@ public class PController extends Thread{
 	public void run(){
 //		usMotor.rotate(-30);
 		int x = 255;
-		while(true){
+		while(doit){
 			if(avoiding){
 				break;
 			}
@@ -87,106 +89,7 @@ public class PController extends Thread{
 			return true;
 		}
 		
-// I COMMENTED THIS OUT starts from here***************************
 
-		
-//		if (distance >= 255 && filterControl < FILTER_OUT) {
-//			// bad value, do not set the distance var, however do increment the
-//			// filter value
-//			filterControl++;
-//		} else if (distance >= 255) {
-//			// We have repeated large values, so there must actually be nothing
-//			// there: leave the distance alone
-//			this.distance = distance;
-//		} else {
-//			// distance went below 255: reset filter and leave
-//			// distance alone.
-//			filterControl = 0;
-//			this.distance = distance;
-//		}
-//
-//		if(motorShift > 9 && this.distance > 25)
-//		{
-//			if(usMotor.getTachoCount() < 0)
-//			{
-//		//		usMotor.rotate(80);
-//				motorShift = 0;
-//				return false;
-//			}
-//			else
-//			{
-//		//		usMotor.rotate(-80);
-//				motorShift = 0;
-//				return false;
-//			}
-//		}
-//		else if(this.distance > 25)
-//		{
-//			motorShift++;
-//			return false;
-//		}
-//		else
-//		{
-//			return true;
-//		}
-
-//ends here *********************************************************
-
-		//		if(distance == 21474)
-		//			// sensor "error" value was passed, replace this value by the set bandCenter 
-		//			// so the robot keeps moving in a straight line
-		//			FilteredDistance=bandCenter;
-		//		else if (distance >= bandCenter+40 && filterControl < FILTER_OUT) {
-		//			// abnormal value (in theory, the robot shoudln't deviate that much from the wall)
-		//			//do not set the distance var, however do increment the filter value
-		//			filterControl++;
-		//		} else if (distance >= bandCenter+40 && filterControl > FILTER_OUT) {
-		//			// We have repeated large values, so there must actually be nothing
-		//			// there: leave the distance alone
-		//			FilteredDistance = distance;
-		//		}	
-		//		 else {
-		//			// distance went below 255: reset filter and leave
-		//			// distance alone.
-		//			filterControl = 0;
-		//			FilteredDistance = distance;
-		//		}
-		//
-		//		
-		//		int distError=FilteredDistance-bandCenter;
-		//		
-		//		// Function used to calculate by how much the speed of the robot should be increased or decreased, 
-		//		// depending on how far the robot is from the target distance from the wall
-		//		int deltaspeed=Math.abs(distError*15);
-		//		
-		//		// Sets a maximum increase or decrease in speed of 200
-		//		if (deltaspeed>200)
-		//			deltaspeed=200;
-		//		
-		//		// If the distance separating the robot and the wall is between a center margin of error (bandwidth), 
-		//		// then the robot keeps moving in a straight line
-		//		if(Math.abs(distError)<=bandwidth){
-		//			leftMotor.setSpeed(motorStraight);
-		//			rightMotor.setSpeed(motorStraight);
-		//			leftMotor.forward();
-		//			rightMotor.forward();
-		//		}
-		//		
-		//		//If the disterror is positive (meaning the robot is too far from the wall), then the robot must turn left
-		//		else if(distError>0){
-		//			leftMotor.setSpeed(motorStraight-deltaspeed);
-		//			rightMotor.setSpeed(motorStraight+deltaspeed);
-		//			leftMotor.forward();
-		//			rightMotor.forward();
-		//		}
-		//		
-		//		//If the disterror is negative (meaning the robot is too close to the wall), then the robot must turn right
-		//		else if(distError<0){
-		//			leftMotor.setSpeed(motorStraight+deltaspeed);
-		//			rightMotor.setSpeed(motorStraight-deltaspeed);
-		//			leftMotor.forward();
-		//			rightMotor.forward();
-		//		}
 	}
 
 	public void avoidOB(){
@@ -196,7 +99,13 @@ public class PController extends Thread{
 		double x = 0;
 		while(avoidingOb){
 			distance = readUSDistance();
-			if(distance<10 && distance < 25){	
+			if(stopSensing){
+				distance = 255;
+				break;
+			}
+			
+			if(distance < 30){
+				motorstop();
 				nav.turnToSmart(odo.getAng()+90); //turn right
 				distance = readUSDistance();
 				if(distance<30){//there is another obstacle to the right, so turn back
@@ -208,10 +117,22 @@ public class PController extends Thread{
 					nav.turnToSmart(odo.getAng()-90); //turn left
 					nav.driveWCorrection(30.48);
 					nav.turnToSmart(odo.getAng()+90);
-					nav.driveWCorrection(3*30.48);
+					nav.driveWCorrection(2*30.48);
 					nav.turnToSmart(odo.getAng()+90); //turn right
-					nav.driveWCorrection(30.48);
-					nav.turnToSmart(odo.getAng()-90); //turn left
+					//check if obstacle is still there
+					distance = readUSDistance();
+					if(distance <25){ //turn back and go another block
+						nav.turnToSmart(odo.getAng()-90); //turn left
+						nav.driveWCorrection(30.48);
+						nav.turnToSmart(odo.getAng()+90); //turn right
+						nav.driveWCorrection(30.48);
+						nav.turnToSmart(odo.getAng()-90); //turn left
+					}
+					else{
+						nav.driveWCorrection(30.48);
+						nav.turnToSmart(odo.getAng()-90); //turn left
+						
+					}
 					avoidedBlock=true;
 				}
 				else{
@@ -221,10 +142,21 @@ public class PController extends Thread{
 					nav.turnToSmart(odo.getAng()+90); //turn right
 					nav.driveWCorrection(30.48);
 					nav.turnToSmart(odo.getAng()-90); //turn left
-					nav.driveWCorrection(3*30.48);
+					nav.driveWCorrection(2*30.48);
 					nav.turnToSmart(odo.getAng()-90); //turn left
-					nav.driveWCorrection(30.48);
-					nav.turnToSmart(odo.getAng()+90); //turn right
+					distance = readUSDistance();
+					if(distance <25){ //turn back and go another block
+						nav.turnToSmart(odo.getAng()+90); //turn right
+						nav.driveWCorrection(30.48);
+						nav.turnToSmart(odo.getAng()-90); //turn left
+						nav.driveWCorrection(30.48);
+						nav.turnToSmart(odo.getAng()+90); //right
+					}
+					else{
+						nav.driveWCorrection(30.48);
+						nav.turnToSmart(odo.getAng()+90); //turn left
+						
+					}
 					avoidedBlock=true;
 
 					motorShift = 0;
@@ -253,6 +185,8 @@ public class PController extends Thread{
 
 	}
 	public void motorstop(){
+		leftMotor.setAcceleration(10000);
+		rightMotor.setAcceleration(10000);
 		leftMotor.setSpeed(0);
 		rightMotor.setSpeed(0);
 		leftMotor.forward();

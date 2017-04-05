@@ -60,7 +60,7 @@ public class WiFiExample {
 	private static final Port colorPortL = LocalEV3.get().getPort("S3");	
 	private static final Port colorPortR = LocalEV3.get().getPort("S4");	
 
-	private static final Port usPort = LocalEV3.get().getPort("S1");
+	public static final Port usPort = LocalEV3.get().getPort("S1");
 
 
 
@@ -105,7 +105,7 @@ public class WiFiExample {
 	 * 
 	 * 2. TEAM_NUMBER: your project team number
 	 */
-	private static final String SERVER_IP = "192.168.2.14";
+	private static final String SERVER_IP = "192.168.2.5";
 	private static final int TEAM_NUMBER = 3;
 
 	// Enable/disable printing of debug info from the WiFi class
@@ -175,28 +175,22 @@ public class WiFiExample {
 			//			System.out.println("Forward Start Corner: " + fwdCorner);
 
 			int defCorner = ((Long) data.get("DEF_CORNER")).intValue();
-			//			System.out.println("Defense Start Corner: " + defCorner);
+
 
 			int w1 = ((Long) data.get("w1")).intValue();
 			int w2 = ((Long) data.get("w2")).intValue();
-			//			System.out.println("Defender zone dimensions (w1,w2): (" + w1 + ", " + w2 +")");
+
 
 			int d1 = ((Long) data.get("d1")).intValue();
-			//			System.out.println("Forward line position d1: " + d1);
+
 
 			int bx = ((Long) data.get("bx")).intValue();
 			int by = ((Long) data.get("by")).intValue();
-			//			System.out.println("Ball dispenser position (bx,by): (" + bx + ", " + by +")");
+
 
 
 			// Example 3: Compare value
 			String orientation = (String) data.get("omega");
-			//			if (orientation.equals("N")) {
-			//				System.out.println("Orientation is North");
-			//			}
-			//			else {
-			//				System.out.println("Orientation is not North");
-			//			}
 
 
 			navigation = new Navigation(odometer);
@@ -219,8 +213,8 @@ public class WiFiExample {
 
 				odometer.start();
 				odometryDisplay.start();
-
-			//	lsl.doLocalization();
+				Sound.setVolume(0);
+				lsl.doLocalization();
 				colorSensorF.close();
 
 				correction = new Correction(odometer, navigation, colorValueR, colorValueL, colorValueF, leftMotor, rightMotor);
@@ -256,7 +250,22 @@ public class WiFiExample {
 
 			
 			if(defTeam == 3){//play defense:
+				System.out.println();
+				System.out.println();
+				System.out.println();
+				System.out.println();
+				System.out.println();
+				System.out.println();
+				System.out.println();
+				System.out.println();
+				odometer.start();
+				odometryDisplay.start();
+				Sound.setVolume(0);
 				lsl.doLocalization();
+				colorSensorF.close();
+				correction = new Correction(odometer, navigation, colorValueR, colorValueL, colorValueF, leftMotor, rightMotor);
+				usPoller.start();
+				cont.start();
 				Defense defense = new Defense(defCorner, w1, w2);
 				defense.startDEF();
 			}

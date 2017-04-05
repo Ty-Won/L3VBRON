@@ -149,11 +149,13 @@ public class Correction {
 
 		if(leftline){
 			do{ 
-				leftMotor.setSpeed(10);
+				leftMotor.setSpeed(1);
+				rightMotor.setSpeed(350);
 				rightline = lineDetected(colorSensorR, colorDataR);
 			} while (rightline == false);
 
 			leftMotor.setSpeed(FORWARD_SPEED);
+			rightMotor.setSpeed(FORWARD_SPEED);
 			updateOdo();
 
 			//			pauseWhileTurning();

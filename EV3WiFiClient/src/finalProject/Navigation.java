@@ -334,11 +334,6 @@ public class Navigation{
 	public void driveWCorrection(double travelDist){
 		synchronized(leftMotor){
 			synchronized(rightMotor){
-				//		stopNav();
-//				if(stop){
-//					return;
-//				}
-//				motorstop();
 				
 				//set both motors to forward speed desired
 				leftMotor.setSpeed(FORWARD_SPEED);
@@ -351,11 +346,14 @@ public class Navigation{
 				rightMotor.rotate(convertDistance(wheel_radius, travelDist), true);
 //				leftMotor.endSynchronization();
 					//System.out.println("drive with correction");
-				while(leftMotor.isMoving()&&rightMotor.isMoving()){
+				while(leftMotor.isMoving()&&rightMotor.isMoving()){ //&&
 					WiFiExample.correction.LightCorrection();
-					WiFiExample.correction.gridcount = 0;
+					
 				}
-
+				WiFiExample.correction.gridcount = 0;
+			//	leftMotor.waitComplete();
+			//	rightMotor.waitComplete();
+				
 				motorstop();
 				//				}
 
@@ -513,7 +511,8 @@ public class Navigation{
 	 * moving in before setting it's speed to be 150 degrees/second shortly afterward.
 	 */
 	public void motorstop(){
-
+		leftMotor.setAcceleration(10000);
+		rightMotor.setAcceleration(10000);
 		leftMotor.setSpeed(0);
 		rightMotor.setSpeed(0);
 		leftMotor.forward();

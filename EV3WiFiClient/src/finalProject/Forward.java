@@ -54,6 +54,7 @@ public class Forward {
 	/** The Ultrasonic Sensor */
 	private static final Port usPort = LocalEV3.get().getPort("S1");
 	Launcher launcher = WiFiExample.launcher;
+	public static SensorModes usSensor = WiFiExample.usSensor;
 	
 	public static Correction correction = WiFiExample.correction;
 //	/** The motor for the ball launcher */
@@ -96,6 +97,7 @@ public class Forward {
 //		Sound.pause(2000); 
 //		launcher.lockArm();
 //		nav.turnTo(360);
+//		nav.driveWCorrection(5*30.48);
 		
 		int[] field_coord = new int[3]; 	//array that stores field coordinates of the robot's position
 		if(corner==1){
@@ -145,30 +147,40 @@ public class Forward {
 		//localize forward
 		correction.localizeFWD();
 		//drive forward a little to correct angle:
-		nav.driveWCorrection(14);
+		nav.driveWCorrection(16);
 		launcher.Enter_Launch_Position();//pulls the arm down
-		nav.driveWCorrection(-16.5); //drive back to intersection
-
-//		launcher.Enter_Launch_Position();//pulls the arm down
+		nav.driveWCorrection(-18.5); //drive back to intersection
+		Sound.setVolume(10);
 		//beep to indicate robot is ready to receive ball:
 		Sound.beep();
+		Sound.setVolume(0);
 		Sound.pause(5000); 
-		nav.driveWCorrection(3);
+		nav.driveWCorrection(5);
 		launcher.lockArm(); //brings it to middle and locks it
+		
 		//change track:
 		correction.width = 12;
 		nav.width = 12;
 		odo.TRACK = 12;
 		System.out.println(WiFiExample.TRACK);
-		
+		nav.driveWCorrection(30.48);
 //		try { Thread.sleep(10000); } catch (InterruptedException e) {}
 		
 		//BALL RECEIVED: turn off US sensor
+		//WiFiExample.cont.doit = false;
+		WiFiExample.cont.stopSensing = true;
+	//	try { WiFiExample.usSensor.wait(1000000000); } catch (InterruptedException e) {		}
 		
 		
 		//travel one tile behind forward line IN Y FIRST, localize
 		int fwdLine_coord = 10 - fwdLinePosition;
-		nav.travelToYFIRST(5*TILE_LENGTH, (fwdLine_coord-1)*TILE_LENGTH);
+		
+		if(fwdLinePosition == 6){
+			nav.travelToYFIRST(5*TILE_LENGTH, (fwdLine_coord-2)*TILE_LENGTH);
+		}
+		else{
+			nav.travelToYFIRST(5*TILE_LENGTH, (fwdLine_coord-1)*TILE_LENGTH);
+		}
 //		correction.width = 14;
 //		nav.width = 14;
 		nav.finishTravel = false;
@@ -176,16 +188,84 @@ public class Forward {
 //		correction.localizeFWD(); 
 		nav.travelTo(5*TILE_LENGTH, (fwdLine_coord*TILE_LENGTH) - ROBOT_FRONT_TOCENTER_DIST); //go to forward line
 		nav.finishTravel = false;
+		
 		nav.turnToSmart(0); //face target 
 		nav.driveWCorrection(-15);
-		nav.driveWCorrection(15);
-		motorstop();
+	//	nav.driveWCorrection(15);
+		//motorstop();
 		launcher.prepareToFire();
 		Sound.pause(1000);
-		launcher.Fire(fwdLinePosition);
+//		launcher.Fire(fwdLinePosition);
+		launcher.Fire(6);
 		
 		correction.width = 10.9;
 		nav.width = 10.9;
+		while(true){
+			WiFiExample.correction.localizeForAvoidance(); //goes back until it sees a line and then again 11.6
+			//travel back unt
+			
+			//travel to ball dispenser cm coordinates:
+			nav.travelTo(bx_cm, by_cm); 
+
+			nav.finishTravel = false;
+			if(bx==10){
+				nav.turnToSmart(270);
+			}
+			if(bx == 0){
+				nav.turnToSmart(90); //facing away from disp
+			}
+			if(by==0){
+				nav.turnToSmart(0);
+			}
+			
+
+			//localize forward
+			correction.localizeFWD();
+			//drive forward a little to correct angle:
+			nav.driveWCorrection(14);
+			launcher.Enter_Launch_Position();//pulls the arm down
+			nav.driveWCorrection(-16.5); //drive back to intersection
+			Sound.setVolume(10);
+			//beep to indicate robot is ready to receive ball:
+			Sound.beep();
+			Sound.setVolume(0);
+			Sound.pause(5000); 
+			nav.driveWCorrection(5);
+			launcher.lockArm(); //brings it to middle and locks it
+			//change track:
+			correction.width = 12;
+			nav.width = 12;
+			odo.TRACK = 12;
+			System.out.println(WiFiExample.TRACK);
+			nav.driveWCorrection(30.48);
+			
+			
+			//travel one tile behind forward line IN Y FIRST, localize
+			fwdLine_coord = 10 - fwdLinePosition;
+			
+			if(fwdLinePosition == 6){
+				nav.travelToYFIRST(5*TILE_LENGTH, (fwdLine_coord-2)*TILE_LENGTH);
+			}
+			else{
+				nav.travelToYFIRST(5*TILE_LENGTH, (fwdLine_coord-1)*TILE_LENGTH);
+			}
+//			correction.width = 14;
+//			nav.width = 14;
+			nav.finishTravel = false;
+
+//			correction.localizeFWD(); 
+			nav.travelTo(5*TILE_LENGTH, (fwdLine_coord*TILE_LENGTH) - ROBOT_FRONT_TOCENTER_DIST); //go to forward line
+			nav.finishTravel = false;
+			
+			nav.turnToSmart(0); //face target 
+			nav.driveWCorrection(-15);
+		//	nav.driveWCorrection(15);
+			//motorstop();
+			launcher.prepareToFire();
+			Sound.pause(1000);
+//			launcher.Fire(fwdLinePosition);
+			launcher.Fire(6);
+		}
 			
 	}
 	
