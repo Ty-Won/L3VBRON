@@ -78,6 +78,8 @@ public class Forward {
 		this.w2 = w2;
 		this.bx = bx;
 		this.by = by;
+
+
 		this.omega = omega;
 		this.nav = navigation;
 		this.odo = odometer;
@@ -98,7 +100,15 @@ public class Forward {
 //		launcher.lockArm();
 //		nav.turnTo(360);
 //		nav.driveWCorrection(5*30.48);
-		
+		if(bx==-1){
+			bx = 0;
+		}
+		if(bx == 11){
+			bx = 10;
+		}
+		if(by == -1){
+			by = 0;
+		}
 		int[] field_coord = new int[3]; 	//array that stores field coordinates of the robot's position
 		if(corner==1){
 			field_coord[0] =0;
@@ -168,7 +178,7 @@ public class Forward {
 		
 		//BALL RECEIVED: turn off US sensor
 		//WiFiExample.cont.doit = false;
-		WiFiExample.cont.stopSensing = true;
+		
 	//	try { WiFiExample.usSensor.wait(1000000000); } catch (InterruptedException e) {		}
 		
 		
@@ -200,6 +210,7 @@ public class Forward {
 		
 		correction.width = 10.9;
 		nav.width = 10.9;
+		WiFiExample.cont.stopSensing = true;
 		while(true){
 			WiFiExample.correction.localizeForAvoidance(); //goes back until it sees a line and then again 11.6
 			//travel back unt
@@ -222,9 +233,9 @@ public class Forward {
 			//localize forward
 			correction.localizeFWD();
 			//drive forward a little to correct angle:
-			nav.driveWCorrection(14);
+			nav.driveWCorrection(16);
 			launcher.Enter_Launch_Position();//pulls the arm down
-			nav.driveWCorrection(-16.5); //drive back to intersection
+			nav.driveWCorrection(-18.5); //drive back to intersection
 			Sound.setVolume(10);
 			//beep to indicate robot is ready to receive ball:
 			Sound.beep();
@@ -239,7 +250,7 @@ public class Forward {
 			System.out.println(WiFiExample.TRACK);
 			nav.driveWCorrection(30.48);
 			
-			
+			WiFiExample.cont.stopSensing = false;
 			//travel one tile behind forward line IN Y FIRST, localize
 			fwdLine_coord = 10 - fwdLinePosition;
 			
@@ -265,6 +276,7 @@ public class Forward {
 			Sound.pause(1000);
 //			launcher.Fire(fwdLinePosition);
 			launcher.Fire(6);
+			WiFiExample.cont.stopSensing = true;
 		}
 			
 	}
