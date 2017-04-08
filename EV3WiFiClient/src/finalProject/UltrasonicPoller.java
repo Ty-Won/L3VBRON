@@ -11,27 +11,43 @@ import lejos.robotics.SampleProvider;
 //  of 1/70mS or about 14 Hz.
 //
 
-
+/**
+ * This class is used to intake the values from the ultrasonic sensor
+ * continually.
+ * 
+ * @author Ian Gauthier
+ * @author Ilana Haddad
+ *
+ */
 public class UltrasonicPoller extends Thread{
 	private SampleProvider us;
-	private PController cont;
 	private float[] usData;
+	public int distance;
 	
-	public UltrasonicPoller(SampleProvider us, float[] usData, PController cont) {
+	/**
+	 * 
+	 * @param us the ultrasoic sensor
+	 * @param usData the array into which the ultrasonic sensor data will be input
+	 */
+	public UltrasonicPoller(SampleProvider us, float[] usData) {
 		this.us = us;
-		this.cont = cont;
 		this.usData = usData;
 	}
 
 //  Sensors now return floats using a uniform protocol.
 //  Need to convert US result to an integer [0,255]
 	
+	/**
+	 * The method should intake the value of distance that
+	 * is found by the ultrasonic sensor and set the variable of
+	 * distance equal to that number.
+	 */
 	public void run() {
-		int distance;
+//		int distance;
 		while (true) {
 			us.fetchSample(usData,0);							// acquire data
-			distance=(int)(usData[0]*100.0);					// extract from buffer, cast to int
-			cont.processUSData(distance);						// now take action depending on value
+			this.distance=(int)(usData[0]*100.0);					// extract from buffer, cast to int
+//			cont.processUSData(distance);						// now take action depending on value
 			try { Thread.sleep(50); } catch(Exception e){}		// Poor man's timed sampling
 		}
 	}

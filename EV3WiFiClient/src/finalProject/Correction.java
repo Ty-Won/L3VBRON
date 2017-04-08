@@ -4,6 +4,7 @@ import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorModes;
+import lejos.robotics.RegulatedMotor;
 import lejos.robotics.SampleProvider;
 
 /**
@@ -17,6 +18,10 @@ import lejos.robotics.SampleProvider;
  * heading.
  * In addition, after the robot crosses over four grid lines, the system should perform
  * an additional localization in order to more exactly correct its position and heading.
+ * This will be done in a different way than the original localization. The robot
+ * will first back up to find a grid line with its back two sensors before turning ninety degrees
+ * and doing the same in the other dimension. It will then use these findings to recalibrate the robot's
+ * heading and position.
  * 
  * @author Ilana Haddad
  * @author Tristan Bouchard
@@ -86,13 +91,13 @@ public class Correction {
 		this.rightMotor = rightMotor; 
 	}
 
-	/**
-	 * This method should continuously check the amount of grid lines that the robot has passed
-	 * while going forward (the program should halt the check while the robot is turning
-	 * as it may pass many lines in this action but not change it's position at all) and after
-	 * the robot has crossed over four, should call for the robot to localize to correct its
-	 * position and heading.
-	 */
+//	/**
+//	 * This method should continuously check the amount of grid lines that the robot has passed
+//	 * while going forward (the program should halt the check while the robot is turning
+//	 * as it may pass many lines in this action but not change it's position at all) and after
+//	 * the robot has crossed over four, should call for the robot to localize to correct its
+//	 * position and heading.
+//	 */
 	//	public void run(){ 
 	//		pauseWhileTurning();
 	//		LightCorrection();
@@ -119,15 +124,18 @@ public class Correction {
 		//left and right sensors have not yet seen a black line
 		leftline = false; 
 		rightline= false; 
-
+		//System.out.println("LC");
 		Sound.twoBeeps();	//DO NOT REMOVE 
 		while(!leftline  && !rightline){
 			leftline = lineDetected(colorSensorL, colorDataL);
 			rightline = lineDetected(colorSensorR, colorDataR);
-			if(leftMotor.isMoving()==false){
+			if(leftMotor.isMoving()==false||rightMotor.isMoving()==false){
 				return;
 			}
-
+			if(WiFiExample.cont.avoidingOb){
+				gridcount = 0;
+				//return;
+			}
 			//if one of them starts seeing a line, this loop exits
 			//			pauseWhileTurning();
 		}
@@ -141,11 +149,13 @@ public class Correction {
 
 		if(leftline){
 			do{ 
-				leftMotor.setSpeed(10);
+				leftMotor.setSpeed(1);
+				rightMotor.setSpeed(350);
 				rightline = lineDetected(colorSensorR, colorDataR);
 			} while (rightline == false);
 
 			leftMotor.setSpeed(FORWARD_SPEED);
+			rightMotor.setSpeed(FORWARD_SPEED);
 			updateOdo();
 
 			//			pauseWhileTurning();
@@ -172,9 +182,9 @@ public class Correction {
 
 	}
 
-	/**
-	 * This method is used to stop the robot from performing correction while the robot is turning.
-	 */
+//	/**
+//	 * This method is used to stop the robot from performing correction while the robot is turning.
+//	 */
 	//	public void pauseWhileTurning(){
 	//		turning = nav.isTurning();
 	//		while(turning){ //puts correction thread to sleep while turning
@@ -196,38 +206,87 @@ public class Correction {
 
 		//		nav.stop=true;
 		localizing = true;
-
+		
 		//synchronize both motors so they can only be accessed by one thread (the Correction thread in this case)
 		synchronized(leftMotor){
 			synchronized(rightMotor){
+
+				//				motorstop();
+				//		Sound.twoBeeps();
+				//				leftMotor.synchronizeWith(new RegulatedMotor[] {rightMotor});
+				//				boolean moving = true;
+				//				while(moving){ //keep going until line detected
+
+				//				leftMotor.startSynchronization();
+//				motorstop();
+//				Sound.beepSequenceUp();
+				leftMotor.rotate(-convertDistance(wheel_radius, 100), true);
+				rightMotor.rotate(-convertDistance(wheel_radius, 100), true);
+				//				rightMotor.endSynchronization();
 				
-				motorstop();
-				Sound.twoBeeps();
-				boolean moving = true;
-				while(moving){ //keep going until line detected
-					leftMotor.rotate(-convertDistance(wheel_radius, 600), true);
-					rightMotor.rotate(-convertDistance(wheel_radius, 600), true);
-					if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){	//at this point, the light sensors at back detected a line so we want to localize
-						moving = false; //if line detected from back sensors, stop going backward
-						motorstop();
-						nav.driveDiag(-11.6); //go backward sensor dist for center of rotation to be at intersection
-						//						Sound.twoBeeps();
-						nav.turnTo(90);//turn right
-					}
+				boolean left = false; 
+				boolean right= false; 
+				while(!left&&!right){
+					left = lineDetected(colorSensorL, colorDataL);
+					right = lineDetected(colorSensorR, colorDataR);	//at this point, the light sensors at back detected a line so we want to localize
+				}
+//				Sound.beepSequenceUp();
+				motorstop(); //kills all .rotate()
+				nav.driveDiag(-11.6); //go backward sensor dist for center of rotation to be at intersection
+//				motorstop();
+				nav.turnTo(90);//turn right
+//				motorstop();
+
+
+
+				//				while(moving2){ //keep going until line detected
+				//				leftMotor.startSynchronization();
+				leftMotor.rotate(convertDistance(wheel_radius, 100), true);
+				rightMotor.rotate(convertDistance(wheel_radius, 100), true);
+				//				leftMotor.endSynchronization();
+
+				//				boolean moving2 = true;
+				//				while(moving2){
+				//					if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){
+				//						moving2 = false; //go forward until line from back sensors is detected
+				//					}
+				//				}
+
+				boolean left2 = false; 
+				boolean right2= false; 
+				while(!left2&&!right2){
+					left2 = lineDetected(colorSensorL, colorDataL);
+					right2 = lineDetected(colorSensorR, colorDataR);	//at this point, the light sensors at back detected a line so we want to localize
 				}
 
-				boolean moving2 = true;
-				while(moving2){ //keep going until line detected
-					leftMotor.rotate(convertDistance(wheel_radius, 600), true);
-					rightMotor.rotate(convertDistance(wheel_radius, 600), true);
-					if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){
-						moving2 = false; //go forward until line from back sensors is detected
-						motorstop();
-						nav.driveDiag(-11.6); //drive back sensor dist
-						//						Sound.twoBeeps();
-						nav.turnTo(-90); //turn back to original heading
-					}		
+				motorstop(); //kills all .rotate()
+				nav.driveDiag(-11.6); //drive back sensor dist
+//				motorstop();
+				nav.turnTo(-90); //turn back to original heading
+//				motorstop();
+				
+				
+				double X_ini = odo.getX();
+				double Y_ini = odo.getY();
+				
+				if(X_ini<-tilelength/2){
+					X_ini = X_ini-tilelength/2;
 				}
+				else{
+					X_ini = X_ini+tilelength/2;
+				}
+				
+				if(Y_ini<-tilelength/2){
+					Y_ini = Y_ini-tilelength/2;
+				}
+				else{
+					Y_ini = Y_ini+tilelength/2;
+				}
+				
+				//calculate the position of the gridline intersection the robot just crossed
+				double[] nearestIntersection={0,0,0};
+				nearestIntersection=getIntersection(X_ini, Y_ini);
+				odo.setPosition(nearestIntersection, new boolean[]{true, true, false});
 
 				gridcount = 0; //dont remove this
 				localizing = false;
@@ -263,24 +322,24 @@ public class Correction {
 		// if the robot is going (decreasing) along the x-direction, update the x-position and the heading
 		else if (odo.getAng()>270-angleThreshold && odo.getAng()<270+angleThreshold){
 			// determine which line the robot has crossed by dividing the y-position returned by the odometer
-			line = (int)(((x)+(tilelength/2)) / tilelength); 
+			line = (int)(((x)+19) / tilelength); //MAKE SURE 19 IS OKAY
 			// multiply by the length of a tile to know the y-position
 			position = (line*tilelength)-11.6;
-//			if(position<0){
-//				return;
-//			}
+			//			if(position<0){
+			//				return;
+			//			}
 			odo.setPosition(new double [] {position, 0.0 , 270}, new boolean [] {true, false, true});	
 		}
 
 		// if the robot is going (decreasing) along the y-direction, update the y-position and the heading
 		else if (odo.getAng()>180-angleThreshold && odo.getAng()<180+angleThreshold) {
 			// determine which line the robot has crossed by dividing the y-position returned by the odometer
-			line = (int)(((y)+(tilelength/2)) / tilelength);		
+			line = (int)(((y)+(19)) / tilelength);	//MAKE SURE 19 IS OKAY	
 			// multiply by the length of a tile to know the y-position
 			position = (line*tilelength)-11.6;
-//			if(position<0){
-//				return;
-//			}
+			//			if(position<0){
+			//				return;
+			//			}
 			odo.setPosition(new double [] {0.0, position , 180}, new boolean [] {false, true, true});	
 		}
 
@@ -321,46 +380,60 @@ public class Correction {
 		colorSensor.fetchSample(colorData, 0);
 		int light_val = (int)((colorData[0])*100);
 
-		if(light_val <= 34){
+		if(light_val <= 28){
 			return true;
 		}
 		else
 			return false;
 	}
 
+	/**
+	 * This method is used to very quickly stop the robot from moving in whatever direction it is
+	 * moving in before setting it's speed to be 150 degrees/second shortly afterward.
+	 */
 	public void motorstop(){
+	//	leftMotor.setAcceleration(7000);
+		//rightMotor.setAcceleration(7000);
 		leftMotor.setSpeed(0);
 		rightMotor.setSpeed(0);
-		leftMotor.stop();
-		rightMotor.stop();
+		leftMotor.forward();
+		rightMotor.forward();
+//		leftMotor.startSynchronization();
+		leftMotor.stop(true);
+		rightMotor.stop(false);
+//		leftMotor.endSynchronization();
 		leftMotor.setSpeed(ROTATE_SPEED);
 		rightMotor.setSpeed(ROTATE_SPEED);
+		leftMotor.setAcceleration(1000);
+		rightMotor.setAcceleration(1000);
 	}
 
 	/**
+	 * Method which returns the intersection closest to the current position of the
+	 * robot.
 	 * 
 	 * @param x the current position in the x direction
 	 * @param y the current position in the y direction
-	 * @return the location of the intersection closest to the current postion
+	 * @return the location of the intersection closest to the current position
 	 */
-	//	public double[] getIntersection(double x, double y){
-	//		double[] intersection={0.0,0.0,0.0};
-	//		double lineX = (int)(x)/tilelength;
-	//		double lineY = (int)(y)/tilelength;
-	//
-	//		intersection[0]=lineX*tilelength;
-	//		intersection[1]=lineY*tilelength;
-	//		intersection[2]=0.0;
-	//
-	//		return intersection;
-	//	}
+		public double[] getIntersection(double x, double y){
+			double[] intersection={0.0,0.0,0.0};
+			double lineX = (int)((x)/tilelength);
+			double lineY = (int)((y)/tilelength);
+	
+			intersection[0]=lineX*tilelength;
+			intersection[1]=lineY*tilelength;
+			intersection[2]=0.0;
+	
+			return intersection;
+		}
 
-	/**
-	 * This method should turn the robot to the given heading. Very similar to the method of the same name in 
-	 * navigation.
-	 * 
-	 * @param theta the angle to which the robot should turn.
-	 */
+//	/**
+//	 * This method should turn the robot to the given heading. Very similar to the method of the same name in 
+//	 * navigation.
+//	 * 
+//	 * @param theta the angle to which the robot should turn.
+//	 */
 	//	public void turnTo(double theta){
 	//		turning = true;
 	//		Sound.twoBeeps(); //DONT REMOVE THIS
@@ -391,12 +464,12 @@ public class Correction {
 	//		////		rightMotor.setAcceleration(6000);
 	//	}
 
-	/**
-	 * This method should move the robot forward by the given amount. Very similar to the method of the 
-	 * same name located in navigation.
-	 * 
-	 * @param travelDist the distance by which the robot should travel straight
-	 */
+//	/**
+//	 * This method should move the robot forward by the given amount. Very similar to the method of the 
+//	 * same name located in navigation.
+//	 * 
+//	 * @param travelDist the distance by which the robot should travel straight
+//	 */
 	//	public void drive(double travelDist){
 	//		//set both motors to forward speed desired
 	//		//		leftMotor.setAcceleration(4000);
@@ -426,19 +499,145 @@ public class Correction {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 	//convertAngle method: This method takes the radius of wheel, width of cart and the angle required to be turned and calculated the required wheel rotation
-	/**
-	 * The method should convert the input angle into a form that can be performed
-	 * by the robot with the given wheel radius and width.
-	 * 
-	 * 
-	 * @param radius the radius of the wheel
-	 * @param width the width of the robot
-	 * @param angle the angle to be converted
-	 * @return the angle now in the form of amount of rotation needed by the robot's wheel to perform that angle of turn
-	 */
+//	/**
+//	 * The method should convert the input angle into a form that can be performed
+//	 * by the robot with the given wheel radius and width.
+//	 * 
+//	 * 
+//	 * @param radius the radius of the wheel
+//	 * @param width the width of the robot
+//	 * @param angle the angle to be converted
+//	 * @return the angle now in the form of amount of rotation needed by the robot's wheel to perform that angle of turn
+//	 */
 	//	private static int convertAngle(double radius, double width, double angle) {
 	//		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	//	}
+	
+	/**
+	 * This method is very similar to the normal localization method in this class but will
+	 * be executed only when the robot has reached the ball dispenser and is almost ready to 
+	 * receive the ball. The robot should perform a normal localization but it should ensure that
+	 * the robot not turn into the wall that will be present as the robot will be very close
+	 * to the wall the dispenser is connected to. 
+	 */
+	public void localizeFWD(){
+
+		//		nav.stop=true;
+		localizing = true;
+		
+		//synchronize both motors so they can only be accessed by one thread (the Correction thread in this case)
+		synchronized(leftMotor){
+			synchronized(rightMotor){
+				leftMotor.rotate(convertDistance(wheel_radius, 100), true);
+				rightMotor.rotate(convertDistance(wheel_radius, 100), true);
+				boolean left = false; 
+				boolean right= false; 
+				while(!left&&!right){
+					left = lineDetected(colorSensorL, colorDataL);
+					right = lineDetected(colorSensorR, colorDataR);	//at this point, the light sensors at back detected a line so we want to localize
+				}
+//				Sound.beepSequenceUp();
+				motorstop(); //kills all .rotate()
+				nav.driveDiag(-11.6); //go backward sensor dist for center of rotation to be at intersection
+//				motorstop();
+				nav.turnTo(90);//turn right
+//				motorstop();
+
+
+
+				//				while(moving2){ //keep going until line detected
+				//				leftMotor.startSynchronization();
+				leftMotor.rotate(convertDistance(wheel_radius, 100), true);
+				rightMotor.rotate(convertDistance(wheel_radius, 100), true);
+				//				leftMotor.endSynchronization();
+
+				//				boolean moving2 = true;
+				//				while(moving2){
+				//					if(lineDetected(colorSensorL, colorDataL)||lineDetected(colorSensorR, colorDataR)){
+				//						moving2 = false; //go forward until line from back sensors is detected
+				//					}
+				//				}
+
+				boolean left2 = false; 
+				boolean right2= false; 
+				while(!left2&&!right2){
+					left2 = lineDetected(colorSensorL, colorDataL);
+					right2 = lineDetected(colorSensorR, colorDataR);	//at this point, the light sensors at back detected a line so we want to localize
+				}
+
+				motorstop(); //kills all .rotate()
+				nav.driveDiag(-11.6); //drive back sensor dist
+//				motorstop();
+				nav.turnTo(-90); //turn back to original heading
+//				motorstop();
+				
+				
+				double X_ini = odo.getX();
+				double Y_ini = odo.getY();
+				
+				if(X_ini<-tilelength/2){
+					X_ini = X_ini-tilelength/2;
+				}
+				else{
+					X_ini = X_ini+tilelength/2;
+				}
+				
+				if(Y_ini<-tilelength/2){
+					Y_ini = Y_ini-tilelength/2;
+				}
+				else{
+					Y_ini = Y_ini+tilelength/2;
+				}
+				
+				//calculate the position of the gridline intersection the robot just crossed
+				double[] nearestIntersection={0,0,0};
+				nearestIntersection=getIntersection(X_ini, Y_ini);
+				odo.setPosition(nearestIntersection, new boolean[]{true, true, false});
+
+				gridcount = 0; //dont remove this
+				localizing = false;
+				//				nav.stop=false;
+			}
+		}
+	}
+	
+	/**
+	 * This method is very similar to the normal localization method found within this class.
+	 * However, this method will only be called directly after the robot has finished with
+	 * avoiding an obstacle. In this method, the robot will only localize in one direction to reset the 
+	 * position of the angle in the direction which it will be driving following 
+	 * the avoidance of an obstacle.
+	 */
+	public void localizeForAvoidance(){
+		// goes back until line detected, goes back 11.6
+		//		nav.stop=true;
+		localizing = true;
+		
+		//synchronize both motors so they can only be accessed by one thread (the Correction thread in this case)
+		synchronized(leftMotor){
+			synchronized(rightMotor){
+				leftMotor.rotate(-convertDistance(wheel_radius, 100), true);
+				rightMotor.rotate(-convertDistance(wheel_radius, 100), true);
+				boolean left = false; 
+				boolean right= false; 
+				while(!left&&!right){
+					left = lineDetected(colorSensorL, colorDataL);
+					right = lineDetected(colorSensorR, colorDataR);	//at this point, the light sensors at back detected a line so we want to localize
+				}
+
+				motorstop(); //kills all .rotate()
+				nav.driveDiag(-11.6); //go backward sensor dist for center of rotation to be at intersection
+
+
+
+	
+				gridcount = 0; //dont remove this
+				localizing = false;
+
+			}
+		}
+		
+	}
 
 
 }

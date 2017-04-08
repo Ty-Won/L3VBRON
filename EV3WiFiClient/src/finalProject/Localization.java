@@ -186,7 +186,7 @@ public class Localization {
 		//only theta is being updated so index 2 is true but x and y remain 0
 		odo.setPosition(pos, updates);
 
-		nav.turnToSmart(55);
+		nav.turnToSmart(45);
 		Sound.buzz();
 		
 		odo.setAng(45);

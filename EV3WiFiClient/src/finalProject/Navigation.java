@@ -2,20 +2,16 @@ package finalProject;
 import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.robotics.RegulatedMotor;
 import lejos.robotics.SampleProvider;
 
 /**
  * The navigator is used to change either the robot's position 
  * or heading in a controlled manner. The navigator intakes values 
- * from the odometer continuously and takes a value for either 
- * angle or position from another class and computes the difference 
- * in heading before using the difference in wheel angle count of the 
- * robot to find the amount of change needed to have the correct 
- * heading. Once the robot has the correct heading, if the robot 
- * needs to move to another position the robot calculates the 
- * amount of distance it needs to travel to reach the correct 
- * position before going there and stopping.
- * 
+ * from the odometer continuously and should first move the robot towards its
+ * target position or target heading. During these movements the robot should
+ * consistently be the calling correction and obstacle avoidance methods
+ * to ensure the robot reaches the correct final position.
  * 
  * 
  * @author Ian Gauthier
@@ -34,7 +30,7 @@ public class Navigation{
 	double width =  WiFiExample.TRACK;
 	private static final int FORWARD_SPEED = WiFiExample.FORWARD_SPEED;
 	private static final int ROTATE_SPEED = WiFiExample.ROTATE_SPEED;
-
+	public double return_theta;
 	/**The odometer value of the X position */
 	public double odo_x;
 	/** The odometer value of the Y position of the robot. */
@@ -48,8 +44,6 @@ public class Navigation{
 	public double y_dest;
 	/** The desired heading of the robot. */
 	public double theta_dest;
-	
-	public double return_theta;
 
 	/** The left wheel's motor. Initialized in main class WiFiExample and passed on in Navigation.*/
 	private EV3LargeRegulatedMotor leftMotor = WiFiExample.leftMotor;
@@ -64,8 +58,7 @@ public class Navigation{
 
 	public boolean localizing=false;
 	public boolean stop = false;
-	public boolean donemoving = true;
-
+	public static boolean finishTravel = false;
 
 	/**The Odometer of the robot */
 	public Odometer odometer = WiFiExample.odometer;
@@ -83,6 +76,7 @@ public class Navigation{
 
 	public Navigation(Odometer odometer){ //constructor
 		this.odometer = odometer;
+//		leftMotor.synchronizeWith(new RegulatedMotor[] {rightMotor});
 	}
 
 	/**
@@ -93,36 +87,35 @@ public class Navigation{
 	 * @param x the X coordinate that should be moved to
 	 * @param y the X coordinate that should be moved to
 	 */
-	public void travelTo(double x, double y){
+	public void travelTo(double x_dest, double y_dest){
 		//this method causes robot to travel to the absolute field location (x,y)
 
 		if(stop){
 			return;
 		}
+		this.x_dest = x_dest;
+		this.y_dest = y_dest;
 		odo_x = odometer.getX();
 		odo_y = odometer.getY();
 		odo_theta = odometer.getAng();
-		x_dest = x;
-		y_dest = y;
 
 		//calculate the distance we want the robot to travel in x and y 
 		double delta_y = y_dest-odo_y;
 		double delta_x = x_dest-odo_x;
 
-		drive(delta_x,delta_y);
-		
-		odo_x = odometer.getX();
-		odo_y = odometer.getY();
-		odo_theta = odometer.getAng();
-		x_dest = x;
-		y_dest = y;
+		drive(delta_x,delta_y,x_dest,y_dest);
 
-		//calculate the distance we want the robot to travel in x and y 
-		delta_y = y_dest-odo_y;
-		delta_x = x_dest-odo_x;
-		
-		drive(delta_x,delta_y);
-
+//		odo_x = odometer.getX();
+//		odo_y = odometer.getY();
+//		odo_theta = odometer.getAng();
+//		x_dest = x;
+//		y_dest = y;
+//
+//		//calculate the distance we want the robot to travel in x and y 
+//		delta_y = y_dest-odo_y;
+//		delta_x = x_dest-odo_x;
+//
+//		drive(delta_x,delta_y);
 	}
 
 	/**
@@ -139,7 +132,10 @@ public class Navigation{
 		if(stop){
 			return;
 		}
-
+		
+		x_dest = x;
+		y_dest = y;
+		
 		odo_x = odometer.getX();
 		odo_y = odometer.getY();
 		odo_theta = odometer.getAng();
@@ -177,23 +173,29 @@ public class Navigation{
 		driveDiag(travelDist);
 	}
 
+	
 	/**
-	 * The method should convert the distance into an angle in terms of
-	 * the radius of the wheel and then travel forward that amount.
-	 * Insert x and y coordinates and the EV3 travels on the x,y planes to reach the destination
-	 * @param distance the distance to be converted in terms of cm
+	 * This method should move the robot to by the given amount first in the x dimension
+	 * and then in the y dimension all while continually calling the obstacle avoidance 
+	 * and correction classes to ensure that the robot is moving to the correct point.
+	 * The grid line correction should be performed when the robot reaches each grid line
+	 * and the localization correction should be performed after the robot has crossed over 
+	 * six grid lines since its last localization.
+	 * 
+	 * @param delta_x the difference in x position from start to finish
+	 * @param delta_y the difference in y position from start to finish
+	 * @param x_dest the final x position
+	 * @param y_dest the final y position
 	 */
-	public void drive(double delta_x,double delta_y){
+	public void drive(double delta_x,double delta_y,double x_dest,double y_dest){
 
 		synchronized(leftMotor){
 			synchronized(rightMotor){
-				//		stopNav();
-				if(stop){
-					return;
-				}
 				//set both motors to forward speed desired
 				leftMotor.setSpeed(FORWARD_SPEED);
 				rightMotor.setSpeed(FORWARD_SPEED);
+				leftMotor.setAcceleration(1000);
+				rightMotor.setAcceleration(1000);
 
 				//X-travel
 				if(Math.abs(delta_x)<1){
@@ -206,24 +208,31 @@ public class Navigation{
 						turnToSmart(270);
 					}
 				}
+
+//				leftMotor.startSynchronization();
 				leftMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_x)), true);
 				rightMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_x)), true);
+//				leftMotor.endSynchronization();
 
 				//might need to add a travel to after while loop to make sure it's in the right location
-				while(leftMotor.isMoving()||rightMotor.isMoving()){
+				while(leftMotor.isMoving()&&rightMotor.isMoving()){
 					WiFiExample.correction.LightCorrection();
-					if(WiFiExample.correction.gridcount==6){
+					if(WiFiExample.cont.avoidingOb = true){
+						return_theta = odometer.getAng();
+						avoidOb(x_dest,y_dest);
+					}
+					if(WiFiExample.correction.gridcount==5){
 						localize();
 					}
-					if(WiFiExample.cont.avoidingOb = true)
-					{
-						return_theta = odometer.getAng();
-						avoidOb();
-					}
+					
 				}
-
-				motorstop();
-
+				if(finishTravel){
+					return;
+				}
+				
+				//motorstop();
+				
+				
 				//Y-travel
 				if(Math.abs(delta_y)<1){
 					delta_y=0;
@@ -239,31 +248,46 @@ public class Navigation{
 				leftMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_y)), true);
 				rightMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_y)), true);
 
-
 				//might need to add a travel to after while loop to make sure it's in the right location
-				while(leftMotor.isMoving()||rightMotor.isMoving()){
+				while(leftMotor.isMoving()&&rightMotor.isMoving()){
 					WiFiExample.correction.LightCorrection();
-					if(WiFiExample.correction.gridcount==6){
-//						donemoving = false;
-						localize();
-//						donemoving = true;
-					}
-					if(WiFiExample.cont.avoidingOb = true)
-					{
+					if(WiFiExample.cont.avoidingOb = true){
 						return_theta = odometer.getAng();
-						avoidOb();
+						avoidOb(x_dest,y_dest);
 					}
+					if(WiFiExample.correction.gridcount==5){
+//						motorstop();
+						localize();
+						return;
+					}
+					
 				}
-
-//				if(donemoving){
-//					Sound.beepSequenceUp();
-//					travelToDiag(x_dest,y_dest);
-//
-//				}
-				motorstop();
 			}
 		}
 	}
+	
+	
+	//this method activates obstacle avoidance and continues travel after the avoidance is done
+	/**
+	 * This method should call the obstacle avoidance system when there has been a block
+	 * detected, avoid the obstacle and then travel to the position that was initially
+	 * the goal.
+	 *	
+	 * @param x_dest the x coordinate of the final position
+	 * @param y_dest the y coordinate of the final position
+	 */
+	public void avoidOb(double x_dest,double y_dest){
+//		motorstop();
+		WiFiExample.cont.avoidOB();
+//		turnToSmart(return_theta);
+		if(WiFiExample.cont.avoidedBlock){
+			WiFiExample.correction.localizeFWD();
+			travelTo(x_dest,y_dest);
+//			motorstop();
+			finishTravel = true;
+		}
+	}
+	
 	/**
 	 * This method travels to distance inputed diagonally.
 	 * @param travelDist
@@ -273,28 +297,69 @@ public class Navigation{
 		synchronized(leftMotor){
 			synchronized(rightMotor){
 				//		stopNav();
-				if(stop){
-					return;
-				}
-
+//				if(stop){
+//					return;
+//				}
+//				motorstop();
+				
 				//set both motors to forward speed desired
 				leftMotor.setSpeed(FORWARD_SPEED);
 				rightMotor.setSpeed(FORWARD_SPEED);
+				leftMotor.setAcceleration(1000);
+				rightMotor.setAcceleration(1000);
 
+//				leftMotor.startSynchronization();
 				leftMotor.rotate(convertDistance(wheel_radius, travelDist), true);
 				rightMotor.rotate(convertDistance(wheel_radius, travelDist), true);
-
-				while(leftMotor.isMoving()){
-					if(stop){
-						turning = false;
-						return;
-					}
-				}
+//				leftMotor.endSynchronization();
+				
+				leftMotor.waitComplete();
+				rightMotor.waitComplete();
+				
+//					motorstop();
+//				}
 
 			}
 		}
 	}
+	
+	/**
+	 * This method is very similar to the drive method except
+	 * that it should continuously call the corrected method for grid line
+	 * correction to fix the heading of the robot as it moves to the final
+	 * position.
+	 * 
+	 * @param travelDist the distance to be traveled
+	 */
+	public void driveWCorrection(double travelDist){
+		synchronized(leftMotor){
+			synchronized(rightMotor){
+				
+				//set both motors to forward speed desired
+				leftMotor.setSpeed(FORWARD_SPEED);
+				rightMotor.setSpeed(FORWARD_SPEED);
+				leftMotor.setAcceleration(1000);
+				rightMotor.setAcceleration(1000);
 
+//				leftMotor.startSynchronization();
+				leftMotor.rotate(convertDistance(wheel_radius, travelDist), true);
+				rightMotor.rotate(convertDistance(wheel_radius, travelDist), true);
+//				leftMotor.endSynchronization();
+					//System.out.println("drive with correction");
+				while(leftMotor.isMoving()&&rightMotor.isMoving()){ //&&
+					WiFiExample.correction.LightCorrection();
+					
+				}
+				WiFiExample.correction.gridcount = 0;
+			//	leftMotor.waitComplete();
+			//	rightMotor.waitComplete();
+				
+				motorstop();
+				//				}
+
+			}
+		}
+	}
 	/**
 	 * The method should intake an angle and then turn the robot to that angle.
 	 * 
@@ -306,54 +371,61 @@ public class Navigation{
 
 		synchronized(leftMotor){
 			synchronized(rightMotor){
-				//		stopNav();
+
 				if(stop){
 					return;
 				}
 
 				turning = true;
 				Sound.twoBeeps(); //DONT REMOVE THIS
-
+//				motorstop();
 				//make robot turn to angle theta:
 				leftMotor.setSpeed(ROTATE_SPEED);
-				leftMotor.setAcceleration(2000);
+				leftMotor.setAcceleration(1000);
 				rightMotor.setSpeed(ROTATE_SPEED);
-				rightMotor.setAcceleration(2000);
+				rightMotor.setAcceleration(1000);
 
+//				leftMotor.startSynchronization();
 				leftMotor.rotate(convertAngle(wheel_radius, width, theta), true);
-				rightMotor.rotate(-convertAngle(wheel_radius, width, theta), true);
+				rightMotor.rotate(-convertAngle(wheel_radius, width, theta), false);
+//				leftMotor.endSynchronization();
 
-				while(leftMotor.isMoving()){
-					if(stop){
-						turning = false;
-						return;
-					}
-				}
+//				while(leftMotor.isMoving()||rightMotor.isMoving()){
+//					if(stop){
+//						turning = false;
+//						return;
+//					}
+//				}
+//				leftMotor.waitComplete();
+//				rightMotor.waitComplete();
+//				
+//				motorstop();
 
 				//returns default acceleration values after turn
-				leftMotor.setAcceleration(6000);
-				rightMotor.setAcceleration(6000);
+				leftMotor.setAcceleration(1000);
+				rightMotor.setAcceleration(1000);
 				leftMotor.setSpeed(FORWARD_SPEED);
 				rightMotor.setSpeed(FORWARD_SPEED);
+				Sound.twoBeeps();
 			}
 		}
 
 		turning = false;
 	}
 
+	/**
+	 * This method should call the correction class' localization method
+	 * and then when finished should call the robot to travel to the initial
+	 * destination of the robot.
+	 */
 	public void localize(){
 		//		leftMotor.setSpeed(0);
 		//		rightMotor.setSpeed(0);
-		motorstop();
+//		motorstop();
 		WiFiExample.correction.localize();
+//		System.out.println("x dest: "+ x_dest + ", y_dest: "+ y_dest);
 		travelTo(x_dest,y_dest);
-	}
-	public void avoidOb()
-	{
-		motorstop();
-		WiFiExample.cont.avoidOB();
-		turnTo(return_theta);
-		travelTo(x_dest,y_dest);
+		finishTravel = true;
 	}
 
 
@@ -367,7 +439,7 @@ public class Navigation{
 	 * @return the converted distance
 	 */
 	private static int convertDistance(double radius, double distance) {
-		return ((int) (100*(180.0 * distance) / (Math.PI * radius)))/100;
+		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 
 	/**
@@ -395,7 +467,7 @@ public class Navigation{
 			return;
 		}
 		odo_theta = odometer.getAng();
-
+		
 		//subtract odo_theta from theta_dest:
 		double theta_corr = angle - odo_theta;
 		//DIRECTING ROBOT TO CORRECT ANGLE: 
@@ -413,6 +485,10 @@ public class Navigation{
 
 	}
 
+	/**
+	 * 
+	 * @return the coordinates of the destination of the robot
+	 */
 	public double[] getDest(){
 		double[] coordinates = {0.0,0.0,0.0};
 		coordinates[0]=x_dest;
@@ -430,13 +506,25 @@ public class Navigation{
 		return turning; 
 	}
 
+	/**
+	 * This method is used to very quickly stop the robot from moving in whatever direction it is
+	 * moving in before setting it's speed to be 150 degrees/second shortly afterward.
+	 */
 	public void motorstop(){
+		leftMotor.setAcceleration(10000);
+		rightMotor.setAcceleration(10000);
 		leftMotor.setSpeed(0);
 		rightMotor.setSpeed(0);
-		leftMotor.stop();
-		rightMotor.stop();
+		leftMotor.forward();
+		rightMotor.forward();
+//		leftMotor.startSynchronization();
+		leftMotor.stop(true);
+		rightMotor.stop(false);
+//		leftMotor.endSynchronization();
 		leftMotor.setSpeed(ROTATE_SPEED);
 		rightMotor.setSpeed(ROTATE_SPEED);
+		leftMotor.setAcceleration(1000);
+		rightMotor.setAcceleration(1000);
 	}
 
 	/**
@@ -450,6 +538,116 @@ public class Navigation{
 				localizing=WiFiExample.correction.islocalizing();
 				Thread.sleep(500);
 			} catch (InterruptedException e) {}
+		}
+	}
+	
+	/**
+	 * This method is identical to the original travelTo method except that it
+	 * moves in the y dimension before it moves in the x dimension.
+	 * 
+	 * @param x_dest the x coordinate of the final position
+	 * @param y_dest the y coordinate of the final position
+	 */
+	public void travelToYFIRST(double x_dest, double y_dest){
+		//this method causes robot to travel to the absolute field location (x,y)
+
+		if(stop){
+			return;
+		}
+		this.x_dest = x_dest;
+		this.y_dest = y_dest;
+		odo_x = odometer.getX();
+		odo_y = odometer.getY();
+		odo_theta = odometer.getAng();
+
+		//calculate the distance we want the robot to travel in x and y 
+		double delta_y = y_dest-odo_y;
+		double delta_x = x_dest-odo_x;
+
+		driveYFIRST(delta_x,delta_y,x_dest,y_dest);
+	}
+	
+	/**
+	 * This method is very similar to the original drive method except that it
+	 * drives in the y dimension before driving in the x dimension.
+	 * 
+	 * @param delta_x the difference in x position from start to finish
+	 * @param delta_y the difference in y position from start to finish
+	 * @param x_dest the final x position
+	 * @param y_dest the final y position
+	 */
+	public void driveYFIRST(double delta_x,double delta_y,double x_dest,double y_dest){
+
+		synchronized(leftMotor){
+			synchronized(rightMotor){
+				//set both motors to forward speed desired
+				leftMotor.setSpeed(FORWARD_SPEED);
+				rightMotor.setSpeed(FORWARD_SPEED);
+				leftMotor.setAcceleration(1000);
+				rightMotor.setAcceleration(1000);
+				
+				//Y-travel
+				if(Math.abs(delta_y)<1){
+					delta_y=0;
+				}	
+				if(Math.abs(delta_y)>1){
+					if(delta_y>1)
+						turnToSmart(0);
+					else{
+						turnToSmart(180);
+					}
+				}
+
+//				leftMotor.startSynchronization();
+				leftMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_y)), true);
+				rightMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_y)), true);
+//				leftMotor.endSynchronization();
+
+				//might need to add a travel to after while loop to make sure it's in the right location
+				while(leftMotor.isMoving()&&rightMotor.isMoving()){
+					WiFiExample.correction.LightCorrection();
+					 
+					if(WiFiExample.cont.avoidingOb = true){
+						return_theta = odometer.getAng();
+						avoidOb(x_dest,y_dest);		
+					}
+					if(WiFiExample.correction.gridcount==5){
+						localize();
+						return;
+					}
+				}
+				if(finishTravel){
+					return;
+				}
+				//X-travel
+				if(Math.abs(delta_x)<1){
+					delta_x=0;
+				}	
+				if(Math.abs(delta_x)>1){
+					if(delta_x>1)
+						turnToSmart(90);
+					else{
+						turnToSmart(270);
+					}
+				}
+
+//				leftMotor.startSynchronization();
+				leftMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_x)), true);
+				rightMotor.rotate(convertDistance(wheel_radius, Math.abs(delta_x)), true);
+//				leftMotor.endSynchronization();
+
+				//might need to add a travel to after while loop to make sure it's in the right location
+				while(leftMotor.isMoving()&&rightMotor.isMoving()){
+					WiFiExample.correction.LightCorrection();
+					if(WiFiExample.cont.avoidingOb = true){
+						return_theta = odometer.getAng();
+						avoidOb(x_dest,y_dest);
+					}
+					if(WiFiExample.correction.gridcount==5){
+						localize();
+					}
+				}
+			}
 		}
 	}
 
