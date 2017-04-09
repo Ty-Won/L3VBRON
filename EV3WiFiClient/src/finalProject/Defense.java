@@ -99,7 +99,6 @@ public class Defense {
 			//travel in y first
 			System.out.println("in w2 = 2");
 			nav.travelToYFIRST(5*TILE_LENGTH, 6*TILE_LENGTH);
-		//	nav.travelToYFIRST(5*TILE_LENGTH, 7*TILE_LENGTH);
 		}
 		if(this.w2 == 3){ //go to coordinates (5, 6.5) 
 			nav.travelToYFIRST(5*TILE_LENGTH, 6*TILE_LENGTH);

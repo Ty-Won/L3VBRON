@@ -57,7 +57,6 @@ public class OdometryDisplay extends Thread {
 			t.drawString("Y:              ", 0, 1);
 			t.drawString("T:              ", 0, 2);
 			t.drawString("D:              ", 0, 3);
-			//				t.drawString("US:"+ Lab3.sample[0]*100, 0, 3);
 
 			// get the odometry information
 			boolean[] update = {true,true,true,true};

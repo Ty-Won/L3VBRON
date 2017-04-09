@@ -59,8 +59,6 @@ public class Launcher {
 		barMotor.rotate(-100);
 		launcherMotor.rotate(-40);
 		barMotor.resetTachoCount();
-//		launcherMotor.close();
-//		barMotor.close();
 		launcherMotor.flt();
 		barMotor.flt();
 	}
@@ -110,7 +108,7 @@ public class Launcher {
 	 */
 	public static int Calculate_Angle(int dist){
 		int angle = 0;
-		//angle = 5*(dist) + 40;
+
 		if(dist > 7){
 			angle = 90;
 		}
@@ -146,9 +144,7 @@ public class Launcher {
 		else if(dist == 3){
 			launch_speed = 310;
 		}
-//		else{	
-//			launch_speed = 2500*(dist) - 12050; 
-//		}
+
 		return launch_speed;
 		
 	}

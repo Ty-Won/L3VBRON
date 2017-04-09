@@ -2,7 +2,7 @@ package finalProject;
 
 import java.util.Map;
 
-import finalProject.BangBangController;
+
 import finalProject.Defense;
 import finalProject.Forward;
 import finalProject.Navigation;
@@ -35,16 +35,10 @@ import lejos.robotics.SampleProvider;
  */
 public class WiFiExample {
 	public static final double WHEEL_RADIUS = 2.0768;
-//	public static final double TRACK = 11.4; 
+	//	public static final double TRACK = 11.4; 
 	public static double TRACK = 10.9; 
 	public static final int FORWARD_SPEED = 250;
 	public static final int ROTATE_SPEED = 150;
-	private static final int bandCenter = 35;			// Offset from the wall (cm)
-	private static final int bandWidth = 3;				// Width of dead band (cm)
-	private static final int motorLow = 100;			// Speed of slower rotating wheel (deg/sec)
-	private static final int motorHigh = 200;			// Speed of the faster rotating wheel (deg/seec)
-	private static final int PbandCenter = 32;			// Offset from the wall for PController (cm)
-	private static final int PbandWidth = 2;			// Bandwidth for PController (cm)
 
 	// Left motor connected to output A
 	// Right motor connected to output D
@@ -53,7 +47,7 @@ public class WiFiExample {
 	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 	public static final EV3LargeRegulatedMotor launcherMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
 	public static final EV3MediumRegulatedMotor barMotor = new EV3MediumRegulatedMotor(LocalEV3.get().getPort("C"));
-	
+
 	public static Launcher launcher = new Launcher(launcherMotor, barMotor);
 	//colorPorts front, left side and right side of the EV3
 	private static final Port colorPortF = LocalEV3.get().getPort("S2");	
@@ -61,8 +55,6 @@ public class WiFiExample {
 	private static final Port colorPortR = LocalEV3.get().getPort("S4");	
 
 	public static final Port usPort = LocalEV3.get().getPort("S1");
-
-
 
 	//Initialization of odometer and navigation objects.
 	public static EV3ColorSensor colorSensorF = new EV3ColorSensor(colorPortF);
@@ -84,7 +76,7 @@ public class WiFiExample {
 	public static UltrasonicPoller usPoller = new UltrasonicPoller(usValue, usData);
 	public static PController cont;
 	//	public static ballLauncher launch = new ballLauncher(launcherMotor,odometer,navigation);
-	
+
 
 	/*
 	 * We use System.out.println() instead of LCD printing so that full debug
@@ -160,38 +152,16 @@ public class WiFiExample {
 			 * was specified and getData() will throw an exception letting you know.
 			 */
 			Map data = conn.getData();
-
-			// Example 1: Print out all received data
-			//			System.out.println("Map:\n" + data);
-
-			// Example 2 : Print out specific values
 			int fwdTeam = ((Long) data.get("FWD_TEAM")).intValue();
-			//			System.out.println("Forward Team: " + fwdTeam);
-
 			int defTeam = ((Long) data.get("DEF_TEAM")).intValue();
-			//			System.out.println("Defense Team: " + defTeam);
-
 			int fwdCorner = ((Long) data.get("FWD_CORNER")).intValue();
-			//			System.out.println("Forward Start Corner: " + fwdCorner);
-
 			int defCorner = ((Long) data.get("DEF_CORNER")).intValue();
-
-
 			int w1 = ((Long) data.get("w1")).intValue();
 			int w2 = ((Long) data.get("w2")).intValue();
-
-
 			int d1 = ((Long) data.get("d1")).intValue();
-
-
 			int bx = ((Long) data.get("bx")).intValue();
 			int by = ((Long) data.get("by")).intValue();
-
-
-
-			// Example 3: Compare value
 			String orientation = (String) data.get("omega");
-
 
 			navigation = new Navigation(odometer);
 			cont = new PController(leftMotor, rightMotor, usPoller, usValue, usSensor, usData);
@@ -216,39 +186,15 @@ public class WiFiExample {
 				Sound.setVolume(0);
 				lsl.doLocalization();
 				colorSensorF.close();
-
 				correction = new Correction(odometer, navigation, colorValueR, colorValueL, colorValueF, leftMotor, rightMotor);
-
-
 				usPoller.start();
 				cont.start();
 				Forward forward = new Forward(navigation,odometer,fwdCorner,d1,w1,w2,bx,by,orientation);
 				forward.startFWD();
-					
-//					navigation.travelTo(6*30.48, 2*30.48);
-//					correction.localize();
-//					navigation.travelTo(6*30.48, 2*30.48);
-//					//				navigation.travelTo(6*30.48, 2*30.48);
-//					navigation.travelTo(0, 0);
-//					correction.localize();
-//					navigation.travelTo(0, 0);
-//					//				navigation.travelTo(0, 0);
+			}
 
 
 
-
-				}
-
-				//				t.drawString(Double.toString(finalProject.Localization.deltaTheta), 0, 2);
-				//				t.drawString(Double.toString(odometer.theta), 0, 3);
-				//				t.drawString(Double.toString(finalProject.Localization.angleA), 0, 4);
-				//				t.drawString(Double.toString(finalProject.Localization.angleB), 0, 5);
-				//				t.drawString(Double.toString(finalProject.Localization.XTheta_Plus), 0, 6);
-				//				t.drawString(Double.toString(finalProject.Localization.XTheta_Minus), 0, 7);
-				//				Forward forward = new Forward(navigation, fwdCorner, d1, w1, w2, bx, by, orientation);
-				//				forward.startFWD(); 
-
-			
 			if(defTeam == 3){//play defense:
 				System.out.println();
 				System.out.println();
