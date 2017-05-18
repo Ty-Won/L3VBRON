@@ -36,7 +36,6 @@ public class Forward {
 	private int by; //ball dispenser position y
 	private String omega; //ball dispenser orientation 
 	private final double TILE_LENGTH = 30.48;
-	private final int CENTER_X_COORD = 10; //x coordinate of center of field we will shoot from
 	private final double ROBOT_FRONT_TOCENTER_DIST = 8; //distance from front of robot to center of rotation
 	private final int FIELD_DIST = 8; //12
 	private final int OUTER_TILES = 2;
@@ -78,8 +77,6 @@ public class Forward {
 		this.w2 = w2;
 		this.bx = bx;
 		this.by = by;
-
-
 		this.omega = omega;
 		this.nav = navigation;
 		this.odo = odometer;
@@ -95,11 +92,7 @@ public class Forward {
 	 * goal before repeating the process for the remainder of the round.
 	 */
 	public void startFWD() {
-//		launcher.Enter_Launch_Position();
-//		Sound.pause(2000); 
-//		launcher.lockArm();
-//		nav.turnTo(360);
-//		nav.driveWCorrection(5*30.48);
+
 		if(bx==-1){
 			bx = 0;
 		}
@@ -174,13 +167,7 @@ public class Forward {
 		odo.TRACK = 12;
 		System.out.println(WiFiExample.TRACK);
 		nav.driveWCorrection(30.48);
-//		try { Thread.sleep(10000); } catch (InterruptedException e) {}
-		
-		//BALL RECEIVED: turn off US sensor
-		//WiFiExample.cont.doit = false;
-		
-	//	try { WiFiExample.usSensor.wait(1000000000); } catch (InterruptedException e) {		}
-		
+
 		
 		//travel one tile behind forward line IN Y FIRST, localize
 		int fwdLine_coord = 10 - fwdLinePosition;
@@ -191,29 +178,23 @@ public class Forward {
 		else{
 			nav.travelToYFIRST(5*TILE_LENGTH, (fwdLine_coord-1)*TILE_LENGTH);
 		}
-//		correction.width = 14;
-//		nav.width = 14;
 		nav.finishTravel = false;
 
-//		correction.localizeFWD(); 
 		nav.travelTo(5*TILE_LENGTH, (fwdLine_coord*TILE_LENGTH) - ROBOT_FRONT_TOCENTER_DIST); //go to forward line
 		nav.finishTravel = false;
 		
 		nav.turnToSmart(0); //face target 
 		nav.driveWCorrection(-15);
-	//	nav.driveWCorrection(15);
-		//motorstop();
+		
 		launcher.prepareToFire();
 		Sound.pause(1000);
-//		launcher.Fire(fwdLinePosition);
-		launcher.Fire(6);
+		launcher.Fire(fwdLinePosition);
 		
 		correction.width = 10.9;
 		nav.width = 10.9;
 		WiFiExample.cont.stopSensing = true;
 		while(true){
 			WiFiExample.correction.localizeForAvoidance(); //goes back until it sees a line and then again 11.6
-			//travel back unt
 			
 			//travel to ball dispenser cm coordinates:
 			nav.travelTo(bx_cm, by_cm); 
@@ -260,22 +241,18 @@ public class Forward {
 			else{
 				nav.travelToYFIRST(5*TILE_LENGTH, (fwdLine_coord-1)*TILE_LENGTH);
 			}
-//			correction.width = 14;
-//			nav.width = 14;
+
 			nav.finishTravel = false;
 
-//			correction.localizeFWD(); 
 			nav.travelTo(5*TILE_LENGTH, (fwdLine_coord*TILE_LENGTH) - ROBOT_FRONT_TOCENTER_DIST); //go to forward line
 			nav.finishTravel = false;
 			
 			nav.turnToSmart(0); //face target 
 			nav.driveWCorrection(-15);
-		//	nav.driveWCorrection(15);
-			//motorstop();
+	
 			launcher.prepareToFire();
 			Sound.pause(1000);
-//			launcher.Fire(fwdLinePosition);
-			launcher.Fire(6);
+			launcher.Fire(fwdLinePosition);
 			WiFiExample.cont.stopSensing = true;
 		}
 			
@@ -290,10 +267,10 @@ public class Forward {
 		rightMotor.setAcceleration(7000);
 		leftMotor.setSpeed(0);
 		rightMotor.setSpeed(0);
-//		leftMotor.startSynchronization();
+
 		leftMotor.stop(true);
 		rightMotor.stop(false);
-//		leftMotor.endSynchronization();
+
 		leftMotor.setSpeed(ROTATE_SPEED);
 		rightMotor.setSpeed(ROTATE_SPEED);
 		leftMotor.setAcceleration(1000);

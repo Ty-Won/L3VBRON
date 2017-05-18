@@ -62,9 +62,6 @@ public class Odometer extends Thread {
 	public void run() {
 		long updateStart, updateEnd;
 
-		//	leftMotor.resetTachoCount(); //Set the tacho count to zero when thread starts
-		//	rightMotor.resetTachoCount();
-
 		int l_lastTacho = leftMotor.getTachoCount(); //Get initial motor tacho count for both left and right
 		int r_lastTacho = rightMotor.getTachoCount();
 
